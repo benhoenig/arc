@@ -57,25 +57,25 @@ Five principles that drive the sequencing:
 
 Everything in TECH_STACK.md §20 (Bootstrap Checklist). Specifically:
 
-- [ ] Next.js 15 app with TypeScript, Tailwind, App Router, `/src` dir
-- [ ] All dependencies installed per TECH_STACK.md §1
-- [ ] Biome configured per CONVENTIONS.md §16
-- [ ] lefthook hooks running on pre-commit and pre-push
+- [x] Next.js 15 app with TypeScript, Tailwind, App Router, `/src` dir
+- [x] All dependencies installed per TECH_STACK.md §1
+- [x] Biome configured per CONVENTIONS.md §16
+- [x] lefthook hooks running on pre-commit and pre-push
 - [ ] Supabase project created (Singapore region, Pro tier)
 - [ ] Prisma initialized, pointed at Supabase
-- [ ] `/src/lib/env.ts` with zod validation, all env vars defined
-- [ ] shadcn/ui initialized with customized tokens from DESIGN_SYSTEM.md
-- [ ] Fonts loaded (IBM Plex Sans Thai + IBM Plex Mono) via `next/font/google`
-- [ ] Tailwind config has full design token theme (colors, spacing, typography per DESIGN_SYSTEM.md)
-- [ ] `middleware.ts` skeleton in place (no auth yet, just locale resolution)
+- [x] `/src/lib/env.ts` with zod validation, all env vars defined
+- [x] shadcn/ui initialized with customized tokens from DESIGN_SYSTEM.md
+- [x] Fonts loaded (IBM Plex Sans Thai + IBM Plex Mono) via `next/font/google`
+- [x] Tailwind config has full design token theme (colors, spacing, typography per DESIGN_SYSTEM.md)
+- [x] `src/proxy.ts` skeleton in place (no auth yet, just locale resolution; Next 16 renamed `middleware.ts` → `proxy.ts`)
 - [ ] Deployed to Vercel with preview deployments working
 
 ### 3.2 Test criteria
 
-- [ ] `pnpm dev` starts on localhost:3000, home page loads in Thai
-- [ ] `pnpm build` succeeds with no TS errors
-- [ ] `pnpm biome check` passes
-- [ ] `git commit` triggers lefthook, runs biome + tsc, blocks on failure
+- [x] `pnpm dev` starts on localhost:3000, home page loads in Thai
+- [x] `pnpm build` succeeds with no TS errors
+- [x] `pnpm biome check` passes
+- [x] `git commit` triggers lefthook, runs biome + tsc, blocks on failure
 - [ ] Pushing to a branch creates a Vercel preview deployment
 - [ ] `.env.local` parsed successfully by zod (intentionally break one to verify the fail-loud behavior)
 

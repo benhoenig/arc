@@ -41,7 +41,7 @@ Five rules that override everything else in this document. If a convention below
 ├── postcss.config.mjs
 ├── tailwind.config.ts
 ├── tsconfig.json
-├── middleware.ts                 # next-intl locale resolution + auth middleware
+├── src/proxy.ts                  # next-intl locale resolution + auth middleware (Next 16: middleware.ts → proxy.ts, must live under /src)
 ├── /docs                         # PRODUCT_SPEC.md, DATA_MODEL.md, etc. live here
 ├── /messages                     # i18n strings
 │   ├── /th

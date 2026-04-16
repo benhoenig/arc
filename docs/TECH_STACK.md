@@ -734,7 +734,7 @@ When setting up this project from zero, this is the order. Package name is `arc`
 11. `pnpm add -D @trigger.dev/sdk @trigger.dev/nextjs` (deferred to M11)
 12. Write `src/app/globals.css` with DESIGN_SYSTEM.md §2 tokens (CSS vars + `@theme inline`), `src/app/fonts.ts` with IBM Plex Sans Thai + Plex Mono via `next/font/google`, `src/lib/utils.ts` (`cn()`), `src/lib/i18n.ts` (`Locale`, `locales`, `getLocalizedName`)
 13. Write `src/i18n/{routing,request,navigation}.ts` for next-intl and wrap `next.config.ts` with `createNextIntlPlugin`
-14. Write `middleware.ts` delegating to `createMiddleware(routing)`; matcher excludes `api`, `_next`, `_vercel`, static files
+14. Write `src/proxy.ts` (Next 16 renamed `middleware.ts` → `proxy.ts`) delegating to next-intl's `createMiddleware(routing)`; matcher is an **array** — list `/` explicitly plus `/((?!api|trpc|_next|_vercel|.*\\..*).*)`, since the negative-lookahead pattern alone doesn't catch the empty suffix in Next 16 + Turbopack; file must live under `/src` when using the `/src` layout
 15. Create `messages/{th,en}/common.json` seeded with at least `app` + `home` namespaces (Thai authored first)
 16. Write `src/app/[locale]/layout.tsx` (awaits async `params`, calls `setRequestLocale`, wraps with `NextIntlClientProvider`) and `src/app/[locale]/page.tsx` (Thai hello); remove the scaffolder's `src/app/{layout,page}.tsx`
 17. Write `src/lib/env.ts` with zod validation (§14); write `.env.example` with placeholder values
