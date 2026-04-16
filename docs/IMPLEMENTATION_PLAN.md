@@ -68,7 +68,7 @@ Everything in TECH_STACK.md §20 (Bootstrap Checklist). Specifically:
 - [x] Fonts loaded (IBM Plex Sans Thai + IBM Plex Mono) via `next/font/google`
 - [x] Tailwind config has full design token theme (colors, spacing, typography per DESIGN_SYSTEM.md)
 - [x] `src/proxy.ts` skeleton in place (no auth yet, just locale resolution; Next 16 renamed `middleware.ts` → `proxy.ts`)
-- [ ] Deployed to Vercel with preview deployments working
+- [x] Deployed to Vercel with preview deployments working
 
 ### 3.2 Test criteria
 
@@ -76,7 +76,7 @@ Everything in TECH_STACK.md §20 (Bootstrap Checklist). Specifically:
 - [x] `pnpm build` succeeds with no TS errors
 - [x] `pnpm biome check` passes
 - [x] `git commit` triggers lefthook, runs biome + tsc, blocks on failure
-- [ ] Pushing to a branch creates a Vercel preview deployment
+- [x] Pushing to a branch creates a Vercel preview deployment
 - [x] `.env.local` parsed successfully by zod (intentionally break one to verify the fail-loud behavior)
 
 ### 3.3 Demo script

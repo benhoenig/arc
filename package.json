@@ -17,7 +17,7 @@
     "lint:fix": "biome check --write",
     "format": "biome format --write",
     "test": "vitest",
-    "prepare": "lefthook install"
+    "prepare": "lefthook install 2>/dev/null || true"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.2.2",
