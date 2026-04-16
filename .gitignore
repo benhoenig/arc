@@ -1,0 +1,48 @@
+# macOS
+.DS_Store
+
+# Node / pnpm
+node_modules/
+.pnpm-store/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Next.js
+.next/
+out/
+build/
+dist/
+
+# Env / secrets
+.env
+.env.local
+.env.*.local
+
+# Google auth token (IDE-local, not for the repo)
+token.json
+
+# Claude Code MCP config (user-specific, not project-specific)
+.mcp.json
+
+# Editor / IDE
+.vscode/
+.idea/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Vercel
+.vercel/
+
+# Supabase local
+.supabase/
+supabase/.temp/
+
+# Turbo / build caches
+.turbo/
