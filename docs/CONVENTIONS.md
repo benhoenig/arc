@@ -438,7 +438,9 @@ if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = db;
 
 ### 5.4 Soft-delete discipline
 
-Every query on a business-data table must filter `deletedAt: null`. Enforced via a Prisma middleware:
+Every query on a business-data table must filter `deletedAt: null`. Enforced via a Prisma Client extension.
+
+> **Prisma 7 note:** `db.$use(middleware)` was removed in Prisma 7 — we use `db.$extends({ query })` instead. Semantics below still apply (auto-filter reads, rewrite `delete` → `update { deletedAt }`); only the wiring syntax changed from the example shown here. The M1 implementation reimplements this as an extension; the example remains for intent.
 
 ```ts
 // src/server/db.ts (continued)

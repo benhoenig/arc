@@ -6,7 +6,7 @@
 
 Property flipping management system for a Thai small-team operation. Internal tool first, commercial product later. Replaces Google Sheets chaos across 4 teams (Sourcing, PM, Contractor Manager, Sales) running 10+ simultaneous flips. **Central entity:** `Flip` (investment lifecycle on a `Property`). Everything hangs off the Flip.
 
-**Stack:** Next.js 15 + TypeScript + Supabase (Postgres + RLS) + Prisma + Tailwind v4 + shadcn/ui + IBM Plex Sans Thai + next-intl.
+**Stack:** Next.js 16 + TypeScript + Supabase (Postgres + RLS) + Prisma 7 + Tailwind v4 + shadcn/ui + IBM Plex Sans Thai + next-intl 4. App package name is `arc`; GitHub repo is `benhoenig/arc`.
 
 ## Where things are documented
 
@@ -25,9 +25,9 @@ Read the relevant doc before generating code. Don't guess at patterns.
 
 > **Ben: update this after each milestone.**
 
-- **Current milestone:** M0 — Bootstrap (not started)
-- **Last completed:** —
-- **Next up:** M0 deliverables per `IMPLEMENTATION_PLAN.md` §3
+- **Current milestone:** M0 — Bootstrap (in progress)
+- **Last completed:** Local scaffold pushed to `github.com/benhoenig/arc` — Next.js 16 + Tailwind v4 + Biome 2 + lefthook 2 + next-intl 4 + design tokens + Thai/English hello pages (static `/th` and `/en`). `pnpm biome check`, `pnpm typecheck`, `pnpm build` all pass.
+- **Next up:** Supabase project (Singapore Pro), Prisma 7 init against it, Vercel deploy + preview deployments. Then M1 Foundation per `IMPLEMENTATION_PLAN.md` §4.
 
 If a request is out of sequence with the current milestone, flag it.
 
@@ -68,4 +68,4 @@ Consult the doc. If the doc doesn't cover it, ask Ben. Don't invent.
 
 ---
 
-*Last updated: 2026-04-16. If rules here drift from `CONVENTIONS.md`, the canonical doc wins — update this file to match.*
+*Last updated: 2026-04-17. If rules here drift from `CONVENTIONS.md`, the canonical doc wins — update this file to match.*

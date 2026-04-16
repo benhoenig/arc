@@ -12,28 +12,28 @@
 | Layer | Choice | Version (pinned) |
 |---|---|---|
 | Runtime | Node.js | 22.x LTS |
-| Package manager | pnpm | 9.x |
-| Language | TypeScript | 5.6.x |
-| Framework | Next.js | 15.x (App Router) |
+| Package manager | pnpm | 10.x |
+| Language | TypeScript | 5.9.x |
+| Framework | Next.js | 16.x (App Router) |
 | UI library | React | 19.x |
 | Styling | Tailwind CSS | 4.x |
 | Component library | shadcn/ui | latest (copy-paste, not versioned) |
-| Icons | Lucide React | 0.460+ |
+| Icons | Lucide React | 1.x |
 | Database | Supabase (Postgres 15) | managed |
-| ORM | Prisma | 6.x |
+| ORM | Prisma | 7.x |
 | Auth | Supabase Auth | managed |
 | File storage | Supabase Storage | managed |
-| i18n | next-intl | 3.x |
-| Forms | react-hook-form | 7.53+ |
-| Form validation | zod | 3.23+ |
+| i18n | next-intl | 4.x |
+| Forms | react-hook-form | 7.7x |
+| Form validation | zod | 4.x |
 | Tables | @tanstack/react-table | 8.x |
 | Date handling | date-fns | 4.x |
-| Notifications (runtime) | sonner | 1.5+ |
+| Notifications (runtime) | sonner | 2.x |
 | Notifications (users) | LINE Notify (v1), Resend (v2) | — |
 | Background jobs | Trigger.dev | 3.x |
 | Maps (deferred) | Mapbox GL JS | 3.x |
-| Linter + formatter | Biome | 1.9+ |
-| Git hooks | lefthook | 1.7+ |
+| Linter + formatter | Biome | 2.x |
+| Git hooks | lefthook | 2.x |
 | Testing | Vitest + Playwright | latest |
 | Hosting (frontend) | Vercel | managed |
 | Hosting (database) | Supabase Cloud (Singapore) | managed |
@@ -56,7 +56,7 @@ Current LTS line. Node 20 enters end-of-life April 2026; Node 22 is the active L
 - `.nvmrc` → `22`
 - Vercel runtime pinned to Node 22
 
-### 2.2 pnpm 9
+### 2.2 pnpm 10
 
 **Why pnpm over npm/yarn:**
 - ~2× faster installs via content-addressable store
@@ -65,11 +65,12 @@ Current LTS line. Node 20 enters end-of-life April 2026; Node 22 is the active L
 - Smaller disk footprint (shared store across projects)
 
 **Locked via:**
-- `package.json` → `"packageManager": "pnpm@9.12.0"`
+- `package.json` → `"packageManager": "pnpm@10.33.0"`
+- `package.json` → `pnpm.onlyBuiltDependencies` whitelist for post-install scripts (pnpm 10 requires explicit approval)
 - CI fails on `npm install` / `yarn install`
-- Corepack enabled in dev setup
+- Installed via Homebrew on macOS; CI uses pnpm action
 
-### 2.3 TypeScript 5.6
+### 2.3 TypeScript 5.9
 
 Strict mode, `noUncheckedIndexedAccess`, `noImplicitOverride`, and all other strictness flags enabled. See CONVENTIONS.md Section 4.
 
@@ -79,7 +80,7 @@ Strict mode, `noUncheckedIndexedAccess`, `noImplicitOverride`, and all other str
 
 ## 3. Frontend framework
 
-### 3.1 Next.js 15 (App Router)
+### 3.1 Next.js 16 (App Router)
 
 **Why Next.js and not a SPA + separate API:**
 - Server Components = less client JavaScript = faster mobile performance (our users are on 4G in Thailand)
@@ -92,6 +93,11 @@ Strict mode, `noUncheckedIndexedAccess`, `noImplicitOverride`, and all other str
 - Server Components are the whole point
 - Layouts + streaming + suspense work correctly
 - Pages Router is in maintenance mode — not adding features
+
+**Next.js 16 specifics:**
+- Turbopack is the default bundler (dev + build)
+- `params` / `searchParams` in route files are always async — must `await params` in layouts and pages
+- Auto-generated route types in `.next/types/**` (ensure they're in `tsconfig.json` `include`)
 
 **Critical gotchas baked into conventions:**
 - Dynamic rendering for anything user-scoped (auth, org-scoped data)
@@ -195,7 +201,7 @@ Loaded via `next/font/google` (see DESIGN_SYSTEM.md §3.2). Zero runtime CSS fla
 - `pg_trgm` (for fuzzy search on property/contractor names in v1.5)
 - `pgvector` (for AI embeddings — v2 only)
 
-### 5.2 Prisma 6
+### 5.2 Prisma 7
 
 ORM + client generation. See CONVENTIONS.md §5 for the full set of patterns.
 
@@ -203,6 +209,10 @@ ORM + client generation. See CONVENTIONS.md §5 for the full set of patterns.
 - Best-in-class TypeScript types for query results
 - Prisma Client is tree-shakeable
 - Decent Supabase RLS support (via passing auth context to queries)
+
+**Prisma 7 breaking change — middleware removed:**
+- `db.$use(middleware)` no longer exists; use `db.$extends({ query })` instead.
+- CONVENTIONS.md §5.4's soft-delete pattern must be implemented as an extension when M1 wires it up. Same behavior, different API.
 
 **What Prisma isn't good at:**
 - Expressing RLS policies (we write these in raw SQL)
@@ -265,7 +275,7 @@ See CONVENTIONS.md §9 for the full pattern.
 - First-class async validation
 - Integrates cleanly with zod via `@hookform/resolvers/zod`
 
-### 6.2 zod 3
+### 6.2 zod 4
 
 **Why:**
 - Same schema validates client input and server input (CONVENTIONS.md §9.3)
@@ -273,13 +283,16 @@ See CONVENTIONS.md §9 for the full pattern.
 - Discriminated unions supported (important for our payment_model and terms_model discriminators)
 - Async validation via `refine()` for server-only checks
 
-**Upgrade path:** zod 4 is in beta as of this writing. Stay on zod 3 through v1; re-evaluate for v2.
+**zod 4 notes:**
+- `z.ZodIssue` is now exposed as `z.core.$ZodIssue` when typing issue arrays directly (e.g. the `ActionResult.issues` field).
+- String formats (`z.email()`, `z.url()`, `z.uuid()`) are now top-level functions — keep using the method form for consistency with existing zod code.
+- Safe-parse return shape (`{ success, data, error }`) is unchanged.
 
 ---
 
 ## 7. Internationalization
 
-### 7.1 next-intl 3
+### 7.1 next-intl 4
 
 See DESIGN_SYSTEM.md §8 and CONVENTIONS.md §13 for full usage patterns.
 
@@ -403,7 +416,7 @@ Not installed in v1. Adding it is additive — no refactor required because `cha
 
 ## 12. Developer tooling
 
-### 12.1 Biome 1.9+
+### 12.1 Biome 2.x
 
 Replaces both ESLint and Prettier. See CONVENTIONS.md §16 for the full config.
 
@@ -413,11 +426,16 @@ Replaces both ESLint and Prettier. See CONVENTIONS.md §16 for the full config.
 - Rust-based — no weird Node version bugs
 - Good-enough rule coverage for 95% of what ESLint gives
 
+**Biome 2 notes:**
+- `assist.actions.source.organizeImports` replaces the top-level `organizeImports` from v1
+- `files.includes` replaces v1's `files.include`
+- Rule paths (`style.noDefaultExport`, `correctness.useExhaustiveDependencies`, `complexity.noBannedTypes`) are unchanged from v1
+
 **Known gaps:**
 - No React-specific lint rules as deep as `eslint-plugin-react-hooks` — but the core `useExhaustiveDependencies` rule is covered
 - If a team member hits a specific ESLint rule they miss, we revisit
 
-### 12.2 lefthook 1.7+
+### 12.2 lefthook 2.x
 
 **Why lefthook over Husky:**
 - Faster (parallel hook execution)
@@ -701,30 +719,33 @@ Things that could go wrong, and how we've designed around them.
 
 ## 20. Bootstrap checklist
 
-When setting up this project from zero, this is the order:
+When setting up this project from zero, this is the order. Package name is `arc`.
 
-1. `pnpm create next-app@latest flipping-system --typescript --tailwind --app --src-dir --import-alias "@/*"`
-2. Pin Node to 20 (`.nvmrc`), set `packageManager` field in `package.json`
-3. `pnpm add -D @biomejs/biome lefthook vitest @playwright/test`
-4. `pnpm dlx @biomejs/biome init` → paste our config from CONVENTIONS.md §16
-5. `pnpm dlx shadcn@latest init` → accept our token-aware config
-6. Install shadcn components listed in §4.2
-7. `pnpm add -D prisma && pnpm prisma init` → point at Supabase
-8. `pnpm add @prisma/client @supabase/supabase-js @supabase/ssr`
+1. `pnpm create next-app@latest arc --typescript --tailwind --app --src-dir --import-alias "@/*" --use-pnpm --no-eslint --turbopack --yes` (scaffold in-place if repo root is non-empty: scaffold to a temp dir and rsync — excluding `.git`, `node_modules`, `.next`, `CLAUDE.md`, `AGENTS.md`, `README.md` — into the project root)
+2. Set `"engines": { "node": "22.x" }` and `"packageManager": "pnpm@10.x.x"` in `package.json`; add `.nvmrc` with `22`
+3. Add `pnpm.onlyBuiltDependencies` whitelist for native packages (`@parcel/watcher`, `@prisma/engines`, `@swc/core`, `lefthook`, `prisma`, `sharp`, `unrs-resolver`) to clear pnpm 10's approval warnings
+4. `pnpm add -D @biomejs/biome lefthook vitest @playwright/test`
+5. `pnpm biome init` → replace with the config from CONVENTIONS.md §16 (plus route-file `noDefaultExport: off` overrides for `page.tsx` / `layout.tsx` / `error.tsx` / `not-found.tsx` / `middleware.ts` / `next.config.ts` / `src/i18n/request.ts`)
+6. Write `lefthook.yml` with pre-commit (biome + tsc on staged) and pre-push (biome . + tsc + vitest) jobs; run `pnpm exec lefthook install`
+7. `pnpm add -D prisma && pnpm prisma init` → point at Supabase (M1)
+8. `pnpm add @prisma/client @supabase/supabase-js @supabase/ssr` (M1)
 9. `pnpm add next-intl react-hook-form zod @hookform/resolvers`
-10. `pnpm add @tanstack/react-table date-fns lucide-react sonner`
-11. `pnpm add -D @trigger.dev/sdk @trigger.dev/nextjs`
-12. Set up Supabase project in Singapore region, copy env vars to `.env.local`
-13. Create `/src/lib/env.ts` with zod validation (§14)
-14. Apply migrations from DATA_MODEL.md §16 in order
-15. Run `pnpm prisma db pull` + `pnpm prisma generate`
-16. Set up `/messages/th/*.json` and `/messages/en/*.json` stubs
-17. Configure `middleware.ts` for locale resolution + auth
-18. Set up lefthook hooks
-19. Deploy to Vercel, connect Supabase via integration
-20. Configure Trigger.dev, deploy tasks
+10. `pnpm add @tanstack/react-table date-fns lucide-react sonner clsx tailwind-merge class-variance-authority`
+11. `pnpm add -D @trigger.dev/sdk @trigger.dev/nextjs` (deferred to M11)
+12. Write `src/app/globals.css` with DESIGN_SYSTEM.md §2 tokens (CSS vars + `@theme inline`), `src/app/fonts.ts` with IBM Plex Sans Thai + Plex Mono via `next/font/google`, `src/lib/utils.ts` (`cn()`), `src/lib/i18n.ts` (`Locale`, `locales`, `getLocalizedName`)
+13. Write `src/i18n/{routing,request,navigation}.ts` for next-intl and wrap `next.config.ts` with `createNextIntlPlugin`
+14. Write `middleware.ts` delegating to `createMiddleware(routing)`; matcher excludes `api`, `_next`, `_vercel`, static files
+15. Create `messages/{th,en}/common.json` seeded with at least `app` + `home` namespaces (Thai authored first)
+16. Write `src/app/[locale]/layout.tsx` (awaits async `params`, calls `setRequestLocale`, wraps with `NextIntlClientProvider`) and `src/app/[locale]/page.tsx` (Thai hello); remove the scaffolder's `src/app/{layout,page}.tsx`
+17. Write `src/lib/env.ts` with zod validation (§14); write `.env.example` with placeholder values
+18. Set up Supabase project in Singapore region (M1), copy env vars to `.env.local`
+19. Apply migrations from DATA_MODEL.md §16 in order (M1)
+20. Run `pnpm prisma db pull` + `pnpm prisma generate` (M1)
+21. Verify `pnpm biome check`, `pnpm typecheck`, `pnpm build` all pass
+22. Deploy to Vercel (sin1 region), connect Supabase via integration
+23. Configure Trigger.dev, deploy tasks (M11)
 
-After step 20, Milestone 1 of IMPLEMENTATION_PLAN.md can begin.
+Steps 1–17, 21 are M0. Steps 18–20, 22 unblock M1. Step 23 is M11.
 
 ---
 
