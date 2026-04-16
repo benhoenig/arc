@@ -1,0 +1,164 @@
+@import 'tailwindcss';
+
+/*
+ * ARC design tokens — canonical source is docs/DESIGN_SYSTEM.md §2–§4.
+ * Semantic colors are used ONLY on signals with good/bad directionality
+ * (budget variance, timeline, payment outcome, destructive actions).
+ * Categories, stages, roles, priorities stay neutral.
+ */
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  --background: #ffffff;
+  --surface: #fafafa;
+  --surface-raised: #ffffff;
+  --border-subtle: #f0f0f0;
+  --border: #e5e5e5;
+  --border-strong: #d4d4d4;
+  --text-muted: #737373;
+  --text-default: #262626;
+  --text-strong: #0a0a0a;
+  --fill-hover: #f5f5f5;
+  --fill-active: #ebebeb;
+  --fill-selected: #e5e5e5;
+  --positive: #15803d;
+  --positive-fill: #dcfce7;
+  --warning: #b45309;
+  --warning-fill: #fef3c7;
+  --destructive: #dc2626;
+  --destructive-fill: #fee2e2;
+
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+  --shadow-md: 0 2px 8px -2px rgba(0, 0, 0, 0.08), 0 1px 3px 0 rgba(0, 0, 0, 0.06);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not(.light) {
+    --background: #0a0a0a;
+    --surface: #111111;
+    --surface-raised: #161616;
+    --border-subtle: #1f1f1f;
+    --border: #2a2a2a;
+    --border-strong: #3a3a3a;
+    --text-muted: #8a8a8a;
+    --text-default: #e5e5e5;
+    --text-strong: #fafafa;
+    --fill-hover: #1f1f1f;
+    --fill-active: #2a2a2a;
+    --fill-selected: #333333;
+    --positive: #4ade80;
+    --positive-fill: #052e16;
+    --warning: #fbbf24;
+    --warning-fill: #451a03;
+    --destructive: #ef4444;
+    --destructive-fill: #450a0a;
+
+    --shadow-sm: none;
+    --shadow-md: none;
+  }
+}
+
+.dark {
+  --background: #0a0a0a;
+  --surface: #111111;
+  --surface-raised: #161616;
+  --border-subtle: #1f1f1f;
+  --border: #2a2a2a;
+  --border-strong: #3a3a3a;
+  --text-muted: #8a8a8a;
+  --text-default: #e5e5e5;
+  --text-strong: #fafafa;
+  --fill-hover: #1f1f1f;
+  --fill-active: #2a2a2a;
+  --fill-selected: #333333;
+  --positive: #4ade80;
+  --positive-fill: #052e16;
+  --warning: #fbbf24;
+  --warning-fill: #451a03;
+  --destructive: #ef4444;
+  --destructive-fill: #450a0a;
+
+  --shadow-sm: none;
+  --shadow-md: none;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-raised: var(--surface-raised);
+  --color-border-subtle: var(--border-subtle);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-text-muted: var(--text-muted);
+  --color-text-default: var(--text-default);
+  --color-text-strong: var(--text-strong);
+  --color-fill-hover: var(--fill-hover);
+  --color-fill-active: var(--fill-active);
+  --color-fill-selected: var(--fill-selected);
+  --color-positive: var(--positive);
+  --color-positive-fill: var(--positive-fill);
+  --color-warning: var(--warning);
+  --color-warning-fill: var(--warning-fill);
+  --color-destructive: var(--destructive);
+  --color-destructive-fill: var(--destructive-fill);
+
+  --font-sans: var(--font-plex-sans-thai), 'IBM Plex Sans', 'Inter', ui-sans-serif, system-ui,
+    sans-serif;
+  --font-mono: var(--font-plex-mono), 'JetBrains Mono', ui-monospace, 'SF Mono', monospace;
+
+  --text-3xl: 30px;
+  --text-3xl--line-height: 36px;
+  --text-2xl: 24px;
+  --text-2xl--line-height: 32px;
+  --text-xl: 20px;
+  --text-xl--line-height: 28px;
+  --text-lg: 16px;
+  --text-lg--line-height: 24px;
+  --text-base: 14px;
+  --text-base--line-height: 20px;
+  --text-sm: 13px;
+  --text-sm--line-height: 18px;
+  --text-xs: 12px;
+  --text-xs--line-height: 16px;
+  --text-micro: 11px;
+  --text-micro--line-height: 14px;
+
+  --font-weight-light: 300;
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  --radius-none: 0;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --radius-xl: 12px;
+  --radius-full: 9999px;
+
+  --shadow-sm: var(--shadow-sm);
+  --shadow-md: var(--shadow-md);
+}
+
+@layer base {
+  html {
+    color-scheme: light dark;
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-default);
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    line-height: var(--text-base--line-height);
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: 0;
+  }
+
+  /* Tabular figures for all numeric displays — required for financial UI */
+  .tabular {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: 'tnum';
+  }
+}

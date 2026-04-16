@@ -1,0 +1,11 @@
+{
+  "app": {
+    "name": "ARC",
+    "tagline": "Property flipping management for small teams"
+  },
+  "home": {
+    "hello": "Hello",
+    "subtitle": "Welcome to ARC",
+    "description": "Property flipping management system for your internal team. Bootstrap in progress."
+  }
+}

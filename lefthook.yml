@@ -1,0 +1,23 @@
+pre-commit:
+  parallel: true
+  jobs:
+    - name: biome-check
+      glob: '*.{js,jsx,ts,tsx,json,mjs}'
+      run: pnpm exec biome check --write --no-errors-on-unmatched --files-ignore-unknown=true {staged_files}
+      stage_fixed: true
+
+    - name: typecheck
+      glob: '*.{ts,tsx}'
+      run: pnpm exec tsc --noEmit
+
+pre-push:
+  parallel: true
+  jobs:
+    - name: biome-ci
+      run: pnpm exec biome check .
+
+    - name: typecheck
+      run: pnpm exec tsc --noEmit
+
+    - name: unit-tests
+      run: pnpm exec vitest run --passWithNoTests
