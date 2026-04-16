@@ -64,7 +64,8 @@
         "src/i18n/request.ts",
         "src/proxy.ts",
         "next.config.ts",
-        "postcss.config.mjs"
+        "postcss.config.mjs",
+        "prisma.config.ts"
       ],
       "linter": {
         "rules": {

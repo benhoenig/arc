@@ -56,3 +56,5 @@ supabase/.temp/
 
 # Turbo / build caches
 .turbo/
+
+/src/generated/prisma

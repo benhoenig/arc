@@ -1424,7 +1424,7 @@ Biome enforces this automatically:
 Hard bans. Violating any of these is a bug, even if it "works."
 
 1. **No `localStorage` or `sessionStorage`** — use server-side state or cookies. Period.
-2. **No `process.env` access outside of `/src/lib/env.ts`** — centralized, typed env. Claude Code must not reach for `process.env.FOO` directly.
+2. **No `process.env` access outside of `/src/lib/env.ts`** — centralized, typed env. Claude Code must not reach for `process.env.FOO` directly in app code. Build/CLI config files (`next.config.ts`, `prisma.config.ts`, etc.) that run outside the app runtime are exempt but should still document why they access env directly.
 3. **No `service_role` key in app code** — ever. If you're about to, stop.
 4. **No `any`** — use `unknown` and narrow.
 5. **No `!` non-null assertion** — narrow properly or `assert`.

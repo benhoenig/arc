@@ -3,6 +3,9 @@ import { notFound } from 'next/navigation';
 import { hasLocale, NextIntlClientProvider } from 'next-intl';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
+// Side-effect import: forces zod validation of env vars at server boot.
+// If anything is missing or malformed, the app fails loud on first render.
+import '@/lib/env';
 import type { Locale } from '@/lib/i18n';
 import { fontMono, fontSans } from '../fonts';
 import '../globals.css';

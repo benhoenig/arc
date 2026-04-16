@@ -1,0 +1,19 @@
+// ARC Prisma schema.
+//
+// Supabase SQL migrations are the source of truth (CONVENTIONS.md §5.2).
+// `pnpm prisma db pull` regenerates this file from the Supabase schema after
+// applying migrations. Never edit models here by hand — edit the SQL migration,
+// apply it, then pull.
+//
+// Prisma 7 note: connection URLs no longer live here. CLI URL is set in
+// prisma.config.ts; runtime uses a driver adapter passed to the PrismaClient
+// constructor (wired up in src/server/db.ts in M1).
+
+generator client {
+  provider = "prisma-client"
+  output   = "../src/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}

@@ -62,7 +62,7 @@ Everything in TECH_STACK.md §20 (Bootstrap Checklist). Specifically:
 - [x] Biome configured per CONVENTIONS.md §16
 - [x] lefthook hooks running on pre-commit and pre-push
 - [ ] Supabase project created (Singapore region, Pro tier)
-- [ ] Prisma initialized, pointed at Supabase
+- [x] Prisma initialized, pointed at Supabase
 - [x] `/src/lib/env.ts` with zod validation, all env vars defined
 - [x] shadcn/ui initialized with customized tokens from DESIGN_SYSTEM.md
 - [x] Fonts loaded (IBM Plex Sans Thai + IBM Plex Mono) via `next/font/google`
@@ -77,7 +77,7 @@ Everything in TECH_STACK.md §20 (Bootstrap Checklist). Specifically:
 - [x] `pnpm biome check` passes
 - [x] `git commit` triggers lefthook, runs biome + tsc, blocks on failure
 - [ ] Pushing to a branch creates a Vercel preview deployment
-- [ ] `.env.local` parsed successfully by zod (intentionally break one to verify the fail-loud behavior)
+- [x] `.env.local` parsed successfully by zod (intentionally break one to verify the fail-loud behavior)
 
 ### 3.3 Demo script
 

@@ -26,7 +26,9 @@ const envSchema = z.object({
   TRIGGER_API_KEY: z.string().min(1),
   TRIGGER_API_URL: z.string().url(),
 
-  SENTRY_DSN: z.string().url().optional(),
+  // Treat empty string as absent — a blank `SENTRY_DSN=` in .env.local counts
+  // as "Sentry disabled" rather than a validation error.
+  SENTRY_DSN: z.preprocess((v) => (v === '' ? undefined : v), z.string().url().optional()),
 });
 
 const parsed = envSchema.safeParse(process.env);
