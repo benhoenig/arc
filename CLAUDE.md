@@ -25,9 +25,9 @@ Read the relevant doc before generating code. Don't guess at patterns.
 
 > **Ben: update this after each milestone.**
 
-- **Current milestone:** M0 — Bootstrap (in progress)
-- **Last completed:** Local scaffold pushed to `github.com/benhoenig/arc` — Next.js 16 + Tailwind v4 + Biome 2 + lefthook 2 + next-intl 4 + design tokens + Thai/English hello pages (static `/th` and `/en`). `pnpm biome check`, `pnpm typecheck`, `pnpm build` all pass.
-- **Next up:** Supabase project (Singapore Pro), Prisma 7 init against it, Vercel deploy + preview deployments. Then M1 Foundation per `IMPLEMENTATION_PLAN.md` §4.
+- **Current milestone:** M0 — Bootstrap (deliverables met; Pro-tier upgrade deferred)
+- **Last completed:** Deployed to Vercel (sin1) at `https://arc-eosin-eight.vercel.app`, git-connected for auto-deploys. Supabase project live (free tier) at `adgehjxudbcsmxrvashk`. Prisma 7 init pointed at Supabase via prisma.config.ts. All 11 env vars set in both local `.env.local` and Vercel production/preview. `pnpm build` includes `prisma generate`; env.ts imported in the root layout so zod fails loud at boot.
+- **Next up:** M1 Foundation per `IMPLEMENTATION_PLAN.md` §4 — auth tables, multi-tenancy, RLS policies, app shell with sidebar/topbar, cross-tenant leak Playwright test. Ben still needs to: (1) rotate the DB password, (2) upgrade Supabase to Pro before real data.
 
 If a request is out of sequence with the current milestone, flag it.
 
