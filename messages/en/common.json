@@ -3,9 +3,73 @@
     "name": "ARC",
     "tagline": "Property flipping management for small teams"
   },
-  "home": {
-    "hello": "Hello",
-    "subtitle": "Welcome to ARC",
-    "description": "Property flipping management system for your internal team. Bootstrap in progress."
+  "nav": {
+    "dashboard": "Dashboard",
+    "sourcing": "Sourcing",
+    "flips": "Flips",
+    "contractors": "Contractors",
+    "investors": "Investors",
+    "listings": "Listings",
+    "settings": "Settings"
+  },
+  "auth": {
+    "login": {
+      "title": "Log in",
+      "subtitle": "Sign in to manage your projects",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "submit": "Log in",
+      "submitting": "Logging in...",
+      "noAccount": "Don't have an account?",
+      "signupLink": "Sign up",
+      "forgotPassword": "Forgot password?"
+    },
+    "signup": {
+      "title": "Sign up",
+      "subtitle": "Create your account and organization",
+      "fullName": "Full name",
+      "fullNamePlaceholder": "Your full name",
+      "email": "Email",
+      "emailPlaceholder": "you@example.com",
+      "password": "Password",
+      "passwordPlaceholder": "At least 8 characters",
+      "orgName": "Organization name",
+      "orgNamePlaceholder": "Your company or team",
+      "submit": "Create account",
+      "submitting": "Creating account...",
+      "hasAccount": "Already have an account?",
+      "loginLink": "Log in"
+    },
+    "logout": "Log out",
+    "errors": {
+      "invalidCredentials": "Invalid email or password",
+      "emailTaken": "This email is already in use",
+      "server": "Something went wrong. Please try again.",
+      "validation": "Please check your input"
+    }
+  },
+  "common": {
+    "cancel": "Cancel",
+    "save": "Save",
+    "delete": "Delete",
+    "edit": "Edit",
+    "add": "Add",
+    "search": "Search",
+    "loading": "Loading...",
+    "noResults": "No results found",
+    "confirm": "Confirm",
+    "back": "Back"
+  },
+  "errors": {
+    "page": {
+      "title": "Something went wrong",
+      "retry": "Try again"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "The page you're looking for doesn't exist",
+      "home": "Go home"
+    }
   }
 }

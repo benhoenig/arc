@@ -3,9 +3,73 @@
     "name": "ARC",
     "tagline": "ระบบบริหารการซื้อ-รีโนเวต-ขายอสังหาริมทรัพย์"
   },
-  "home": {
-    "hello": "สวัสดี",
-    "subtitle": "ยินดีต้อนรับสู่ ARC",
-    "description": "ระบบบริหารการ flip อสังหาริมทรัพย์สำหรับทีมภายในของคุณ กำลังจัดเตรียมระบบอยู่"
+  "nav": {
+    "dashboard": "แดชบอร์ด",
+    "sourcing": "จัดหาดีล",
+    "flips": "Flips",
+    "contractors": "ผู้รับเหมา",
+    "investors": "นักลงทุน",
+    "listings": "ประกาศขาย",
+    "settings": "ตั้งค่า"
+  },
+  "auth": {
+    "login": {
+      "title": "เข้าสู่ระบบ",
+      "subtitle": "เข้าสู่ระบบเพื่อจัดการโครงการของคุณ",
+      "email": "อีเมล",
+      "emailPlaceholder": "you@example.com",
+      "password": "รหัสผ่าน",
+      "submit": "เข้าสู่ระบบ",
+      "submitting": "กำลังเข้าสู่ระบบ...",
+      "noAccount": "ยังไม่มีบัญชี?",
+      "signupLink": "สมัครสมาชิก",
+      "forgotPassword": "ลืมรหัสผ่าน?"
+    },
+    "signup": {
+      "title": "สมัครสมาชิก",
+      "subtitle": "สร้างบัญชีและองค์กรของคุณ",
+      "fullName": "ชื่อ-นามสกุล",
+      "fullNamePlaceholder": "ชื่อเต็มของคุณ",
+      "email": "อีเมล",
+      "emailPlaceholder": "you@example.com",
+      "password": "รหัสผ่าน",
+      "passwordPlaceholder": "อย่างน้อย 8 ตัวอักษร",
+      "orgName": "ชื่อองค์กร",
+      "orgNamePlaceholder": "บริษัทหรือทีมของคุณ",
+      "submit": "สร้างบัญชี",
+      "submitting": "กำลังสร้างบัญชี...",
+      "hasAccount": "มีบัญชีอยู่แล้ว?",
+      "loginLink": "เข้าสู่ระบบ"
+    },
+    "logout": "ออกจากระบบ",
+    "errors": {
+      "invalidCredentials": "อีเมลหรือรหัสผ่านไม่ถูกต้อง",
+      "emailTaken": "อีเมลนี้ถูกใช้งานแล้ว",
+      "server": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง",
+      "validation": "กรุณาตรวจสอบข้อมูลที่กรอก"
+    }
+  },
+  "common": {
+    "cancel": "ยกเลิก",
+    "save": "บันทึก",
+    "delete": "ลบ",
+    "edit": "แก้ไข",
+    "add": "เพิ่ม",
+    "search": "ค้นหา",
+    "loading": "กำลังโหลด...",
+    "noResults": "ไม่พบข้อมูล",
+    "confirm": "ยืนยัน",
+    "back": "กลับ"
+  },
+  "errors": {
+    "page": {
+      "title": "เกิดข้อผิดพลาด",
+      "retry": "ลองอีกครั้ง"
+    },
+    "notFound": {
+      "title": "ไม่พบหน้าที่ต้องการ",
+      "description": "หน้าที่คุณกำลังมองหาไม่มีอยู่",
+      "home": "กลับหน้าแรก"
+    }
   }
 }
