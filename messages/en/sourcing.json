@@ -1,0 +1,79 @@
+{
+  "title": "Sourcing",
+  "properties": {
+    "title": "Properties",
+    "addProperty": "Add property",
+    "empty": "No properties yet",
+    "emptyDescription": "Add a property to start analyzing deals",
+    "columns": {
+      "nickname": "Name",
+      "location": "Location",
+      "type": "Type",
+      "specs": "Specs",
+      "analyses": "Analyses",
+      "added": "Added"
+    }
+  },
+  "propertyForm": {
+    "createTitle": "Add property",
+    "editTitle": "Edit property",
+    "nickname": "Nickname",
+    "nicknamePlaceholder": "e.g. Sathorn Townhouse #3",
+    "addressLine1": "Address",
+    "addressLine1Placeholder": "Street address",
+    "subdistrict": "Subdistrict",
+    "district": "District",
+    "province": "Province",
+    "postalCode": "Postal code",
+    "propertyType": "Type",
+    "bedrooms": "Bedrooms",
+    "bathrooms": "Bathrooms",
+    "floorAreaSqm": "Floor area (sqm)",
+    "landAreaSqwa": "Land area (sq wah)",
+    "yearBuilt": "Year built",
+    "floors": "Floors",
+    "notes": "Notes",
+    "submit": "Save",
+    "submitting": "Saving..."
+  },
+  "propertyTypes": {
+    "condo": "Condo",
+    "townhouse": "Townhouse",
+    "detached_house": "Detached house",
+    "land": "Land",
+    "commercial": "Commercial",
+    "shophouse": "Shophouse",
+    "other": "Other"
+  },
+  "dealAnalysis": {
+    "title": "Deal Analysis",
+    "addAnalysis": "New analysis",
+    "empty": "No analyses yet",
+    "inputs": "Deal inputs",
+    "results": "Analysis results",
+    "purchasePrice": "Purchase price",
+    "renovationCost": "Renovation budget",
+    "holdingCost": "Holding costs",
+    "transactionCost": "Transaction costs (buy)",
+    "sellingCost": "Selling costs",
+    "arv": "After-repair value (ARV)",
+    "timeline": "Timeline (days)",
+    "totalCost": "Total cost",
+    "profit": "Est. profit",
+    "margin": "Margin",
+    "roi": "ROI",
+    "submit": "Save analysis",
+    "submitting": "Saving..."
+  },
+  "decision": {
+    "pending": "Pending",
+    "pursue": "Pursue",
+    "pass": "Pass",
+    "decidedAt": "Decided"
+  },
+  "detail": {
+    "backToList": "Back to list",
+    "analyses": "Analyses ({count})",
+    "noAnalyses": "No deal analyses for this property yet"
+  }
+}

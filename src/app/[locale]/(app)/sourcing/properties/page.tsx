@@ -1,0 +1,21 @@
+import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { PropertiesPageClient } from '@/features/sourcing/components/properties-page-client';
+import { listProperties } from '@/features/sourcing/queries/list-properties';
+import { getActiveOrgId } from '@/server/supabase/auth';
+
+type Props = {
+  params: Promise<{ locale: string }>;
+};
+
+export default async function PropertiesPage({ params }: Props) {
+  const { locale } = await params;
+  setRequestLocale(locale);
+
+  const orgId = await getActiveOrgId();
+  const properties = await listProperties(orgId);
+  const t = await getTranslations('sourcing.properties');
+
+  return (
+    <PropertiesPageClient properties={properties} title={t('title')} addLabel={t('addProperty')} />
+  );
+}

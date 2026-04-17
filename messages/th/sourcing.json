@@ -1,0 +1,79 @@
+{
+  "title": "จัดหาดีล",
+  "properties": {
+    "title": "อสังหาริมทรัพย์",
+    "addProperty": "เพิ่มอสังหาฯ",
+    "empty": "ยังไม่มีอสังหาริมทรัพย์",
+    "emptyDescription": "เพิ่มอสังหาริมทรัพย์เพื่อเริ่มวิเคราะห์ดีล",
+    "columns": {
+      "nickname": "ชื่อ",
+      "location": "ที่ตั้ง",
+      "type": "ประเภท",
+      "specs": "สเปค",
+      "analyses": "วิเคราะห์",
+      "added": "เพิ่มเมื่อ"
+    }
+  },
+  "propertyForm": {
+    "createTitle": "เพิ่มอสังหาริมทรัพย์",
+    "editTitle": "แก้ไขอสังหาริมทรัพย์",
+    "nickname": "ชื่อเรียก",
+    "nicknamePlaceholder": "เช่น ทาวน์เฮ้าส์สาทร #3",
+    "addressLine1": "ที่อยู่",
+    "addressLine1Placeholder": "เลขที่ ซอย ถนน",
+    "subdistrict": "แขวง/ตำบล",
+    "district": "เขต/อำเภอ",
+    "province": "จังหวัด",
+    "postalCode": "รหัสไปรษณีย์",
+    "propertyType": "ประเภท",
+    "bedrooms": "ห้องนอน",
+    "bathrooms": "ห้องน้ำ",
+    "floorAreaSqm": "พื้นที่ใช้สอย (ตร.ม.)",
+    "landAreaSqwa": "พื้นที่ดิน (ตร.วา)",
+    "yearBuilt": "ปีที่สร้าง",
+    "floors": "จำนวนชั้น",
+    "notes": "หมายเหตุ",
+    "submit": "บันทึก",
+    "submitting": "กำลังบันทึก..."
+  },
+  "propertyTypes": {
+    "condo": "คอนโด",
+    "townhouse": "ทาวน์เฮ้าส์",
+    "detached_house": "บ้านเดี่ยว",
+    "land": "ที่ดิน",
+    "commercial": "อาคารพาณิชย์",
+    "shophouse": "ตึกแถว",
+    "other": "อื่นๆ"
+  },
+  "dealAnalysis": {
+    "title": "วิเคราะห์ดีล",
+    "addAnalysis": "วิเคราะห์ดีลใหม่",
+    "empty": "ยังไม่มีการวิเคราะห์",
+    "inputs": "ข้อมูลเบื้องต้น",
+    "results": "ผลการวิเคราะห์",
+    "purchasePrice": "ราคาซื้อ",
+    "renovationCost": "งบปรับปรุง",
+    "holdingCost": "ค่าใช้จ่ายระหว่างถือ",
+    "transactionCost": "ค่าธรรมเนียมซื้อ",
+    "sellingCost": "ค่าธรรมเนียมขาย",
+    "arv": "มูลค่าหลังปรับปรุง (ARV)",
+    "timeline": "ระยะเวลา (วัน)",
+    "totalCost": "ต้นทุนรวม",
+    "profit": "กำไรโดยประมาณ",
+    "margin": "อัตรากำไร",
+    "roi": "ผลตอบแทน (ROI)",
+    "submit": "บันทึกการวิเคราะห์",
+    "submitting": "กำลังบันทึก..."
+  },
+  "decision": {
+    "pending": "รอตัดสินใจ",
+    "pursue": "ติดตามต่อ",
+    "pass": "ไม่สนใจ",
+    "decidedAt": "ตัดสินใจเมื่อ"
+  },
+  "detail": {
+    "backToList": "กลับไปรายการ",
+    "analyses": "การวิเคราะห์ ({count})",
+    "noAnalyses": "ยังไม่ได้วิเคราะห์ดีลนี้"
+  }
+}
