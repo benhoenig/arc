@@ -62,7 +62,7 @@ export async function signup(
       });
 
       // Seed the 5 system roles via the DB function
-      await tx.$queryRawUnsafe('SELECT seed_organization_roles($1::uuid)', org.id);
+      await tx.$executeRawUnsafe('SELECT seed_organization_roles($1::uuid)', org.id);
 
       // Find the admin role we just seeded
       const adminRole = await tx.role.findFirst({
