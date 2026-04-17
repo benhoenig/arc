@@ -3,7 +3,7 @@ import 'server-only';
 import { db } from '@/server/db';
 
 export async function listProperties(orgId: string) {
-  return db.property.findMany({
+  const rows = await db.property.findMany({
     where: { organizationId: orgId, deletedAt: null },
     select: {
       id: true,
@@ -25,6 +25,14 @@ export async function listProperties(orgId: string) {
     },
     orderBy: { createdAt: 'desc' },
   });
+
+  // Convert Prisma Decimal objects to plain numbers for client serialization
+  return rows.map((row) => ({
+    ...row,
+    bathrooms: row.bathrooms != null ? Number(row.bathrooms) : null,
+    floorAreaSqm: row.floorAreaSqm != null ? Number(row.floorAreaSqm) : null,
+    askingPriceThb: row.askingPriceThb != null ? Number(row.askingPriceThb) : null,
+  }));
 }
 
 export type PropertyListItem = Awaited<ReturnType<typeof listProperties>>[number];

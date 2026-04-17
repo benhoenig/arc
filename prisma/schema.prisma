@@ -296,14 +296,25 @@ model DealAnalysis {
   propertyId              String    @map("property_id") @db.Uuid
   flipId                  String?   @map("flip_id") @db.Uuid
 
+  flipType                String    @default("float_flip") @map("flip_type")
+
+  // Shared fields (both types)
   estPurchasePriceThb     Decimal   @map("est_purchase_price_thb") @db.Decimal(14, 2)
   estRenovationCostThb    Decimal   @map("est_renovation_cost_thb") @db.Decimal(14, 2)
-  estHoldingCostThb       Decimal   @default(0) @map("est_holding_cost_thb") @db.Decimal(14, 2)
-  estTransactionCostThb   Decimal   @default(0) @map("est_transaction_cost_thb") @db.Decimal(14, 2)
   estSellingCostThb       Decimal   @default(0) @map("est_selling_cost_thb") @db.Decimal(14, 2)
   estArvThb               Decimal   @map("est_arv_thb") @db.Decimal(14, 2)
   estTimelineDays         Int       @map("est_timeline_days")
 
+  // Transfer-in specific
+  estHoldingCostThb       Decimal   @default(0) @map("est_holding_cost_thb") @db.Decimal(14, 2)
+  estTransactionCostThb   Decimal   @default(0) @map("est_transaction_cost_thb") @db.Decimal(14, 2)
+
+  // Float-flip specific
+  depositAmountThb        Decimal?  @map("deposit_amount_thb") @db.Decimal(14, 2)
+  contractMonths          Int?      @map("contract_months")
+  marketingCostThb        Decimal   @default(0) @map("marketing_cost_thb") @db.Decimal(14, 2)
+
+  // Computed (stored for snapshot integrity)
   totalCostThb            Decimal   @map("total_cost_thb") @db.Decimal(14, 2)
   estProfitThb            Decimal   @map("est_profit_thb") @db.Decimal(14, 2)
   estMarginPct            Decimal   @map("est_margin_pct") @db.Decimal(6, 2)

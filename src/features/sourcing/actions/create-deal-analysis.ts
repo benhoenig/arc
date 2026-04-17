@@ -26,18 +26,25 @@ export async function createDealAnalysis(
         data: {
           organizationId: orgId,
           propertyId: parsed.data.propertyId,
+          flipType: parsed.data.flipType,
           estPurchasePriceThb: parsed.data.estPurchasePriceThb,
           estRenovationCostThb: parsed.data.estRenovationCostThb,
-          estHoldingCostThb: parsed.data.estHoldingCostThb,
-          estTransactionCostThb: parsed.data.estTransactionCostThb,
           estSellingCostThb: parsed.data.estSellingCostThb,
           estArvThb: parsed.data.estArvThb,
           estTimelineDays: parsed.data.estTimelineDays,
+          // Transfer-in fields
+          estHoldingCostThb: parsed.data.estHoldingCostThb ?? 0,
+          estTransactionCostThb: parsed.data.estTransactionCostThb ?? 0,
+          // Float-flip fields
+          depositAmountThb: parsed.data.depositAmountThb ?? null,
+          contractMonths: parsed.data.contractMonths ?? null,
+          marketingCostThb: parsed.data.marketingCostThb ?? 0,
+          // Computed
           totalCostThb: computed.totalCostThb,
           estProfitThb: computed.estProfitThb,
           estMarginPct: computed.estMarginPct,
           estRoiPct: computed.estRoiPct,
-          notes: parsed.data.notes,
+          notes: parsed.data.notes || null,
           createdBy: user.id,
           updatedBy: user.id,
         },
