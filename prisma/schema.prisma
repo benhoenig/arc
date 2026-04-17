@@ -1,13 +1,13 @@
-// ARC Prisma schema.
+// ARC Prisma schema — hand-written to match the SQL migration because
+// `prisma db pull` hangs on Supabase free-tier networking (IPv4 + pooler
+// transaction mode). Once on Pro tier with IPv4 direct, re-run db pull
+// to verify this file matches the DB exactly.
 //
-// Supabase SQL migrations are the source of truth (CONVENTIONS.md §5.2).
-// `pnpm prisma db pull` regenerates this file from the Supabase schema after
-// applying migrations. Never edit models here by hand — edit the SQL migration,
-// apply it, then pull.
+// Source of truth: supabase/migrations (applied via MCP). Per CONVENTIONS.md
+// §5.2, SQL migrations own the schema; this file is regenerated from them.
 //
-// Prisma 7 note: connection URLs no longer live here. CLI URL is set in
-// prisma.config.ts; runtime uses a driver adapter passed to the PrismaClient
-// constructor (wired up in src/server/db.ts in M1).
+// Prisma 7: connection URLs live in prisma.config.ts, not here. Runtime
+// uses a driver adapter in src/server/db.ts.
 
 generator client {
   provider = "prisma-client"
@@ -16,4 +16,133 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+// ============================================
+// Foundation tables (M1)
+// ============================================
+
+model Organization {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name                  String
+  slug                  String    @unique
+  countryCode           String    @default("TH") @map("country_code") @db.Char(2)
+  currency              String    @default("THB") @db.Char(3)
+  timezone              String    @default("Asia/Bangkok")
+  stripeCustomerId      String?   @unique @map("stripe_customer_id")
+  subscriptionStatus    String?   @map("subscription_status")
+  subscriptionPlan      String?   @map("subscription_plan")
+  subscriptionStartedAt DateTime? @map("subscription_started_at") @db.Timestamptz(6)
+  settings              Json      @default("{}")
+  metadata              Json      @default("{}")
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt             DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  roles       Role[]
+  userRoles   UserRole[]
+  activityLog ActivityLog[]
+  featureFlags FeatureFlag[]
+
+  @@map("organizations")
+}
+
+model User {
+  id          String    @id @db.Uuid
+  email       String    @unique
+  fullName    String?   @map("full_name")
+  displayName String?   @map("display_name")
+  avatarUrl   String?   @map("avatar_url")
+  phone       String?
+  lineUserId  String?   @map("line_user_id")
+  locale      String    @default("th")
+  lastSeenAt  DateTime? @map("last_seen_at") @db.Timestamptz(6)
+  metadata    Json      @default("{}")
+  createdAt   DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  userRoles      UserRole[] @relation("UserToUserRole")
+  createdRoles   UserRole[] @relation("UserRoleCreatedBy")
+  activityLog    ActivityLog[]
+
+  @@map("users")
+}
+
+model Role {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  slug           String
+  nameTh         String    @map("name_th")
+  nameEn         String?   @map("name_en")
+  descriptionTh  String?   @map("description_th")
+  descriptionEn  String?   @map("description_en")
+  permissions    Json      @default("{}")
+  isSystem       Boolean   @default(false) @map("is_system")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  userRoles    UserRole[]
+
+  @@unique([organizationId, slug], map: "idx_roles_org_slug")
+  @@index([organizationId], map: "idx_roles_org")
+  @@map("roles")
+}
+
+model UserRole {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  userId         String    @map("user_id") @db.Uuid
+  roleId         String    @map("role_id") @db.Uuid
+  flipId         String?   @map("flip_id") @db.Uuid
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdBy      String?   @map("created_by") @db.Uuid
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User         @relation("UserToUserRole", fields: [userId], references: [id], onDelete: Cascade)
+  role         Role         @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  createdByUser User?       @relation("UserRoleCreatedBy", fields: [createdBy], references: [id])
+
+  @@index([userId], map: "idx_user_roles_user")
+  @@index([organizationId], map: "idx_user_roles_org")
+  @@map("user_roles")
+}
+
+model ActivityLog {
+  id             BigInt   @id @default(autoincrement())
+  organizationId String   @map("organization_id") @db.Uuid
+  userId         String?  @map("user_id") @db.Uuid
+  entityType     String   @map("entity_type")
+  entityId       String   @map("entity_id") @db.Uuid
+  action         String
+  changes        Json?
+  context        Json     @default("{}")
+  createdAt      DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([entityType, entityId, createdAt(sort: Desc)], map: "idx_activity_entity")
+  @@index([organizationId, createdAt(sort: Desc)], map: "idx_activity_org")
+  @@index([userId, createdAt(sort: Desc)], map: "idx_activity_user")
+  @@map("activity_log")
+}
+
+model FeatureFlag {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String?   @map("organization_id") @db.Uuid
+  flagKey        String    @map("flag_key")
+  isEnabled      Boolean   @default(false) @map("is_enabled")
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization Organization? @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@unique([organizationId, flagKey])
+  @@index([organizationId, flagKey, isEnabled], map: "idx_feature_flags_lookup")
+  @@map("feature_flags")
 }
