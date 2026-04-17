@@ -25,9 +25,11 @@ Read the relevant doc before generating code. Don't guess at patterns.
 
 > **Ben: update this after each milestone.**
 
-- **Current milestone:** M0 — Bootstrap (deliverables met; Pro-tier upgrade deferred)
-- **Last completed:** Deployed to Vercel (sin1) at `https://arc-eosin-eight.vercel.app`, git-connected for auto-deploys. Supabase project live (free tier) at `adgehjxudbcsmxrvashk`. Prisma 7 init pointed at Supabase via prisma.config.ts. All 11 env vars set in both local `.env.local` and Vercel production/preview. `pnpm build` includes `prisma generate`; env.ts imported in the root layout so zod fails loud at boot.
-- **Next up:** M1 Foundation per `IMPLEMENTATION_PLAN.md` §4 — auth tables, multi-tenancy, RLS policies, app shell with sidebar/topbar, cross-tenant leak Playwright test. Ben still needs to: (1) rotate the DB password, (2) upgrade Supabase to Pro before real data.
+- **Current milestone:** M2 — Properties & Deal Analysis (starting)
+- **Last completed:** M0 Bootstrap (fully deployed) + M1 Foundation (core delivered, polish deferred). Auth flow (signup/login/logout) works end-to-end. 6 foundation tables with RLS in Supabase. App shell with sidebar/topbar/mobile tabbar. Primitive UI components (Pill, Currency, DateDisplay, Variance, EmptyState, SkeletonTable, ConfirmDeleteDialog). Formatter helpers for Buddhist Era dates and THB currency.
+- **M1 deferred items** (tracked in `IMPLEMENTATION_PLAN.md` §4.1–4.2 with **DEFERRED** tags): forgot-password pages, locale switcher UI, users.locale persistence, dark mode toggle, unit tests for formatters, Playwright E2E tests (signup flow + cross-tenant leak — meaningful after M2 adds property URLs).
+- **Next up:** M2 deliverables per `IMPLEMENTATION_PLAN.md` §5 — properties table, deal_analyses table, flip_stages (seeded), property library, deal analysis calculator, pipeline Kanban.
+- **Ben's pending actions:** (1) rotate DB password, (2) upgrade Supabase to Pro before real data.
 
 If a request is out of sequence with the current milestone, flag it.
 

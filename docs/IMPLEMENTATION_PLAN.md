@@ -105,78 +105,78 @@ You can point Claude Code at the project, tell it "add a new shadcn component," 
 ### 4.1 Deliverables
 
 **Database (SQL migrations applied in order):**
-- [ ] `organizations` table (DATA_MODEL.md §2.1)
-- [ ] `users` table (DATA_MODEL.md §2.2)
-- [ ] `roles` table with seeded 5 system roles (DATA_MODEL.md §2.3)
-- [ ] `user_roles` junction (DATA_MODEL.md §2.4)
-- [ ] `activity_log` table + trigger function (DATA_MODEL.md §11.1, §14.2)
-- [ ] `feature_flags` table (DATA_MODEL.md §12)
-- [ ] Helper function `user_org_ids()` (DATA_MODEL.md §15.1)
-- [ ] RLS enabled on all 4 foundation tables with policies from DATA_MODEL.md §15.3–15.4
-- [ ] Seed function: on org creation, insert 5 system roles + default `flip_stages` + default `budget_categories` (even though these tables don't exist yet in M1 — skip the dependent seeds, add them when those tables arrive)
+- [x] `organizations` table (DATA_MODEL.md §2.1)
+- [x] `users` table (DATA_MODEL.md §2.2)
+- [x] `roles` table with seeded 5 system roles (DATA_MODEL.md §2.3)
+- [x] `user_roles` junction (DATA_MODEL.md §2.4)
+- [x] `activity_log` table + trigger function (DATA_MODEL.md §11.1, §14.2)
+- [x] `feature_flags` table (DATA_MODEL.md §12)
+- [x] Helper function `user_org_ids()` (DATA_MODEL.md §15.1)
+- [x] RLS enabled on all 6 foundation tables with policies from DATA_MODEL.md §15.3–15.5
+- [x] Seed function: `seed_organization_roles(org_id)` inserts 5 system roles (flip_stages + budget_categories deferred to M2/M4 when those tables exist)
 
 **Auth flow:**
-- [ ] `/login` page with email + password
-- [ ] `/signup` page that creates both auth user + `users` row + `organizations` row + `user_roles` row (as admin) in a transaction
-- [ ] `/forgot-password` and `/reset-password` (magic link flow via Supabase)
-- [ ] Logout action
-- [ ] Middleware redirects: unauthenticated → `/login`; authenticated on `/login` → `/dashboard`
+- [x] `/login` page with email + password
+- [x] `/signup` page that creates both auth user + `users` row + `organizations` row + `user_roles` row (as admin) in a transaction
+- [ ] `/forgot-password` and `/reset-password` (magic link flow via Supabase) — **DEFERRED: 4 internal users; low priority until commercial**
+- [x] Logout action
+- [x] Auth redirects: unauthenticated → `/login`; authenticated on `/login` → `/dashboard` (via layout checks, not proxy middleware)
 
 **i18n:**
-- [ ] `/messages/th/common.json` and `/messages/en/common.json` with foundation strings (nav, buttons, auth forms)
-- [ ] Locale switcher in user menu
-- [ ] `users.locale` persisted; changing locale in UI updates the row
-- [ ] Buddhist Era date formatter helper (CONVENTIONS.md §13.5)
-- [ ] Currency formatter helper (CONVENTIONS.md §13.6)
-- [ ] `getLocalizedName` helper for lookup tables (CONVENTIONS.md §13.7)
+- [x] `/messages/th/common.json` and `/messages/en/common.json` with foundation strings (nav, buttons, auth forms)
+- [ ] Locale switcher in user menu — **DEFERRED: URL-based switching (`/en/*`) works; UI toggle is UX polish**
+- [ ] `users.locale` persisted; changing locale in UI updates the row — **DEFERRED: blocked by locale switcher**
+- [x] Buddhist Era date formatter helper (CONVENTIONS.md §13.5)
+- [x] Currency formatter helper (CONVENTIONS.md §13.6)
+- [x] `getLocalizedName` helper for lookup tables (CONVENTIONS.md §13.7)
 
 **App shell:**
-- [ ] `app/[locale]/(auth)/layout.tsx` — minimal layout for auth pages
-- [ ] `app/[locale]/(app)/layout.tsx` — sidebar + topbar + main content area
-- [ ] Sidebar with nav items (stubs — most routes 404 at this stage): Dashboard, Sourcing, Flips, Contractors, Investors, Listings, Settings
-- [ ] Topbar with org name (static), user menu, theme toggle
-- [ ] Mobile: bottom tab bar replaces sidebar at ≤768px
-- [ ] Dark mode toggle working; theme persisted to `users.metadata.theme`
+- [x] `app/[locale]/(auth)/layout.tsx` — minimal layout for auth pages
+- [x] `app/[locale]/(app)/layout.tsx` — sidebar + topbar + main content area
+- [x] Sidebar with nav items (stubs — most routes 404 at this stage): Dashboard, Sourcing, Flips, Contractors, Investors, Listings, Settings
+- [x] Topbar with org name, user info, logout button
+- [x] Mobile: bottom tab bar replaces sidebar at ≤768px
+- [ ] Dark mode toggle working; theme persisted to `users.metadata.theme` — **DEFERRED: `prefers-color-scheme` auto-detection works; manual toggle is UX polish**
 
 **Server primitives (used everywhere):**
-- [ ] `/src/server/db.ts` — Prisma client singleton with soft-delete middleware (CONVENTIONS.md §5.3, §5.4)
-- [ ] `/src/server/supabase/server-client.ts` — server Supabase client (CONVENTIONS.md §6.1)
-- [ ] `/src/server/supabase/auth.ts` — `getCurrentUser`, `requireAuth`, `getActiveOrgId` (CONVENTIONS.md §6.2)
-- [ ] `/src/server/shared/activity-log.ts` — `logActivity` helper
-- [ ] `/src/lib/i18n.ts` — locale type, supported locales, `getLocalizedName`
-- [ ] `/src/types/common.ts` — `ActionResult` discriminated union (CONVENTIONS.md §7.2)
+- [x] `/src/server/db.ts` — Prisma 7 client singleton with PrismaPg adapter (soft-delete `$extends` deferred to M2 when queries need it)
+- [x] `/src/server/supabase/server-client.ts` — server Supabase client (CONVENTIONS.md §6.1)
+- [x] `/src/server/supabase/auth.ts` — `getCurrentUser`, `requireAuth`, `getActiveOrgId` (CONVENTIONS.md §6.2)
+- [x] `/src/server/shared/activity-log.ts` — `logActivity` helper
+- [x] `/src/lib/i18n.ts` — locale type, supported locales, `getLocalizedName`
+- [x] `/src/types/common.ts` — `ActionResult` discriminated union (CONVENTIONS.md §7.2)
 
 **Primitive UI components:**
-- [ ] `<Pill>` (neutral + semantic variants per DESIGN_SYSTEM.md §5.4)
-- [ ] `<Currency>` — formatted THB display, tabular nums, locale-aware
-- [ ] `<Date>` — formatted date, Buddhist Era in Thai locale
-- [ ] `<Variance>` — number + percent with semantic color per directionality
-- [ ] `<EmptyState>` — centered text + CTA button
-- [ ] `<SkeletonTable>` — loading placeholder
-- [ ] `<ConfirmDeleteDialog>` — destructive action confirmation
+- [x] `<Pill>` (neutral + semantic variants per DESIGN_SYSTEM.md §5.4)
+- [x] `<Currency>` — formatted THB display, tabular nums, locale-aware
+- [x] `<DateDisplay>` — formatted date, Buddhist Era in Thai locale
+- [x] `<Variance>` — number + percent with semantic color per directionality
+- [x] `<EmptyState>` — centered text + CTA button
+- [x] `<SkeletonTable>` — loading placeholder
+- [x] `<ConfirmDeleteDialog>` — destructive action confirmation
 
 ### 4.2 Test criteria
 
 **Automated:**
-- [ ] `pnpm tsc --noEmit` passes
-- [ ] `pnpm biome check` passes
-- [ ] Unit tests: all formatter helpers (currency, date, Buddhist Era edge cases)
-- [ ] Unit tests: `ActionResult` type narrowing works correctly
-- [ ] Playwright E2E: signup → creates org → lands on empty dashboard → logout → login with same creds → back on dashboard
-- [ ] Playwright E2E (**critical**): cross-tenant leak test
+- [x] `pnpm tsc --noEmit` passes
+- [x] `pnpm biome check` passes
+- [ ] Unit tests: all formatter helpers (currency, date, Buddhist Era edge cases) — **DEFERRED to M2: formatters are written and typed; vitest tests added when M2 exercises them**
+- [ ] Unit tests: `ActionResult` type narrowing works correctly — **DEFERRED: type is defined and used; formal test added with M2**
+- [ ] Playwright E2E: signup → creates org → lands on empty dashboard → logout → login with same creds → back on dashboard — **DEFERRED: tested manually; Playwright wiring in M2 when there's more to test**
+- [ ] Playwright E2E (**critical**): cross-tenant leak test — **DEFERRED to end of M2: needs org-scoped data URLs (property pages) to probe meaningfully**
   1. User A signs up, creates Org A
   2. User B signs up, creates Org B
   3. Logged in as User A, directly hit URLs that should only return Org B data (once we have any)
   4. Assert 404 or empty response, never Org B data
 
 **Manual:**
-- [ ] Signup form renders in Thai by default
-- [ ] Toggle to English → form renders in English, URL changes to `/en/signup`
-- [ ] Signup with email + password → immediately logged in, lands on dashboard
-- [ ] Refresh page → still logged in
-- [ ] Logout → redirects to `/login`, hitting `/dashboard` redirects to `/login`
-- [ ] Dark mode toggle → instant, persists across sessions
-- [ ] Mobile view (Chrome DevTools, iPhone 14 Pro) → bottom tab bar visible, sidebar hidden
+- [x] Signup form renders in Thai by default
+- [ ] Toggle to English → form renders in English, URL changes to `/en/signup` — **DEFERRED: URL-based `/en/signup` works; no locale switcher UI yet**
+- [x] Signup with email + password → immediately logged in, lands on dashboard (requires Supabase email confirmation disabled)
+- [x] Refresh page → still logged in
+- [x] Logout → redirects to `/login`, hitting `/dashboard` redirects to `/login`
+- [ ] Dark mode toggle → instant, persists across sessions — **DEFERRED: `prefers-color-scheme` works; manual toggle is UX polish**
+- [x] Mobile view (Chrome DevTools, iPhone 14 Pro) → bottom tab bar visible, sidebar hidden
 
 ### 4.3 Demo script
 
