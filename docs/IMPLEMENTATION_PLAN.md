@@ -219,15 +219,20 @@ Sign up as a new user → see the sidebar with your org name → toggle language
 **Feature: `/src/features/sourcing`**
 - [x] Queries: `listProperties` (with project + contact joins), `getProperty` (with deal analyses)
 - [x] Actions: `createProperty` (auto-creates project + contact records), `createDealAnalysis` (with computed fields), `recordDealDecision`
-- [ ] Actions: `updateProperty`, `updateDealAnalysis` — **DEFERRED: edit flow added after core CRUD is validated**
+- [ ] Actions: `updateProperty`, `updateDealAnalysis`
 - [x] Validators: `propertySchema`, `dealAnalysisSchema`, `dealDecisionSchema`, `computeDealFields`
 - [x] Components:
   - [x] `<PropertyLibraryTable>` — all properties with project, type, specs, asking price, sourcing status columns
   - [x] `<CreatePropertyDialog>` — 4-section form: Basic (listing name, project, type, URL) → Specs (bed/bath/area/floors/floor level/land) → Pricing (asking price, terms) → Contact (type, name, phone, LINE, email)
-  - [x] `<DealAnalysisForm>` — underwriting calculator with live profit/margin/ROI computation panel
-  - [ ] `<DealPipelineKanban>` — Kanban view of sourcing pipeline stages — **DEFERRED: core CRUD validates first, Kanban added as visual layer**
+  - [x] `<DealAnalysisForm>` — underwriting calculator with ฟลิบลอย/โอนเข้า toggle + live profit/margin/ROI computation panel
+  - [ ] `<DealPipelineKanban>` — Kanban view of sourcing pipeline stages — **DEFERRED: Kanban added as visual layer after core management is complete**
   - [x] `<PropertyDetailPage>` — property info + deal analyses list + inline analysis form
-  - [ ] Decision buttons (pursue/pass) on deal analysis cards — **DEFERRED**
+
+**Deal analysis management (required before M2 is done):**
+- [ ] Analysis label/name field — prominent at top of form, displayed on cards (e.g. "conservative", "best case")
+- [ ] Delete analysis — button on each card with `<ConfirmDeleteDialog>`
+- [ ] Decision buttons (pursue/pass) — inline on each analysis card, triggers `recordDealDecision`
+- [ ] Action: `deleteDealAnalysis` (soft delete)
 
 **Sourcing sub-navigation (contacts + projects management):**
 - [ ] Sub-nav bar at top of sourcing section: อสังหาฯ | ผู้ติดต่อ | โครงการ
