@@ -209,46 +209,60 @@ Sign up as a new user → see the sidebar with your org name → toggle language
 ### 5.1 Deliverables
 
 **Database:**
-- [ ] `properties` table (DATA_MODEL.md §3.1) with RLS
-- [ ] `deal_analyses` table (DATA_MODEL.md §4.1) with RLS
-- [ ] `flip_stages` table (DATA_MODEL.md §3.3) with RLS + seeded 9 default stages (Thai + English names, since M1 couldn't seed these)
-- [ ] Backfill: add `flip_stages` and `budget_categories` (just the table + seeds, not yet referenced) to the M1 org seed function so new orgs get them
+- [x] `properties` table with RLS — reworked from DATA_MODEL.md §3.1: removed address requirement, added `listing_name`, `project_id`, `contact_id`, `asking_price_thb`, `price_remark`, `listing_url`, `floor_level`, `sourcing_status` pipeline field
+- [x] `deal_analyses` table (DATA_MODEL.md §4.1) with RLS
+- [x] `flip_stages` table (DATA_MODEL.md §3.3) with RLS + seeded 9 default stages
+- [x] `contacts` table with RLS — reusable contact records (seller/agent/owner/developer) linked across properties
+- [x] `projects` table with RLS — canonical project/development names for comp analysis, unique per org
+- [x] `seed_organization_flip_stages()` function for new org creation
 
 **Feature: `/src/features/sourcing`**
-- [ ] Queries: `listProperties`, `getProperty`, `listDealAnalyses`, `getDealAnalysisById`
-- [ ] Actions: `createProperty`, `updateProperty`, `createDealAnalysis`, `updateDealAnalysis`, `recordDealDecision`
-- [ ] Validators: `propertySchema`, `dealAnalysisSchema`, `dealDecisionSchema`
-- [ ] Components:
-  - [ ] `<PropertyLibraryTable>` — all properties, filterable by decision outcome
-  - [ ] `<PropertyForm>` — create/edit property (dialog)
-  - [ ] `<DealAnalysisForm>` — underwriting calculator with live profit/margin/ROI computation
-  - [ ] `<DealPipelineKanban>` — Kanban view of pre-acquisition stages (sourcing → underwriting → negotiating → acquiring)
-  - [ ] `<PropertyDetailPage>` — property info + list of deal analyses for that property
+- [x] Queries: `listProperties` (with project + contact joins), `getProperty` (with deal analyses)
+- [x] Actions: `createProperty` (auto-creates project + contact records), `createDealAnalysis` (with computed fields), `recordDealDecision`
+- [ ] Actions: `updateProperty`, `updateDealAnalysis` — **DEFERRED: edit flow added after core CRUD is validated**
+- [x] Validators: `propertySchema`, `dealAnalysisSchema`, `dealDecisionSchema`, `computeDealFields`
+- [x] Components:
+  - [x] `<PropertyLibraryTable>` — all properties with project, type, specs, asking price, sourcing status columns
+  - [x] `<CreatePropertyDialog>` — 4-section form: Basic (listing name, project, type, URL) → Specs (bed/bath/area/floors/floor level/land) → Pricing (asking price, terms) → Contact (type, name, phone, LINE, email)
+  - [x] `<DealAnalysisForm>` — underwriting calculator with live profit/margin/ROI computation panel
+  - [ ] `<DealPipelineKanban>` — Kanban view of sourcing pipeline stages — **DEFERRED: core CRUD validates first, Kanban added as visual layer**
+  - [x] `<PropertyDetailPage>` — property info + deal analyses list + inline analysis form
+  - [ ] Decision buttons (pursue/pass) on deal analysis cards — **DEFERRED**
+
+**Sourcing sub-navigation (contacts + projects management):**
+- [ ] Sub-nav bar at top of sourcing section: อสังหาฯ | ผู้ติดต่อ | โครงการ
+- [ ] `/sourcing/contacts` → contact directory table (all agents/sellers, linked properties count, phone/LINE)
+- [ ] `/sourcing/contacts/[contactId]` → contact detail with linked properties list
+- [ ] `/sourcing/projects` → project directory table (all developments, unit count, avg price)
+- [ ] `/sourcing/projects/[projectId]` → project detail with linked properties + future comp analysis view
 
 **Routes:**
-- [ ] `/sourcing` → pipeline Kanban view
-- [ ] `/sourcing/properties` → property library table
-- [ ] `/sourcing/properties/[propertyId]` → property detail page
-- [ ] `/sourcing/properties/[propertyId]/analyze` → deal analysis form
+- [x] `/sourcing` → redirects to `/sourcing/properties`
+- [x] `/sourcing/properties` → property library table
+- [x] `/sourcing/properties/[propertyId]` → property detail page with deal analyses
+- [ ] `/sourcing/contacts` → contact directory — **NEW**
+- [ ] `/sourcing/projects` → project directory — **NEW**
 
-**i18n:** `/messages/{th,en}/sourcing.json` with all strings
+**i18n:** `/messages/{th,en}/sourcing.json` with all strings — [x] done, includes contact types, sourcing statuses, all form fields
 
 ### 5.2 Test criteria
 
 **Automated:**
-- [ ] Unit tests: deal analysis computed fields (`total_cost`, `est_profit`, `est_margin_pct`, `est_roi_pct`) — edge cases: zero ARV, negative profit, very high ROI
-- [ ] Unit tests: `propertySchema` validation (land area conversions, postal code formats)
-- [ ] Integration test: `createDealAnalysis` creates the row, logs activity, recomputes totals correctly
-- [ ] Playwright: Sourcing team user creates property → runs analysis → marks as "pursue" → appears in Kanban at correct stage
+- [ ] Unit tests: deal analysis computed fields (`total_cost`, `est_profit`, `est_margin_pct`, `est_roi_pct`) — edge cases: zero ARV, negative profit, very high ROI — **DEFERRED to when Playwright + vitest are wired**
+- [ ] Integration test: `createDealAnalysis` creates the row, logs activity, recomputes totals correctly — **DEFERRED**
+- [ ] Playwright: Sourcing team user creates property → runs analysis → marks as "pursue" — **DEFERRED**
 
 **Manual:**
-- [ ] Create a property with Thai address fields → renders correctly in both locales
-- [ ] Run a deal analysis → live totals update as inputs change (debounced, not on every keystroke)
-- [ ] Pipeline Kanban → drag a card between stages → DB updated, optimistic UI
+- [x] Create a property with Thai listing name, project, specs → renders correctly
+- [x] Run a deal analysis → live totals update as inputs change
+- [x] Seed data: 8 properties, 3 projects, 5 contacts, 6 deal analyses — all in Thai, realistic Bangkok data
+- [ ] Pipeline Kanban → drag a card between stages → DB updated — **DEFERRED: Kanban comes after core CRUD validated**
+- [ ] Contact directory: view all contacts, see linked properties — **TODO**
+- [ ] Project directory: view all projects, see linked units — **TODO**
 
 ### 5.3 Demo script
 
-Create a property (Thai address: ซอยสาทร 12, ทุ่งมหาเมฆ, สาทร, กรุงเทพ). Run a deal analysis: purchase 4.5M, reno 1.2M, ARV 7.5M → see est. margin ~24%. Mark as "pursue" → appears in Kanban at "negotiating" stage. Run another analysis on the same property with different numbers → both saved, property page shows both. Reject one, pursue the other → pipeline updates.
+Open `/sourcing/properties` → see 8 seeded Thai properties across 3 projects (ลุมพินี ดินแดง, บ้านกลางเมือง สาทร, ไอดีโอ โมบิ). Click "เพิ่มอสังหาฯ" → fill: listing name "ทาวน์เฮ้าส์สาทร #9", project "บ้านกลางเมือง สาทร-ตากสิน" (auto-links existing project), type ทาวน์เฮ้าส์, 3 bed / 3 bath / 150 sqm / 3 floors, asking ฿6.5M, price remark "ค่าโอนคนละครึ่ง", contact: agent "สมชาย ใจดี" 081-234-5678. Save → lands on property detail. Fill deal analysis: purchase 6.5M, reno 1.2M, ARV 9.5M, 90 days → live panel shows ~19% margin. Save → analysis appears in list above. Click back → property in library table with project name and ฿6.5M asking price.
 
 ### 5.4 What's explicitly NOT in M2
 
@@ -256,10 +270,12 @@ Create a property (Thai address: ซอยสาทร 12, ทุ่งมหา
 - Property photos (deferred to M11 when we do document upload everywhere)
 - Map view (Mapbox deferred)
 - Property search / full-text filtering (v1.5)
+- Project comp analysis (data collection starts in M2 via projects table; analysis UI is v1.5)
 
 ### 5.5 Done when
 
-- The Sourcing team's full workflow is usable: add property → analyze → decide → see pipeline
+- The Sourcing team's full workflow is usable: add property → analyze → decide → see pipeline status
+- Contact and project directories let the team manage their agent/seller contacts and track developments
 - 10+ properties can be created, 20+ deal analyses run without perf issues
 - All Thai text renders correctly; English toggle works end-to-end
 
