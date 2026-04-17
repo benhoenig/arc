@@ -39,14 +39,20 @@ export default async function PropertyDetailPage({ params }: Props) {
 
       <div className="mb-6">
         <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold text-text-strong">{property.nickname}</h1>
+          <h1 className="text-2xl font-semibold text-text-strong">{property.listingName}</h1>
           <Pill>{tTypes(property.propertyType)}</Pill>
         </div>
-        <p className="mt-1 text-sm text-text-muted">
-          {property.addressLine1}
-          {property.district && `, ${property.district}`}
-          {property.province && `, ${property.province}`}
-        </p>
+        {property.project && (
+          <p className="mt-1 text-sm text-text-muted">{property.project.name}</p>
+        )}
+        {property.askingPriceThb && (
+          <p className="mt-1 text-sm font-medium">
+            <Currency amount={Number(property.askingPriceThb)} />
+            {property.priceRemark && (
+              <span className="ml-2 font-normal text-text-muted">({property.priceRemark})</span>
+            )}
+          </p>
+        )}
       </div>
 
       <div className="mb-8">

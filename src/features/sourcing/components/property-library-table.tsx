@@ -1,7 +1,7 @@
 'use client';
 
 import { useTranslations } from 'next-intl';
-import { DateDisplay } from '@/components/data-display/date-display';
+import { Currency } from '@/components/data-display/currency';
 import { EmptyState } from '@/components/data-display/empty-state';
 import { Pill } from '@/components/data-display/pill';
 import {
@@ -23,6 +23,7 @@ type Props = {
 export function PropertyLibraryTable({ properties, onAdd }: Props) {
   const t = useTranslations('sourcing.properties');
   const tTypes = useTranslations('sourcing.propertyTypes');
+  const tStatus = useTranslations('sourcing.sourcingStatus');
 
   if (properties.length === 0) {
     return (
@@ -39,43 +40,47 @@ export function PropertyLibraryTable({ properties, onAdd }: Props) {
     <Table>
       <TableHeader>
         <TableRow>
-          <TableHead>{t('columns.nickname')}</TableHead>
-          <TableHead>{t('columns.location')}</TableHead>
+          <TableHead>{t('columns.name')}</TableHead>
+          <TableHead>{t('columns.project')}</TableHead>
           <TableHead>{t('columns.type')}</TableHead>
-          <TableHead className="text-right">{t('columns.specs')}</TableHead>
-          <TableHead className="text-right">{t('columns.analyses')}</TableHead>
-          <TableHead>{t('columns.added')}</TableHead>
+          <TableHead>{t('columns.specs')}</TableHead>
+          <TableHead className="text-right">{t('columns.askingPrice')}</TableHead>
+          <TableHead>{t('columns.status')}</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {properties.map((property) => (
-          <TableRow key={property.id} className="cursor-pointer hover:bg-fill-hover">
+        {properties.map((p) => (
+          <TableRow key={p.id} className="cursor-pointer hover:bg-fill-hover">
             <TableCell>
               <Link
-                href={`/sourcing/properties/${property.id}`}
+                href={`/sourcing/properties/${p.id}`}
                 className="font-medium text-text-strong hover:underline"
               >
-                {property.nickname}
+                {p.listingName}
               </Link>
             </TableCell>
-            <TableCell className="text-text-muted">
-              {[property.district, property.province].filter(Boolean).join(', ') || '—'}
+            <TableCell className="text-text-muted">{p.project?.name ?? '—'}</TableCell>
+            <TableCell>
+              <Pill>{tTypes(p.propertyType)}</Pill>
+            </TableCell>
+            <TableCell className="tabular text-text-muted">
+              {[
+                `${p.bedrooms} bed`,
+                `${Number(p.bathrooms)} bath`,
+                `${Number(p.floorAreaSqm)} sqm`,
+              ].join(' · ')}
+            </TableCell>
+            <TableCell className="tabular text-right">
+              {p.askingPriceThb ? (
+                <Currency amount={Number(p.askingPriceThb)} />
+              ) : (
+                <span className="text-text-muted">—</span>
+              )}
             </TableCell>
             <TableCell>
-              <Pill>{tTypes(property.propertyType)}</Pill>
-            </TableCell>
-            <TableCell className="tabular text-right text-text-muted">
-              {[
-                property.bedrooms != null ? `${property.bedrooms} bed` : null,
-                property.bathrooms != null ? `${Number(property.bathrooms)} bath` : null,
-                property.floorAreaSqm != null ? `${Number(property.floorAreaSqm)} sqm` : null,
-              ]
-                .filter(Boolean)
-                .join(' · ') || '—'}
-            </TableCell>
-            <TableCell className="tabular text-right">{property._count.dealAnalyses}</TableCell>
-            <TableCell className="text-text-muted">
-              <DateDisplay date={property.createdAt} format="short" />
+              <Pill variant={p.sourcingStatus === 'dropped' ? 'muted' : 'neutral'}>
+                {tStatus(p.sourcingStatus)}
+              </Pill>
             </TableCell>
           </TableRow>
         ))}

@@ -13,8 +13,15 @@ export async function getSupabaseServerClient() {
       cookies: {
         getAll: () => cookieStore.getAll(),
         setAll: (cookiesToSet) => {
-          for (const { name, value, options } of cookiesToSet) {
-            cookieStore.set(name, value, options);
+          try {
+            for (const { name, value, options } of cookiesToSet) {
+              cookieStore.set(name, value, options);
+            }
+          } catch {
+            // Called from a Server Component during token refresh — cookie
+            // writes are only allowed in Server Actions and Route Handlers.
+            // The refreshed token is picked up by the next mutation or
+            // middleware pass. This is the official Supabase SSR pattern.
           }
         },
       },

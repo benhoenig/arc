@@ -46,6 +46,8 @@ model Organization {
   flipStages   FlipStage[]
   properties   Property[]
   dealAnalyses DealAnalysis[]
+  contacts     Contact[]
+  projects     Project[]
 
   @@map("organizations")
 }
@@ -179,12 +181,60 @@ model FlipStage {
   @@map("flip_stages")
 }
 
+model Contact {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  name           String
+  contactType    String    @default("agent") @map("contact_type")
+  phone          String?
+  lineId         String?   @map("line_id")
+  email          String?
+  notes          String?
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  properties   Property[]
+
+  @@index([organizationId], map: "idx_contacts_org")
+  @@map("contacts")
+}
+
+model Project {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  name           String
+  developer      String?
+  location       String?
+  propertyType   String?   @map("property_type")
+  notes          String?
+  metadata       Json      @default("{}")
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  properties   Property[]
+
+  @@unique([organizationId, name], map: "idx_projects_org_name")
+  @@index([organizationId], map: "idx_projects_org")
+  @@map("projects")
+}
+
 model Property {
   id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   organizationId String    @map("organization_id") @db.Uuid
 
-  nickname       String
-  addressLine1   String    @map("address_line1")
+  // Identification
+  listingName    String    @map("listing_name")
+  projectId      String?   @map("project_id") @db.Uuid
+  contactId      String?   @map("contact_id") @db.Uuid
+  listingUrl     String?   @map("listing_url")
+
+  // Address (optional — hidden from default form, kept for future map features)
+  addressLine1   String?   @map("address_line1")
   addressLine2   String?   @map("address_line2")
   subdistrict    String?
   district       String?
@@ -194,17 +244,27 @@ model Property {
   latitude       Decimal?  @db.Decimal(10, 7)
   longitude      Decimal?  @db.Decimal(10, 7)
 
+  // Legal
   titleDeedNumber String?  @map("title_deed_number")
   titleDeedType   String?  @map("title_deed_type")
   landAreaSqwa    Decimal? @map("land_area_sqwa") @db.Decimal(10, 2)
   landAreaSqm     Decimal? @map("land_area_sqm") @db.Decimal(10, 2)
 
+  // Physical
   propertyType   String    @map("property_type")
   bedrooms       Int?
   bathrooms      Decimal?  @db.Decimal(4, 1)
   floorAreaSqm   Decimal?  @map("floor_area_sqm") @db.Decimal(10, 2)
   yearBuilt      Int?      @map("year_built")
   floors         Int?
+  floorLevel     Int?      @map("floor_level")
+
+  // Pricing
+  askingPriceThb Decimal?  @map("asking_price_thb") @db.Decimal(14, 2)
+  priceRemark    String?   @map("price_remark")
+
+  // Pipeline
+  sourcingStatus String    @default("new") @map("sourcing_status")
 
   notes          String?
   metadata       Json      @default("{}")
@@ -216,12 +276,17 @@ model Property {
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
 
   organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  project        Project?       @relation(fields: [projectId], references: [id], onDelete: SetNull)
+  contact        Contact?       @relation(fields: [contactId], references: [id], onDelete: SetNull)
   createdByUser  User?          @relation("PropertyCreatedBy", fields: [createdBy], references: [id])
   updatedByUser  User?          @relation("PropertyUpdatedBy", fields: [updatedBy], references: [id])
   dealAnalyses   DealAnalysis[]
 
   @@index([organizationId], map: "idx_properties_org")
   @@index([province, district], map: "idx_properties_location")
+  @@index([projectId], map: "idx_properties_project")
+  @@index([contactId], map: "idx_properties_contact")
+  @@index([organizationId, sourcingStatus], map: "idx_properties_status")
   @@map("properties")
 }
 
