@@ -26,7 +26,8 @@
     "listingName": "ชื่อประกาศ",
     "listingNamePlaceholder": "เช่น ทาวน์เฮ้าส์สาทร 3 ห้องนอน",
     "projectName": "ชื่อโครงการ",
-    "projectNamePlaceholder": "เช่น ลุมพินี สวีท สาทร",
+    "projectNamePlaceholder": "ค้นหาหรือเพิ่มโครงการใหม่",
+    "projectCreateNew": "เพิ่มโครงการ",
     "listingUrl": "ลิงก์ประกาศ",
     "listingUrlPlaceholder": "https://...",
     "propertyType": "ประเภท",
@@ -41,6 +42,8 @@
     "priceRemarkPlaceholder": "เช่น ค่าโอนคนละครึ่ง, รวมค่าโอนฯ",
     "contactType": "ประเภทผู้ติดต่อ",
     "contactName": "ชื่อผู้ติดต่อ",
+    "contactNamePlaceholder": "ค้นหาหรือเพิ่มผู้ติดต่อใหม่",
+    "contactCreateNew": "เพิ่มผู้ติดต่อ",
     "contactPhone": "เบอร์โทร",
     "contactLineId": "LINE ID",
     "contactEmail": "อีเมล",
@@ -49,9 +52,8 @@
     "submitting": "กำลังบันทึก..."
   },
   "contactTypes": {
-    "seller": "เจ้าของ/ผู้ขาย",
-    "agent": "นายหน้า",
     "owner": "เจ้าของ",
+    "agent": "นายหน้า",
     "developer": "เจ้าของโครงการ",
     "other": "อื่นๆ"
   },
@@ -78,6 +80,10 @@
     "title": "วิเคราะห์ดีล",
     "addAnalysis": "วิเคราะห์ดีลใหม่",
     "empty": "ยังไม่มีการวิเคราะห์",
+    "label": "ชื่อการวิเคราะห์",
+    "labelPlaceholder": "เช่น conservative, best case",
+    "deleteTitle": "ลบการวิเคราะห์",
+    "deleteDescription": "การวิเคราะห์นี้จะถูกลบและไม่สามารถกู้คืนได้",
     "inputs": "ข้อมูลเบื้องต้น",
     "results": "ผลการวิเคราะห์",
     "flipTypes": {
@@ -114,5 +120,57 @@
     "backToList": "กลับไปรายการ",
     "analyses": "การวิเคราะห์ ({count})",
     "noAnalyses": "ยังไม่ได้วิเคราะห์ดีลนี้"
+  },
+  "nav": {
+    "properties": "อสังหาฯ",
+    "contacts": "ผู้ติดต่อ",
+    "projects": "โครงการ"
+  },
+  "contacts": {
+    "title": "ผู้ติดต่อ",
+    "empty": "ยังไม่มีผู้ติดต่อ",
+    "emptyDescription": "ผู้ติดต่อจะถูกสร้างอัตโนมัติเมื่อเพิ่มอสังหาริมทรัพย์",
+    "columns": {
+      "name": "ชื่อ",
+      "type": "ประเภท",
+      "phone": "เบอร์โทร",
+      "lineId": "LINE ID",
+      "email": "อีเมล",
+      "properties": "อสังหาฯ"
+    },
+    "detail": {
+      "backToList": "กลับไปรายการผู้ติดต่อ",
+      "linkedProperties": "อสังหาริมทรัพย์ที่เกี่ยวข้อง ({count})",
+      "noProperties": "ยังไม่มีอสังหาริมทรัพย์ที่เชื่อมโยง"
+    },
+    "add": "เพิ่มผู้ติดต่อ",
+    "createTitle": "เพิ่มผู้ติดต่อ",
+    "edit": "แก้ไข",
+    "save": "บันทึก",
+    "saving": "กำลังบันทึก...",
+    "cancel": "ยกเลิก"
+  },
+  "projects": {
+    "title": "โครงการ",
+    "empty": "ยังไม่มีโครงการ",
+    "emptyDescription": "โครงการจะถูกสร้างอัตโนมัติเมื่อเพิ่มอสังหาริมทรัพย์",
+    "columns": {
+      "name": "ชื่อโครงการ",
+      "developer": "เจ้าของโครงการ",
+      "location": "ทำเล",
+      "type": "ประเภท",
+      "properties": "จำนวนยูนิต"
+    },
+    "detail": {
+      "backToList": "กลับไปรายการโครงการ",
+      "linkedProperties": "อสังหาริมทรัพย์ในโครงการ ({count})",
+      "noProperties": "ยังไม่มีอสังหาริมทรัพย์ในโครงการนี้"
+    },
+    "add": "เพิ่มโครงการ",
+    "createTitle": "เพิ่มโครงการ",
+    "edit": "แก้ไข",
+    "save": "บันทึก",
+    "saving": "กำลังบันทึก...",
+    "cancel": "ยกเลิก"
   }
 }

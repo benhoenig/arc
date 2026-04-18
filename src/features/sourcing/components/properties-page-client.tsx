@@ -3,17 +3,19 @@
 import { Plus } from 'lucide-react';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import type { PickerOptions } from '../queries/list-picker-options';
 import type { PropertyListItem } from '../queries/list-properties';
-import { CreatePropertyDialog } from './create-property-dialog';
+import { PropertyDialog } from './property-dialog';
 import { PropertyLibraryTable } from './property-library-table';
 
 type Props = {
   properties: PropertyListItem[];
   title: string;
   addLabel: string;
+  pickerOptions: PickerOptions;
 };
 
-export function PropertiesPageClient({ properties, title, addLabel }: Props) {
+export function PropertiesPageClient({ properties, title, addLabel, pickerOptions }: Props) {
   const [dialogOpen, setDialogOpen] = useState(false);
 
   return (
@@ -28,7 +30,11 @@ export function PropertiesPageClient({ properties, title, addLabel }: Props) {
 
       <PropertyLibraryTable properties={properties} onAdd={() => setDialogOpen(true)} />
 
-      <CreatePropertyDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <PropertyDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        pickerOptions={pickerOptions}
+      />
     </div>
   );
 }

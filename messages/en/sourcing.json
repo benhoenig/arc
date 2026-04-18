@@ -26,7 +26,8 @@
     "listingName": "Listing name",
     "listingNamePlaceholder": "e.g. Sathorn Townhouse 3BR",
     "projectName": "Project name",
-    "projectNamePlaceholder": "e.g. Lumpini Suite Sathorn",
+    "projectNamePlaceholder": "Search or add new project",
+    "projectCreateNew": "Add project",
     "listingUrl": "Listing URL",
     "listingUrlPlaceholder": "https://...",
     "propertyType": "Type",
@@ -41,6 +42,8 @@
     "priceRemarkPlaceholder": "e.g. Transfer fee split, includes transfer",
     "contactType": "Contact type",
     "contactName": "Contact name",
+    "contactNamePlaceholder": "Search or add new contact",
+    "contactCreateNew": "Add contact",
     "contactPhone": "Phone",
     "contactLineId": "LINE ID",
     "contactEmail": "Email",
@@ -49,9 +52,8 @@
     "submitting": "Saving..."
   },
   "contactTypes": {
-    "seller": "Seller",
-    "agent": "Agent",
     "owner": "Owner",
+    "agent": "Agent",
     "developer": "Developer",
     "other": "Other"
   },
@@ -78,6 +80,10 @@
     "title": "Deal Analysis",
     "addAnalysis": "New analysis",
     "empty": "No analyses yet",
+    "label": "Analysis name",
+    "labelPlaceholder": "e.g. conservative, best case",
+    "deleteTitle": "Delete analysis",
+    "deleteDescription": "This analysis will be permanently deleted.",
     "inputs": "Deal inputs",
     "results": "Analysis results",
     "flipTypes": {
@@ -114,5 +120,57 @@
     "backToList": "Back to list",
     "analyses": "Analyses ({count})",
     "noAnalyses": "No deal analyses for this property yet"
+  },
+  "nav": {
+    "properties": "Properties",
+    "contacts": "Contacts",
+    "projects": "Projects"
+  },
+  "contacts": {
+    "title": "Contacts",
+    "empty": "No contacts yet",
+    "emptyDescription": "Contacts are created automatically when you add a property",
+    "columns": {
+      "name": "Name",
+      "type": "Type",
+      "phone": "Phone",
+      "lineId": "LINE ID",
+      "email": "Email",
+      "properties": "Properties"
+    },
+    "detail": {
+      "backToList": "Back to contacts",
+      "linkedProperties": "Linked properties ({count})",
+      "noProperties": "No properties linked to this contact"
+    },
+    "add": "Add contact",
+    "createTitle": "Add contact",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel"
+  },
+  "projects": {
+    "title": "Projects",
+    "empty": "No projects yet",
+    "emptyDescription": "Projects are created automatically when you add a property",
+    "columns": {
+      "name": "Project name",
+      "developer": "Developer",
+      "location": "Location",
+      "type": "Type",
+      "properties": "Units"
+    },
+    "detail": {
+      "backToList": "Back to projects",
+      "linkedProperties": "Properties in project ({count})",
+      "noProperties": "No properties in this project yet"
+    },
+    "add": "Add project",
+    "createTitle": "Add project",
+    "edit": "Edit",
+    "save": "Save",
+    "saving": "Saving...",
+    "cancel": "Cancel"
   }
 }

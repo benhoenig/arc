@@ -297,6 +297,7 @@ model DealAnalysis {
   flipId                  String?   @map("flip_id") @db.Uuid
 
   flipType                String    @default("float_flip") @map("flip_type")
+  label                   String?   @db.VarChar(100)
 
   // Shared fields (both types)
   estPurchasePriceThb     Decimal   @map("est_purchase_price_thb") @db.Decimal(14, 2)

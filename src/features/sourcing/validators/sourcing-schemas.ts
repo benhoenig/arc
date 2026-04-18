@@ -1,6 +1,9 @@
 import { z } from 'zod';
 
-const optionalNumber = z.number().optional();
+const optionalNumber = z.preprocess(
+  (v) => (v === '' || Number.isNaN(v) ? undefined : v),
+  z.number().optional(),
+);
 
 export const propertySchema = z.object({
   listingName: z.string().min(1).max(200),
@@ -23,7 +26,7 @@ export const propertySchema = z.object({
   landAreaSqwa: optionalNumber,
   askingPriceThb: optionalNumber,
   priceRemark: z.string().max(500).optional(),
-  contactType: z.enum(['seller', 'agent', 'owner', 'developer', 'other']).optional(),
+  contactType: z.enum(['owner', 'agent', 'developer', 'other']).optional(),
   contactName: z.string().max(200).optional(),
   contactPhone: z.string().max(50).optional(),
   contactLineId: z.string().max(100).optional(),
@@ -35,6 +38,47 @@ export const updatePropertySchema = propertySchema.partial().extend({
   id: z.string().uuid(),
 });
 
+// ── Contact ───────────────────────────────────────────────────────
+
+export const CONTACT_TYPES = ['owner', 'agent', 'developer', 'other'] as const;
+
+export const createContactSchema = z.object({
+  name: z.string().min(1).max(200),
+  contactType: z.enum(CONTACT_TYPES),
+  phone: z.string().max(50).optional(),
+  lineId: z.string().max(100).optional(),
+  email: z.string().email().or(z.literal('')).optional(),
+  notes: z.string().max(5000).optional(),
+});
+
+export const updateContactSchema = createContactSchema.extend({
+  id: z.string().uuid(),
+});
+
+// ── Project ───────────────────────────────────────────────────────
+
+export const PROPERTY_TYPES = [
+  'condo',
+  'townhouse',
+  'detached_house',
+  'land',
+  'commercial',
+  'shophouse',
+  'other',
+] as const;
+
+export const createProjectSchema = z.object({
+  name: z.string().min(1).max(200),
+  developer: z.string().max(200).optional(),
+  location: z.string().max(200).optional(),
+  propertyType: z.enum(PROPERTY_TYPES).optional(),
+  notes: z.string().max(5000).optional(),
+});
+
+export const updateProjectSchema = createProjectSchema.extend({
+  id: z.string().uuid(),
+});
+
 // ── Deal Analysis ──────────────────────────────────────────────────
 
 export const FLIP_TYPES = ['float_flip', 'transfer_in'] as const;
@@ -43,6 +87,7 @@ export type FlipType = (typeof FLIP_TYPES)[number];
 export const dealAnalysisSchema = z.object({
   propertyId: z.string().uuid(),
   flipType: z.enum(FLIP_TYPES),
+  label: z.string().max(100).optional(),
 
   // Shared: purchase/SPA price, reno, selling commission, target/ARV, timeline
   estPurchasePriceThb: z.number().positive(),
@@ -61,6 +106,10 @@ export const dealAnalysisSchema = z.object({
   marketingCostThb: z.number().nonnegative().optional(),
 
   notes: z.string().max(5000).optional(),
+});
+
+export const updateDealAnalysisSchema = dealAnalysisSchema.partial().extend({
+  id: z.string().uuid(),
 });
 
 export const dealDecisionSchema = z.object({

@@ -2,10 +2,12 @@ import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { Currency } from '@/components/data-display/currency';
-import { DateDisplay } from '@/components/data-display/date-display';
 import { Pill } from '@/components/data-display/pill';
+import { DealAnalysisCard } from '@/features/sourcing/components/deal-analysis-card';
 import { DealAnalysisForm } from '@/features/sourcing/components/deal-analysis-form';
+import { PropertyHeaderActions } from '@/features/sourcing/components/property-header-actions';
 import { getProperty } from '@/features/sourcing/queries/get-property';
+import { listPickerOptions } from '@/features/sourcing/queries/list-picker-options';
 import { Link } from '@/i18n/navigation';
 import { getActiveOrgId } from '@/server/supabase/auth';
 
@@ -18,7 +20,10 @@ export default async function PropertyDetailPage({ params }: Props) {
   setRequestLocale(locale);
 
   const orgId = await getActiveOrgId();
-  const property = await getProperty(orgId, propertyId);
+  const [property, pickerOptions] = await Promise.all([
+    getProperty(orgId, propertyId),
+    listPickerOptions(orgId),
+  ]);
 
   if (!property) {
     notFound();
@@ -37,22 +42,25 @@ export default async function PropertyDetailPage({ params }: Props) {
         {t('detail.backToList')}
       </Link>
 
-      <div className="mb-6">
-        <div className="flex items-center gap-3">
-          <h1 className="text-2xl font-semibold text-text-strong">{property.listingName}</h1>
-          <Pill>{tTypes(property.propertyType)}</Pill>
+      <div className="mb-6 flex items-start justify-between gap-4">
+        <div>
+          <div className="flex items-center gap-3">
+            <h1 className="text-2xl font-semibold text-text-strong">{property.listingName}</h1>
+            <Pill>{tTypes(property.propertyType)}</Pill>
+          </div>
+          {property.project && (
+            <p className="mt-1 text-sm text-text-muted">{property.project.name}</p>
+          )}
+          {property.askingPriceThb && (
+            <p className="mt-1 text-sm font-medium">
+              <Currency amount={Number(property.askingPriceThb)} />
+              {property.priceRemark && (
+                <span className="ml-2 font-normal text-text-muted">({property.priceRemark})</span>
+              )}
+            </p>
+          )}
         </div>
-        {property.project && (
-          <p className="mt-1 text-sm text-text-muted">{property.project.name}</p>
-        )}
-        {property.askingPriceThb && (
-          <p className="mt-1 text-sm font-medium">
-            <Currency amount={Number(property.askingPriceThb)} />
-            {property.priceRemark && (
-              <span className="ml-2 font-normal text-text-muted">({property.priceRemark})</span>
-            )}
-          </p>
-        )}
+        <PropertyHeaderActions property={property} pickerOptions={pickerOptions} />
       </div>
 
       <div className="mb-8">
@@ -63,48 +71,7 @@ export default async function PropertyDetailPage({ params }: Props) {
         {property.dealAnalyses.length > 0 && (
           <div className="mb-6 space-y-3">
             {property.dealAnalyses.map((da) => (
-              <div key={da.id} className="rounded-md border border-border p-4">
-                <div className="mb-2 flex items-center justify-between">
-                  <DateDisplay
-                    date={da.createdAt}
-                    format="short"
-                    className="text-sm text-text-muted"
-                  />
-                  {da.decision && (
-                    <Pill
-                      variant={
-                        da.decision === 'pursue'
-                          ? 'positive'
-                          : da.decision === 'pass'
-                            ? 'muted'
-                            : 'neutral'
-                      }
-                    >
-                      {t(`decision.${da.decision}`)}
-                    </Pill>
-                  )}
-                </div>
-                <div className="grid grid-cols-2 gap-y-1 text-sm sm:grid-cols-4">
-                  <div>
-                    <span className="text-text-muted">{t('dealAnalysis.totalCost')}: </span>
-                    <Currency amount={Number(da.totalCostThb)} className="font-medium" />
-                  </div>
-                  <div>
-                    <span className="text-text-muted">{t('dealAnalysis.profit')}: </span>
-                    <Currency amount={Number(da.estProfitThb)} className="font-medium" />
-                  </div>
-                  <div>
-                    <span className="text-text-muted">{t('dealAnalysis.margin')}: </span>
-                    <span className="tabular font-medium">
-                      {Number(da.estMarginPct).toFixed(1)}%
-                    </span>
-                  </div>
-                  <div>
-                    <span className="text-text-muted">{t('dealAnalysis.roi')}: </span>
-                    <span className="tabular font-medium">{Number(da.estRoiPct).toFixed(1)}%</span>
-                  </div>
-                </div>
-              </div>
+              <DealAnalysisCard key={da.id} analysis={da} />
             ))}
           </div>
         )}

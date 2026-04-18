@@ -27,6 +27,7 @@ export async function createDealAnalysis(
           organizationId: orgId,
           propertyId: parsed.data.propertyId,
           flipType: parsed.data.flipType,
+          label: parsed.data.label || null,
           estPurchasePriceThb: parsed.data.estPurchasePriceThb,
           estRenovationCostThb: parsed.data.estRenovationCostThb,
           estSellingCostThb: parsed.data.estSellingCostThb,
