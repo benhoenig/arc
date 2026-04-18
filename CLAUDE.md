@@ -60,7 +60,7 @@ Read the relevant doc before generating code. Don't guess at patterns.
   - **Inline summary + sub-route editing.** `FlipBudgetPanel` on the flip detail page renders read-only summary; `/flips/[id]/budget` is the single source of truth for line-level edits. Avoids two UIs mutating the same data. Apply the same pattern to future heavy sub-features (tasks, payments).
   - **Turbopack `.next/dev/` cache outlasts `pnpm dev` restarts.** Regenerating the Prisma client under `src/generated/prisma/` requires `rm -rf .next` (or `mv .next .next.stale`) before restarting, or Turbopack serves stale compiled chunks that reference the old client. Killing the dev process is not enough.
 - **Next up:** M4.5 — `flip_transactions` table with signed amounts (inflows + outflows), Supabase Storage receipts bucket, trigger-maintained `budget_lines.actual_amount_thb`, flip cash-balance indicator on the detail header, replacement of direct `actual` edit with transaction CRUD. Design locked in memory `project_m4_5_transactions_and_m10_investor_link.md`.
-- **Ben's pending actions:** (1) rotate DB password, (2) upgrade Supabase to Pro before real data, (3) smoke-test M4 end-to-end with the ARC Seed org before starting M4.5, (4) delete `.next.stale-*` dir (blocked by permission policy; Ben runs the `rm -rf` himself).
+- **Ben's pending actions:** (1) rotate DB password, (2) upgrade Supabase to Pro before real data. M4 smoke-test complete 2026-04-19 — handoff to M4.5 is fully unblocked.
 
 If a request is out of sequence with the current milestone, flag it.
 
