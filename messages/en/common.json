@@ -10,7 +10,8 @@
     "contractors": "Contractors",
     "investors": "Investors",
     "listings": "Listings",
-    "settings": "Settings"
+    "settings": "Settings",
+    "members": "Members"
   },
   "auth": {
     "login": {
@@ -59,7 +60,8 @@
     "loading": "Loading...",
     "noResults": "No results found",
     "confirm": "Confirm",
-    "back": "Back"
+    "back": "Back",
+    "copy": "Copy"
   },
   "errors": {
     "page": {

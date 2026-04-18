@@ -1,0 +1,85 @@
+{
+  "title": "Members",
+  "subtitle": "Manage members and invitations for this organization",
+  "tabs": {
+    "members": "Members ({count})",
+    "invitations": "Pending invitations ({count})"
+  },
+  "members": {
+    "empty": "No members yet",
+    "columns": {
+      "name": "Name",
+      "email": "Email",
+      "role": "Role",
+      "joined": "Joined"
+    },
+    "you": "(you)",
+    "remove": "Remove from organization",
+    "removeConfirmTitle": "Remove member",
+    "removeConfirmDescription": "This person will lose access to this organization. Their past flip assignments are kept for history.",
+    "errors": {
+      "cannotRemoveSelf": "You can't remove yourself from here",
+      "lastAdmin": "Can't remove the last admin — promote another member first",
+      "forbidden": "Only admins can remove members",
+      "server": "Something went wrong. Please try again."
+    }
+  },
+  "invitations": {
+    "empty": "No pending invitations",
+    "columns": {
+      "email": "Email",
+      "role": "Role",
+      "invitedBy": "Invited by",
+      "expiresAt": "Expires",
+      "actions": "Actions"
+    },
+    "copied": "Copied",
+    "revoke": "Revoke",
+    "expired": "Expired",
+    "reissueNote": "The invite link is only shown when you create it. If you need it again, revoke and re-invite."
+  },
+  "invite": {
+    "button": "Invite member",
+    "title": "Invite a member",
+    "description": "We'll generate a link tied to this email. The link is valid for 7 days.",
+    "emailLabel": "Email",
+    "emailPlaceholder": "teammate@example.com",
+    "roleLabel": "Role",
+    "submit": "Generate invite link",
+    "submitting": "Generating...",
+    "successTitle": "Invite link generated",
+    "successDescription": "Copy this link and send it to the invitee via LINE or your preferred channel. It expires in 7 days.",
+    "close": "Close"
+  },
+  "errors": {
+    "duplicate": "There is already a pending invitation for this email",
+    "alreadyMember": "This email is already a member",
+    "forbidden": "Only admins can invite members",
+    "server": "Something went wrong. Please try again."
+  },
+  "accept": {
+    "title": "Join organization",
+    "invitedTo": "You've been invited to join",
+    "asRole": "as",
+    "emailLocked": "You must sign up using this email",
+    "fullName": "Full name",
+    "password": "Password",
+    "passwordPlaceholder": "At least 8 characters",
+    "submit": "Sign up and join",
+    "submitting": "Joining...",
+    "expired": {
+      "title": "This invitation has expired",
+      "description": "Please ask the admin for a new invite link."
+    },
+    "invalid": {
+      "title": "Invalid invitation",
+      "description": "The link may have been revoked or already used."
+    },
+    "errors": {
+      "emailMismatch": "You must sign up with the email on the invitation",
+      "alreadyMember": "You're already a member of this organization",
+      "emailTaken": "This email already has an account. Please log in and re-open the invite link.",
+      "server": "Something went wrong. Please try again."
+    }
+  }
+}

@@ -30,8 +30,9 @@ Five principles that drive the sequencing:
 | [x] | M0 | Bootstrap | Empty app running on Vercel, connected to Supabase | 8–12 | 12 | 1 |
 | [x] | M1 | Foundation | Auth + multi-tenancy + i18n + app shell | 20–30 | 42 | 1–2 |
 | [x] | M2 | Properties & Deal Analysis | Add properties, run underwriting | 16–24 | 66 | 2–3 |
-| [ ] | M3 | Flips (core) | Create flips, flip detail page, stages, team | 20–28 | 94 | 3–4 |
-| [ ] | M4 | Budget | Three-state budget tracking, categories, variance | 20–28 | 122 | 4–6 |
+| [x] | M3 | Flips (core) | Create flips, flip detail page, stages, team | 20–28 | 94 | 3–4 |
+| [x] | M3.5 | Invitations & Members | Admin-issued invite links + members page | 4–6 | 100 | 4 |
+| [ ] | M4 | Budget | Three-state budget tracking, categories, variance | 20–28 | 128 | 4–6 |
 | [ ] | M5 | Contractors (directory + assignments) | Contractor library + scope of work per flip | 20–28 | 150 | 6–7 |
 | [ ] | M6 | Contractor Payments | Milestones, T&M entries, payment queue | 24–32 | 182 | 7–9 |
 | [ ] | M7 | Tasks & Timeline | Tasks per flip, milestone timeline, due dates | 12–18 | 200 | 9 |
@@ -304,33 +305,35 @@ Open `/sourcing/properties` → see 8 seeded Thai properties across 3 projects (
 ### 6.1 Deliverables
 
 **Database:**
-- [ ] `flips` table (DATA_MODEL.md §3.2) with RLS
-- [ ] `flip_team_members` table (DATA_MODEL.md §3.4) with RLS
-- [ ] `flip_portfolio_dashboard` view (DATA_MODEL.md §13.3) — note: this view references tables that don't fully exist yet (budget_lines, tasks), so create a simpler version in M3 that omits those aggregates. Extend it in M4 and M7.
+- [x] `flips` table (DATA_MODEL.md §3.2) with RLS
+- [x] `flip_team_members` table (DATA_MODEL.md §3.4) with RLS
+- [x] `flip_code_counters` table — atomic per-(org, year) allocator for `FLIP-YYYY-###` codes (DATA_MODEL.md §3.5, added during M3)
+- [x] `flip_portfolio_dashboard` view — M3-basic version without budget/task aggregates; extend in M4 and M7
 
 **Feature: `/src/features/flips`**
-- [ ] Queries: `listFlips`, `getFlipById`, `listFlipTeamMembers`, `listActiveFlips`, `getFlipBasicSummary`
-- [ ] Actions: `createFlip` (from deal analysis — carries baseline numbers forward), `updateFlip`, `moveFlipToStage`, `killFlip`, `assignTeamMember`, `removeTeamMember`
-- [ ] Validators: `createFlipSchema`, `updateFlipSchema`, `killFlipSchema`, `teamMemberSchema`
-- [ ] Components:
-  - [ ] `<FlipListTable>` — all flips, filterable by stage
-  - [ ] `<FlipDetailHeader>` — flip code, name, stage pill, stage change dropdown, actions menu
-  - [ ] `<FlipStageSelect>` — dropdown to change stage (with confirmation for terminal stages)
-  - [ ] `<FlipTeamPanel>` — list of team members + assign/remove
-  - [ ] `<CreateFlipFromDealDialog>` — invoked from Sourcing when a deal is marked pursue + "Convert to Flip"
-  - [ ] `<KillFlipDialog>` — destructive confirmation with reason dropdown
+- [x] Queries: `listFlips` (filterable all/active/closed), `getFlipById`, `listFlipStages`, `listOrgUsers`
+- [x] Actions: `createFlip` (from deal analysis; carries baseline numbers; atomic code allocation), `updateFlip`, `moveFlipToStage` (rejects terminal stages; `killed` must go through killFlip), `killFlip`, `assignTeamMember`, `removeTeamMember`
+- [x] Validators: `createFlipSchema`, `updateFlipSchema`, `killFlipSchema`, `assignTeamMemberSchema`, `removeTeamMemberSchema`, `moveFlipToStageSchema`
+- [x] Components:
+  - [x] `<FlipListTable>` + `<FlipsPageClient>` (filter tabs all/active/closed)
+  - [x] `<FlipDetailHeader>` — code, name, stage pill, stage change dropdown, kill action
+  - [x] `<FlipStageSelect>` — dropdown with confirmation for terminal stages; locks on sold/killed
+  - [x] `<FlipTeamPanel>` — list of team members + assign/remove dialog
+  - [x] `<CreateFlipFromDealDialog>` — invoked from Sourcing when a deal is marked pursue + "Convert to Flip"
+  - [x] `<KillFlipDialog>` — destructive confirmation with reason dropdown
+  - [x] `<FlipOverviewPanel>` — baseline vs. actuals side-by-side, with M4/M7/M11 placeholders
 
 **Routes:**
-- [ ] `/flips` → flip list table (not the portfolio dashboard yet — that's M11)
-- [ ] `/flips/[flipId]` → flip detail page (header + team panel + placeholders for budget/timeline/docs tabs)
-- [ ] `/flips/[flipId]/team` → team management (sub-tab)
+- [x] `/flips` → flip list table with filter tabs
+- [x] `/flips/[flipId]` → flip detail (header + overview panel + team panel)
+- [x] `/flips/[flipId]/team` → team management sub-route
 
 **Integration with M2:**
-- [ ] Deal analysis detail page gets a "Convert to Flip" button (only shown when `decision = 'pursue'`)
-- [ ] Clicking it opens `<CreateFlipFromDealDialog>` pre-populated with baseline numbers from the deal analysis
-- [ ] On creation, `deal_analyses.flip_id` is set to link them
+- [x] Deal analysis card gets a "Convert to Flip" button (shown only when `decision = 'pursue'` and no flip yet)
+- [x] Dialog pre-populates the flip name from the property listing name
+- [x] On creation, `deal_analyses.flip_id` is set to link them; card shows "→ flip" link after
 
-**i18n:** `/messages/{th,en}/flips.json`
+**i18n:** [x] `/messages/{th,en}/flips.json`
 
 ### 6.2 Test criteria
 
@@ -360,10 +363,63 @@ Take the "pursue" deal from M2's demo → convert to Flip. See FLIP-2026-001 cre
 
 ### 6.5 Done when
 
-- A full deal-to-flip workflow is usable end-to-end
-- A flip can be created, updated, staged through the lifecycle, killed
-- The flip detail page is the "home" for a flip (even if most panels are placeholders)
-- 10+ flips can coexist, each on a different stage, without conflicts
+- [x] A full deal-to-flip workflow is usable end-to-end
+- [x] A flip can be created, updated, staged through the lifecycle, killed
+- [x] The flip detail page is the "home" for a flip (even if most panels are placeholders)
+- [x] 10+ flips can coexist, each on a different stage, without conflicts
+
+### 6.6 M3 deferred items (carried forward)
+
+- **Automated/Playwright tests** (§6.2) — not wired; test harness still pending from M1.
+- **"Edit flip" form** — `updateFlip` action exists but there's no UI yet to edit name, actual purchase price, acquired/listed/sold dates, notes. Overview panel always shows "—" for actuals. Schedule before M4 if actuals are needed during budget entry.
+- **Full property photo gallery** — single thumbnail only; M11.
+- **Expanded `flip_portfolio_dashboard` view** — no budget/task aggregates yet (M4 + M7 to extend).
+
+---
+
+## 6.5.1 M3.5 — Invitations & Members
+
+**Goal:** Additional users can join an existing org via admin-issued invite links. Settings/members page lets admins invite, revoke, remove.
+
+**Duration:** ~half a day (~4–6 hours). Built immediately after M3 once team assignment surfaced the "only one user exists" gap.
+
+### 6.5.1.1 Deliverables
+
+**Database:**
+- [x] `org_invitations` table (DATA_MODEL.md §2.5) with RLS — admin-issued, SHA-256 hashed tokens, email-bound, 7-day expiry, soft-delete
+- [x] `get_invitation_by_hash(token_hash)` — SECURITY DEFINER function; anon-callable; returns public invitation fields if valid
+- [x] `accept_invitation(token_hash, full_name)` — SECURITY DEFINER function; authenticated-only; atomically validates invite, updates user's name, creates `user_roles` row, marks accepted, logs activity
+
+**Feature: `/src/features/members`**
+- [x] Queries: `listMembers`, `listInvitations`, `listOrgRoles`, `getInvitationByToken`
+- [x] Actions: `createInvitation` (admin-only; generates hashed token), `revokeInvitation` (admin-only), `removeMember` (admin-only; refuses self-removal + last-admin removal), `acceptInvitation` (public; Supabase signUp → rpc('accept_invitation'))
+- [x] Validators: `createInvitationSchema`, `revokeInvitationSchema`, `removeMemberSchema`, `acceptInvitationSchema`
+- [x] Helpers: `isOrgAdmin()` at `src/server/shared/require-admin.ts`; `generateInviteToken()`/`hashInviteToken()` at `src/features/members/lib/invite-token.ts`
+- [x] Components: `<MembersPageClient>` (tabs: members + pending invites), `<InviteMemberDialog>` (shows link once), `<AcceptInvitationForm>`
+
+**Routes:**
+- [x] `/settings/members` → admin-gated member management (non-admins see members list only)
+- [x] `/invite/[token]` → public accept page (new-user signup only)
+
+**Nav:** [x] "Members" item added to sidebar
+
+**i18n:** [x] `/messages/{th,en}/members.json`
+
+### 6.5.1.2 Design decisions (locked 2026-04-18)
+
+1. **Tokens hashed, not raw.** SHA-256 in DB; raw only in the invite URL. Leaked DB backup can't replay.
+2. **Email strictly locked.** Signup must use the exact invitation email. No per-invite toggle.
+3. **Admin-only.** Only `admin` role can invite/revoke/remove. Admins can invite anyone as any role (no "can't invite higher than self" rule).
+4. **New-user-only accept flow.** Existing-account-joins-another-org is out of scope — see `memory/project_multi_org_gap.md`.
+5. **Expiry 7 days**, admin-revocable anytime via soft-delete. Expired invites stay in the list (marked "Expired") so admins can revoke/re-issue.
+6. **Remove member safety:** can't remove self; can't remove the last admin; soft-deletes the `user_roles` row (existing `flip_team_members` rows stay for history).
+
+### 6.5.1.3 What's explicitly NOT in M3.5
+
+- **Existing-user accept flow** (logged-in user claiming a second invite) — deferred with multi-org support.
+- **Org switcher UI** — deferred.
+- **Email delivery.** Links are generated in-app; admin pastes into LINE/email manually. No transactional email service wired.
+- **Role permission enforcement** beyond `admin`. See `memory/project_role_permissions_gap.md`.
 
 ---
 

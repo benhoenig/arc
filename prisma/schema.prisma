@@ -39,15 +39,19 @@ model Organization {
   updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt             DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  roles        Role[]
-  userRoles    UserRole[]
-  activityLog  ActivityLog[]
-  featureFlags FeatureFlag[]
-  flipStages   FlipStage[]
-  properties   Property[]
-  dealAnalyses DealAnalysis[]
-  contacts     Contact[]
-  projects     Project[]
+  roles            Role[]
+  userRoles        UserRole[]
+  activityLog      ActivityLog[]
+  featureFlags     FeatureFlag[]
+  flipStages       FlipStage[]
+  properties       Property[]
+  dealAnalyses     DealAnalysis[]
+  contacts         Contact[]
+  projects         Project[]
+  flips            Flip[]
+  flipTeamMembers  FlipTeamMember[]
+  flipCodeCounters FlipCodeCounter[]
+  invitations      OrgInvitation[]
 
   @@map("organizations")
 }
@@ -67,14 +71,21 @@ model User {
   updatedAt   DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  userRoles               UserRole[]     @relation("UserToUserRole")
-  createdRoles            UserRole[]     @relation("UserRoleCreatedBy")
+  userRoles               UserRole[]       @relation("UserToUserRole")
+  createdRoles            UserRole[]       @relation("UserRoleCreatedBy")
   activityLog             ActivityLog[]
-  propertiesCreated       Property[]     @relation("PropertyCreatedBy")
-  propertiesUpdated       Property[]     @relation("PropertyUpdatedBy")
-  dealAnalysesDecided     DealAnalysis[] @relation("DealAnalysisDecidedBy")
-  dealAnalysesCreated     DealAnalysis[] @relation("DealAnalysisCreatedBy")
-  dealAnalysesUpdated     DealAnalysis[] @relation("DealAnalysisUpdatedBy")
+  propertiesCreated       Property[]       @relation("PropertyCreatedBy")
+  propertiesUpdated       Property[]       @relation("PropertyUpdatedBy")
+  dealAnalysesDecided     DealAnalysis[]   @relation("DealAnalysisDecidedBy")
+  dealAnalysesCreated     DealAnalysis[]   @relation("DealAnalysisCreatedBy")
+  dealAnalysesUpdated     DealAnalysis[]   @relation("DealAnalysisUpdatedBy")
+  flipsCreated            Flip[]           @relation("FlipCreatedBy")
+  flipsUpdated            Flip[]           @relation("FlipUpdatedBy")
+  flipTeamMemberships     FlipTeamMember[] @relation("FlipTeamMemberUser")
+  flipAssignmentsMade     FlipTeamMember[] @relation("FlipTeamMemberAssignedBy")
+  invitationsCreated      OrgInvitation[]  @relation("OrgInvitationInvitedBy")
+  invitationsAccepted     OrgInvitation[]  @relation("OrgInvitationAcceptedBy")
+  invitationsRevoked      OrgInvitation[]  @relation("OrgInvitationRevokedBy")
 
   @@map("users")
 }
@@ -93,8 +104,9 @@ model Role {
   updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
 
-  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  organization Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   userRoles    UserRole[]
+  invitations  OrgInvitation[]
 
   @@unique([organizationId, slug], map: "idx_roles_org_slug")
   @@index([organizationId], map: "idx_roles_org")
@@ -175,6 +187,7 @@ model FlipStage {
   deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  flips        Flip[]
 
   @@unique([organizationId, slug], map: "idx_flip_stages_org_slug")
   @@index([organizationId, sortOrder], map: "idx_flip_stages_org")
@@ -282,6 +295,7 @@ model Property {
   createdByUser  User?          @relation("PropertyCreatedBy", fields: [createdBy], references: [id])
   updatedByUser  User?          @relation("PropertyUpdatedBy", fields: [updatedBy], references: [id])
   dealAnalyses   DealAnalysis[]
+  flips          Flip[]
 
   @@index([organizationId], map: "idx_properties_org")
   @@index([province, district], map: "idx_properties_location")
@@ -341,6 +355,7 @@ model DealAnalysis {
 
   organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   property       Property     @relation(fields: [propertyId], references: [id], onDelete: Cascade)
+  flip           Flip?        @relation(fields: [flipId], references: [id], onDelete: SetNull)
   decidedByUser  User?        @relation("DealAnalysisDecidedBy", fields: [decidedBy], references: [id])
   createdByUser  User?        @relation("DealAnalysisCreatedBy", fields: [createdBy], references: [id])
   updatedByUser  User?        @relation("DealAnalysisUpdatedBy", fields: [updatedBy], references: [id])
@@ -349,4 +364,121 @@ model DealAnalysis {
   @@index([flipId], map: "idx_deal_analyses_flip")
   @@index([organizationId], map: "idx_deal_analyses_org_pending")
   @@map("deal_analyses")
+}
+
+// ============================================
+// M3: Flips Core
+// ============================================
+
+model Flip {
+  id                            String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId                String    @map("organization_id") @db.Uuid
+  propertyId                    String    @map("property_id") @db.Uuid
+
+  code                          String
+  name                          String
+  stageId                       String    @map("stage_id") @db.Uuid
+
+  baselinePurchasePriceThb      Decimal?  @map("baseline_purchase_price_thb") @db.Decimal(14, 2)
+  baselineRenovationBudgetThb   Decimal?  @map("baseline_renovation_budget_thb") @db.Decimal(14, 2)
+  baselineTargetArvThb          Decimal?  @map("baseline_target_arv_thb") @db.Decimal(14, 2)
+  baselineTargetMarginPct       Decimal?  @map("baseline_target_margin_pct") @db.Decimal(5, 2)
+  baselineTargetTimelineDays    Int?      @map("baseline_target_timeline_days")
+
+  actualPurchasePriceThb        Decimal?  @map("actual_purchase_price_thb") @db.Decimal(14, 2)
+  acquiredAt                    DateTime? @map("acquired_at") @db.Timestamptz(6)
+  listedAt                      DateTime? @map("listed_at") @db.Timestamptz(6)
+  soldAt                        DateTime? @map("sold_at") @db.Timestamptz(6)
+  actualSalePriceThb            Decimal?  @map("actual_sale_price_thb") @db.Decimal(14, 2)
+
+  hasInvestorCapital            Boolean   @default(false) @map("has_investor_capital")
+
+  isOnHold                      Boolean   @default(false) @map("is_on_hold")
+  onHoldReason                  String?   @map("on_hold_reason")
+  killedAt                      DateTime? @map("killed_at") @db.Timestamptz(6)
+  killedReason                  String?   @map("killed_reason")
+
+  notes                         String?
+  metadata                      Json      @default("{}")
+
+  createdAt                     DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt                     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy                     String?   @map("created_by") @db.Uuid
+  updatedBy                     String?   @map("updated_by") @db.Uuid
+  deletedAt                     DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization  Organization     @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  property      Property         @relation(fields: [propertyId], references: [id], onDelete: Restrict)
+  stage         FlipStage        @relation(fields: [stageId], references: [id])
+  createdByUser User?            @relation("FlipCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser User?            @relation("FlipUpdatedBy", fields: [updatedBy], references: [id])
+  teamMembers   FlipTeamMember[]
+  dealAnalyses  DealAnalysis[]
+
+  @@index([organizationId], map: "idx_flips_org")
+  @@index([propertyId], map: "idx_flips_property")
+  @@index([stageId], map: "idx_flips_stage")
+  @@map("flips")
+}
+
+model FlipTeamMember {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String    @map("organization_id") @db.Uuid
+  flipId          String    @map("flip_id") @db.Uuid
+  userId          String    @map("user_id") @db.Uuid
+  roleInFlip      String    @map("role_in_flip")
+  assignedAt      DateTime  @default(now()) @map("assigned_at") @db.Timestamptz(6)
+  assignedBy      String?   @map("assigned_by") @db.Uuid
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  flip            Flip         @relation(fields: [flipId], references: [id], onDelete: Cascade)
+  user            User         @relation("FlipTeamMemberUser", fields: [userId], references: [id], onDelete: Cascade)
+  assignedByUser  User?        @relation("FlipTeamMemberAssignedBy", fields: [assignedBy], references: [id])
+
+  @@index([flipId], map: "idx_flip_team_flip")
+  @@index([userId], map: "idx_flip_team_user")
+  @@map("flip_team_members")
+}
+
+model FlipCodeCounter {
+  organizationId String   @map("organization_id") @db.Uuid
+  year           Int
+  nextNumber     Int      @default(1) @map("next_number")
+  updatedAt      DateTime @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+
+  @@id([organizationId, year])
+  @@map("flip_code_counters")
+}
+
+// ============================================
+// M3.5: Org Invitations
+// ============================================
+
+model OrgInvitation {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String    @map("organization_id") @db.Uuid
+  email           String
+  roleId          String    @map("role_id") @db.Uuid
+  tokenHash       String    @map("token_hash")
+  expiresAt       DateTime  @map("expires_at") @db.Timestamptz(6)
+  invitedBy       String?   @map("invited_by") @db.Uuid
+  acceptedAt      DateTime? @map("accepted_at") @db.Timestamptz(6)
+  acceptedBy      String?   @map("accepted_by") @db.Uuid
+  revokedAt       DateTime? @map("revoked_at") @db.Timestamptz(6)
+  revokedBy       String?   @map("revoked_by") @db.Uuid
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization    Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  role            Role         @relation(fields: [roleId], references: [id], onDelete: Restrict)
+  invitedByUser   User?        @relation("OrgInvitationInvitedBy", fields: [invitedBy], references: [id])
+  acceptedByUser  User?        @relation("OrgInvitationAcceptedBy", fields: [acceptedBy], references: [id])
+  revokedByUser   User?        @relation("OrgInvitationRevokedBy", fields: [revokedBy], references: [id])
+
+  @@index([organizationId], map: "idx_org_invitations_org")
+  @@map("org_invitations")
 }

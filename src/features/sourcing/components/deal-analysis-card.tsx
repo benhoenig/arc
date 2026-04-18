@@ -1,6 +1,6 @@
 'use client';
 
-import { Pencil, Trash2 } from 'lucide-react';
+import { ArrowRight, Pencil, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
 import { Currency } from '@/components/data-display/currency';
@@ -8,6 +8,8 @@ import { DateDisplay } from '@/components/data-display/date-display';
 import { Pill } from '@/components/data-display/pill';
 import { ConfirmDeleteDialog } from '@/components/form/confirm-delete-dialog';
 import { Button } from '@/components/ui/button';
+import { CreateFlipFromDealDialog } from '@/features/flips/components/create-flip-from-deal-dialog';
+import { Link } from '@/i18n/navigation';
 import { deleteDealAnalysis } from '../actions/delete-deal-analysis';
 import { recordDealDecision } from '../actions/record-deal-decision';
 import { DealAnalysisForm } from './deal-analysis-form';
@@ -33,20 +35,26 @@ type DealAnalysis = {
   estMarginPct: number;
   estRoiPct: number;
   decision: string | null;
+  flipId: string | null;
   createdAt: Date;
 };
 
 type Props = {
   analysis: DealAnalysis;
+  propertyListingName?: string;
 };
 
-export function DealAnalysisCard({ analysis }: Props) {
+export function DealAnalysisCard({ analysis, propertyListingName }: Props) {
   const t = useTranslations('sourcing');
+  const tFlips = useTranslations('flips');
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [editing, setEditing] = useState(false);
+  const [convertOpen, setConvertOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
 
   const hasDecision = analysis.decision != null;
+  const canConvert = analysis.decision === 'pursue' && analysis.flipId == null;
+  const convertedFlipId = analysis.flipId;
 
   function handleDelete() {
     startTransition(async () => {
@@ -161,6 +169,27 @@ export function DealAnalysisCard({ analysis }: Props) {
             </Button>
           </div>
         )}
+
+        {canConvert && (
+          <div className="mt-3 flex gap-2 border-t border-border pt-3">
+            <Button size="sm" onClick={() => setConvertOpen(true)}>
+              {tFlips('actions.convertToFlip')}
+              <ArrowRight size={14} strokeWidth={1.5} className="ml-1" />
+            </Button>
+          </div>
+        )}
+
+        {convertedFlipId && (
+          <div className="mt-3 border-t border-border pt-3 text-xs text-text-muted">
+            <Link
+              href={`/flips/${convertedFlipId}`}
+              className="inline-flex items-center gap-1 hover:text-text-default hover:underline"
+            >
+              {tFlips('actions.convertToFlip')}
+              <ArrowRight size={12} strokeWidth={1.5} />
+            </Link>
+          </div>
+        )}
       </div>
 
       <ConfirmDeleteDialog
@@ -171,6 +200,15 @@ export function DealAnalysisCard({ analysis }: Props) {
         onConfirm={handleDelete}
         isPending={isPending}
       />
+
+      {canConvert && (
+        <CreateFlipFromDealDialog
+          dealAnalysisId={analysis.id}
+          defaultName={propertyListingName ?? analysis.label ?? ''}
+          open={convertOpen}
+          onOpenChange={setConvertOpen}
+        />
+      )}
     </>
   );
 }

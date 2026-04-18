@@ -25,17 +25,28 @@ Read the relevant doc before generating code. Don't guess at patterns.
 
 > **Ben: update this after each milestone.**
 
-- **Current milestone:** M3 — Flips Core (starting)
-- **Last completed:** M0 Bootstrap + M1 Foundation + M2 Properties & Deal Analysis — all shipped. Sourcing workflow end-to-end: property library (table + Kanban), property create/edit with thumbnails, deal analysis CRUD with label/edit/delete + pursue/pass decisions, contacts directory (with sub-nav), projects directory, drag-and-drop pipeline Kanban across 8 status columns. Shared form primitives in place: `<NumberInput>` (thousand separators), `<ComboboxPicker>` (search + create-inline), `<ThumbnailUpload>` (direct to Supabase Storage). Two `deal_analyses` columns added post-initial: `label`, `other_cost_thb`. Contact type enum simplified: `seller` merged into `owner`.
-- **M1 deferred items** still outstanding (not needed for M3): forgot-password pages, locale switcher UI, `users.locale` persistence, dark mode toggle, unit tests for formatters, Playwright E2E tests (signup flow + cross-tenant leak — now actually viable since property detail URLs exist).
+- **Current milestone:** M4 — Budget (next up). M3 + M3.5 shipped.
+- **Last completed:** M0/M1/M2 + **M3 Flips Core** + **M3.5 Invitations & Members** — all shipped. M3 delivered the full deal-to-flip workflow: `flips` + `flip_team_members` + `flip_code_counters` with RLS, atomic `FLIP-YYYY-###` code generation, createFlip-from-deal action, detail page (header + overview panel + team panel), stage transitions with terminal-stage guards, kill flow, `/flips` + `/flips/[id]` + `/flips/[id]/team` routes, "Convert to Flip" button on deal-analysis cards. M3.5 added `org_invitations` with SHA-256-hashed email-bound tokens, admin-only invite/revoke/remove-member actions, `/settings/members` page (tabs: members + pending invites), public `/invite/[token]` accept page, Members nav item. Two SECURITY DEFINER DB functions (`get_invitation_by_hash`, `accept_invitation`) bridge the RLS gap for anon/just-signed-up callers.
+- **M1 deferred items** still outstanding (not needed for M4): forgot-password pages, locale switcher UI, `users.locale` persistence, dark mode toggle, unit tests for formatters, Playwright E2E tests.
 - **M2 deferred items**: full property photo gallery (single thumbnail shipped; gallery stays in M11), unit + integration tests for deal-analysis compute (defer until vitest/playwright is wired).
+- **M3 deferred items**: edit-flip UI (action exists but no form — overview panel shows "—" for actuals until built); expanded `flip_portfolio_dashboard` view aggregates (budget in M4, tasks in M7); integration + Playwright tests for the flip flow.
+- **M3.5 deferred items**: existing-user-joins-second-org is blocked (see memory `project_multi_org_gap.md`); no org-switcher UI; no transactional email — admins share links manually.
+- **Cross-cutting gaps tracked in memory:**
+  - **Role permissions not enforced** beyond `admin` (invite/revoke/remove). Every other server action is open to any org member. See `project_role_permissions_gap.md`. Plan: wire per-feature as milestones land; full pass after M7.
 - **Key architectural decisions made during M2:**
   - **shadcn token aliases in `globals.css`** — shadcn components reference `--color-popover`, `--color-accent`, `--color-muted-foreground` etc. which are mapped to ARC tokens. New shadcn primitives should consume ARC tokens directly (e.g. `bg-background`, `text-text-default`) rather than shadcn class names to avoid resolution ambiguity.
-  - **Decimal serialization** — Prisma returns `Decimal` objects that can't cross the server/client boundary. Every query that feeds a Client Component must `Number()`-convert its Decimal columns (see `get-property.ts`, `get-contact.ts`, `get-project.ts` for the pattern). This bites every time a new Decimal column is selected.
-  - **`useTransition` + `revalidatePath` hang** — the `DealAnalysisForm` uses plain `useState` instead of `useTransition` because `useWatch` + `form.reset()` + `revalidatePath` inside a transition caused `isPending` to never settle. Only this form is affected; the pattern with `useTransition` is fine elsewhere (no `useWatch` re-computation).
-  - **Storage bucket pattern** — `property-thumbnails` is public with UUID-based paths (`{orgId}/{uuid}.{ext}`). Adequate for internal tool; revisit with signed URLs pre-commercial. RLS allows authenticated insert and owner-scoped update/delete.
-- **Next up:** M3 deliverables per `IMPLEMENTATION_PLAN.md` §6 — `flips` table + `flip_team_members` + RLS, convert-pursued-deal-to-flip action, flip detail page with stages/team/baseline budget, `/flips` index.
-- **Ben's pending actions:** (1) rotate DB password, (2) upgrade Supabase to Pro before real data.
+  - **Decimal serialization** — Prisma returns `Decimal` objects that can't cross the server/client boundary. Every query that feeds a Client Component must `Number()`-convert its Decimal columns (see `get-property.ts`, `get-flip.ts`, `list-flips.ts` for the pattern). Bites every time a new Decimal column is selected.
+  - **`useTransition` + `revalidatePath` hang** — the `DealAnalysisForm` uses plain `useState` instead of `useTransition` because `useWatch` + `form.reset()` + `revalidatePath` inside a transition caused `isPending` to never settle. Only this form is affected; the pattern with `useTransition` is fine elsewhere.
+  - **Storage bucket pattern** — `property-thumbnails` is public with UUID-based paths (`{orgId}/{uuid}.{ext}`). Adequate for internal tool; revisit with signed URLs pre-commercial.
+- **Key architectural decisions made during M3 / M3.5:**
+  - **Sequential entity codes via a counter table** — `flip_code_counters` (org_id, year, next_number) + single-statement `INSERT ... ON CONFLICT DO UPDATE ... RETURNING (next_number - 1)` is the concurrency-safe way to allocate per-org human codes. Reuse the pattern for future entities (POs, budget refs).
+  - **`moveFlipToStage` blocks moves to `killed`** — users must call `killFlip` so reason capture is enforced. Moves from terminal stages (sold/killed) are blocked entirely. The stage `<Select>` hides `killed` from its options.
+  - **Dev-server Prisma client caching** — `globalThis.db` caches the generated client in dev. After `prisma generate` you must fully restart `pnpm dev`; HMR won't re-import the client, and runtime calls (`db.flip.findMany`) will blow up with "cannot read properties of undefined".
+  - **Invitation tokens: hashed at rest, email-locked.** SHA-256 in DB, raw only in URL. `chk_invitation_email_lower` CHECK keeps emails canonical. Unique partial index on `(org_id, email) WHERE pending` prevents duplicate outstanding invites.
+  - **SECURITY DEFINER for anon/new-user flows.** `get_invitation_by_hash` and `accept_invitation` are the only paths that bypass RLS — the accepter has no `user_roles` row until the invite is consumed. `accept_invitation` is called via `supabase.rpc()` (not Prisma) so `auth.uid()` resolves from the JWT session cookie; a Prisma pooled connection wouldn't carry the claim.
+  - **Admin check lives in app code, not RLS.** `isOrgAdmin()` at `src/server/shared/require-admin.ts`. RLS still enforces org-membership only; finer-grained gates are per-action. Keeps RLS policies simple and debuggable.
+- **Next up:** M4 deliverables per `IMPLEMENTATION_PLAN.md` §7 — `budget_categories` + `budget_lines`, three-state tracking (budgeted / committed / actual), variance rollups, `/flips/[id]/budget` tab.
+- **Ben's pending actions:** (1) rotate DB password, (2) upgrade Supabase to Pro before real data, (3) smoke-test M3 end-to-end before M4 starts (recommended so actuals/edit-flip gaps surface).
 
 If a request is out of sequence with the current milestone, flag it.
 
@@ -76,4 +87,4 @@ Consult the doc. If the doc doesn't cover it, ask Ben. Don't invent.
 
 ---
 
-*Last updated: 2026-04-18 after M2 complete. If rules here drift from `CONVENTIONS.md`, the canonical doc wins — update this file to match.*
+*Last updated: 2026-04-18 after M3 + M3.5 complete. If rules here drift from `CONVENTIONS.md`, the canonical doc wins — update this file to match.*

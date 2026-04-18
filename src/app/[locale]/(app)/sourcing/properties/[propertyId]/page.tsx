@@ -82,7 +82,11 @@ export default async function PropertyDetailPage({ params }: Props) {
         {property.dealAnalyses.length > 0 && (
           <div className="mb-6 space-y-3">
             {property.dealAnalyses.map((da) => (
-              <DealAnalysisCard key={da.id} analysis={da} />
+              <DealAnalysisCard
+                key={da.id}
+                analysis={da}
+                propertyListingName={property.listingName}
+              />
             ))}
           </div>
         )}

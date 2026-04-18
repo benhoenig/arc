@@ -188,6 +188,53 @@ CREATE INDEX idx_user_roles_org ON user_roles(organization_id) WHERE deleted_at 
 CREATE INDEX idx_user_roles_flip ON user_roles(flip_id) WHERE flip_id IS NOT NULL AND deleted_at IS NULL;
 ```
 
+### 2.5 `org_invitations`
+
+Admin-issued invitation links that let additional users join an existing org. Introduced in M3.5.
+
+- **Tokens are hashed.** Raw token only ever lives in the invite URL; the DB stores SHA-256 hex. Leaked DB backup cannot replay valid invites.
+- **Strictly email-bound.** Accepting requires signing up with the exact `email` on the invitation (case-insensitive compare; `email` is stored lowercase via CHECK constraint).
+- **7-day expiry**, admin-revocable. Unique partial index ensures only one pending invite per (org, email).
+
+```sql
+CREATE TABLE org_invitations (
+  id              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  email           text NOT NULL,                         -- CHECK: must equal lower(email)
+  role_id         uuid NOT NULL REFERENCES roles(id) ON DELETE RESTRICT,
+  token_hash      text NOT NULL,                         -- sha256 hex of raw token
+  expires_at      timestamptz NOT NULL,
+  invited_by      uuid REFERENCES users(id),
+  accepted_at     timestamptz,
+  accepted_by     uuid REFERENCES users(id),
+  revoked_at      timestamptz,
+  revoked_by      uuid REFERENCES users(id),
+  created_at      timestamptz NOT NULL DEFAULT now(),
+  updated_at      timestamptz NOT NULL DEFAULT now(),
+  deleted_at      timestamptz,
+
+  CONSTRAINT chk_invitation_email_lower CHECK (email = lower(email))
+);
+
+CREATE UNIQUE INDEX idx_org_invitations_pending ON org_invitations (organization_id, email)
+  WHERE accepted_at IS NULL AND revoked_at IS NULL AND deleted_at IS NULL;
+CREATE UNIQUE INDEX idx_org_invitations_token_hash ON org_invitations (token_hash)
+  WHERE deleted_at IS NULL;
+CREATE INDEX idx_org_invitations_org ON org_invitations (organization_id)
+  WHERE deleted_at IS NULL;
+```
+
+**RLS:** Standard org-member SELECT/INSERT/UPDATE. Admin-only gating is enforced in the app layer (`isOrgAdmin()`), not in RLS, so the same table can support "am I already invited?" lookups by non-admins later if needed.
+
+**SECURITY DEFINER functions** (the only paths that bypass RLS for the accept flow, since the accepter has no `user_roles` row yet):
+
+- `get_invitation_by_hash(p_token_hash text)` — returns `{ invitation_id, organization_id, organization_name, email, role_slug, role_name_th, role_name_en, expires_at }` for a valid pending invitation; NULL otherwise. Granted to `anon, authenticated` (anon is allowed so the accept page can render before signup).
+- `accept_invitation(p_token_hash text, p_full_name text DEFAULT NULL)` — authenticated-only. Validates the invitation is pending, not expired, not revoked, and matches `auth.email()`. Atomically updates `users.full_name`/`display_name` if provided, inserts the `user_roles` row, marks the invitation accepted, and writes an `activity_log` entry. Raises `P0001` exceptions with coded messages (`not_found`, `expired`, `revoked`, `already_accepted`, `email_mismatch`, `already_member`, `not_authenticated`).
+
+**Gaps (deferred):**
+- Accept flow assumes new-user signup. Existing-account-joins-another-org is out of scope until multi-org session switching is built.
+- No transactional email delivery. Admins copy the generated link and share via LINE/email manually.
+
 ---
 
 ## 3. Core domain tables
@@ -366,6 +413,26 @@ CREATE TABLE flip_team_members (
 CREATE INDEX idx_flip_team_flip ON flip_team_members(flip_id) WHERE deleted_at IS NULL;
 CREATE INDEX idx_flip_team_user ON flip_team_members(user_id) WHERE deleted_at IS NULL;
 ```
+
+### 3.5 `flip_code_counters`
+
+Atomic per-(org, year) allocator backing the `FLIP-YYYY-###` codes on `flips.code`. Introduced in M3.
+
+A single `INSERT ... ON CONFLICT DO UPDATE ... RETURNING (next_number - 1)` upsert is the serialisation point: inserts seed `next_number = 2` (caller takes 1), conflicts increment by 1 (caller takes the previous value). Concurrent callers are guaranteed distinct numbers. Must run inside the same transaction as the `flips` insert so the counter only advances when the flip is persisted.
+
+```sql
+CREATE TABLE flip_code_counters (
+  organization_id uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  year            integer NOT NULL,
+  next_number     integer NOT NULL DEFAULT 1,
+  updated_at      timestamptz NOT NULL DEFAULT now(),
+  PRIMARY KEY (organization_id, year)
+);
+```
+
+RLS: org-member read/insert/update. No SECURITY DEFINER needed — the insert is always performed by an authenticated user who already has membership.
+
+This table pattern is intentionally generic. Reuse it for any future sequential entity codes (POs, budget line refs, etc.) by adding rows with different `year` granularity or a discriminator column.
 
 ---
 

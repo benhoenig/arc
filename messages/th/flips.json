@@ -1,0 +1,121 @@
+{
+  "title": "Flips",
+  "empty": {
+    "title": "ยังไม่มีฟลิบ",
+    "description": "แปลงดีลที่ผ่านการวิเคราะห์เป็นฟลิบใหม่ที่นี่"
+  },
+  "list": {
+    "code": "รหัสฟลิบ",
+    "name": "ชื่อ",
+    "stage": "สถานะ",
+    "property": "ทรัพย์",
+    "baselineArv": "ARV เป้าหมาย",
+    "baselineMargin": "กำไรเป้าหมาย %",
+    "team": "ทีม",
+    "acquiredAt": "วันซื้อ",
+    "soldAt": "วันขาย",
+    "filterAll": "ทั้งหมด",
+    "filterActive": "กำลังดำเนินการ",
+    "filterClosed": "ปิดแล้ว"
+  },
+  "detail": {
+    "overview": "ภาพรวม",
+    "team": "ทีม",
+    "budget": "งบประมาณ",
+    "timeline": "ไทม์ไลน์",
+    "documents": "เอกสาร",
+    "baseline": "ตัวเลขเริ่มต้น (จากการวิเคราะห์ดีล)",
+    "actuals": "ตัวเลขจริง",
+    "baselinePurchase": "ราคาซื้อ",
+    "baselineReno": "งบรีโนเวต",
+    "baselineArv": "ARV เป้าหมาย",
+    "baselineMargin": "กำไรเป้าหมาย %",
+    "baselineTimeline": "ระยะเวลา (วัน)",
+    "actualPurchase": "ราคาซื้อจริง",
+    "actualSale": "ราคาขายจริง",
+    "acquiredAt": "วันโอนกรรมสิทธิ์",
+    "listedAt": "วันขึ้นประกาศขาย",
+    "soldAt": "วันขายสำเร็จ",
+    "onHold": "พักไว้ชั่วคราว",
+    "onHoldReason": "เหตุผล",
+    "hasInvestorCapital": "มีเงินลงทุนจากนักลงทุน",
+    "notes": "บันทึก",
+    "placeholders": {
+      "budget": "งบประมาณจะปรากฏที่นี่ใน M4",
+      "timeline": "ไทม์ไลน์และงานจะปรากฏที่นี่ใน M7",
+      "documents": "เอกสารและรูปภาพจะปรากฏที่นี่ใน M11"
+    }
+  },
+  "actions": {
+    "convertToFlip": "แปลงเป็นฟลิบ",
+    "createFlip": "สร้างฟลิบ",
+    "edit": "แก้ไขฟลิบ",
+    "changeStage": "เปลี่ยนสถานะ",
+    "kill": "ยกเลิกฟลิบ",
+    "assignTeamMember": "เพิ่มสมาชิกทีม",
+    "removeTeamMember": "ลบออก",
+    "backToFlips": "กลับไปรายการฟลิบ"
+  },
+  "create": {
+    "title": "สร้างฟลิบจากดีลที่ผ่านการวิเคราะห์",
+    "description": "ตัวเลขเริ่มต้นจะถูกล็อคจากการวิเคราะห์ดีลเพื่อใช้เปรียบเทียบภายหลัง",
+    "nameLabel": "ชื่อฟลิบ",
+    "nameHelp": "ชื่อภายในสำหรับใช้เรียกฟลิบนี้",
+    "stageLabel": "สถานะเริ่มต้น",
+    "hasInvestorLabel": "ใช้เงินลงทุนจากนักลงทุน",
+    "submit": "สร้างฟลิบ",
+    "submitting": "กำลังสร้าง..."
+  },
+  "kill": {
+    "title": "ยกเลิกฟลิบ",
+    "description": "การยกเลิกจะย้ายฟลิบไปยังสถานะ \"ยกเลิก\" ถาวร",
+    "reasonLabel": "เหตุผล",
+    "notesLabel": "บันทึกเพิ่มเติม",
+    "reasons": {
+      "pivoted_to_rental": "เปลี่ยนเป็นปล่อยเช่า",
+      "deal_collapsed": "ดีลล่ม",
+      "market_change": "ตลาดเปลี่ยน",
+      "other": "อื่น ๆ"
+    },
+    "confirm": "ยกเลิกฟลิบ",
+    "confirming": "กำลังยกเลิก..."
+  },
+  "stage": {
+    "confirmTerminal": "สถานะนี้เป็นสถานะสุดท้าย หลังเปลี่ยนแล้วจะย้ายสถานะอีกไม่ได้ ดำเนินการต่อ?",
+    "blockedFromTerminal": "ฟลิบที่ขายแล้วหรือยกเลิกแล้วไม่สามารถเปลี่ยนสถานะได้"
+  },
+  "team": {
+    "title": "ทีม",
+    "empty": "ยังไม่มีสมาชิกในทีม",
+    "role": "บทบาท",
+    "user": "ผู้ใช้",
+    "assignedAt": "วันที่เพิ่ม",
+    "roles": {
+      "pm_lead": "หัวหน้า PM",
+      "sourcing_lead": "หัวหน้า Sourcing",
+      "contractor_lead": "หัวหน้าผู้รับเหมา",
+      "sales_lead": "หัวหน้า Sales",
+      "contributor": "ผู้ร่วมงาน"
+    }
+  },
+  "stages": {
+    "sourcing": "จัดหา",
+    "underwriting": "วิเคราะห์",
+    "negotiating": "เจรจา",
+    "acquiring": "ซื้อ",
+    "renovating": "ปรับปรุง",
+    "listing": "ประกาศขาย",
+    "under_offer": "มีผู้สนใจ",
+    "sold": "ขายแล้ว",
+    "killed": "ยกเลิก"
+  },
+  "toast": {
+    "created": "สร้างฟลิบ {code} แล้ว",
+    "updated": "บันทึกการเปลี่ยนแปลงแล้ว",
+    "stageChanged": "เปลี่ยนสถานะแล้ว",
+    "killed": "ยกเลิกฟลิบแล้ว",
+    "memberAdded": "เพิ่มสมาชิกทีมแล้ว",
+    "memberRemoved": "ลบสมาชิกทีมแล้ว",
+    "error": "ไม่สามารถดำเนินการได้"
+  }
+}

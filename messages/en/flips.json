@@ -1,0 +1,121 @@
+{
+  "title": "Flips",
+  "empty": {
+    "title": "No flips yet",
+    "description": "Convert a pursued deal into a flip to get started."
+  },
+  "list": {
+    "code": "Code",
+    "name": "Name",
+    "stage": "Stage",
+    "property": "Property",
+    "baselineArv": "Target ARV",
+    "baselineMargin": "Target margin %",
+    "team": "Team",
+    "acquiredAt": "Acquired",
+    "soldAt": "Sold",
+    "filterAll": "All",
+    "filterActive": "Active",
+    "filterClosed": "Closed"
+  },
+  "detail": {
+    "overview": "Overview",
+    "team": "Team",
+    "budget": "Budget",
+    "timeline": "Timeline",
+    "documents": "Documents",
+    "baseline": "Baseline (locked from deal analysis)",
+    "actuals": "Actuals",
+    "baselinePurchase": "Purchase price",
+    "baselineReno": "Renovation budget",
+    "baselineArv": "Target ARV",
+    "baselineMargin": "Target margin %",
+    "baselineTimeline": "Target timeline (days)",
+    "actualPurchase": "Actual purchase price",
+    "actualSale": "Actual sale price",
+    "acquiredAt": "Acquired at",
+    "listedAt": "Listed at",
+    "soldAt": "Sold at",
+    "onHold": "On hold",
+    "onHoldReason": "Reason",
+    "hasInvestorCapital": "Uses investor capital",
+    "notes": "Notes",
+    "placeholders": {
+      "budget": "Budget will appear here in M4.",
+      "timeline": "Timeline and tasks will appear here in M7.",
+      "documents": "Documents and photos will appear here in M11."
+    }
+  },
+  "actions": {
+    "convertToFlip": "Convert to flip",
+    "createFlip": "Create flip",
+    "edit": "Edit flip",
+    "changeStage": "Change stage",
+    "kill": "Kill flip",
+    "assignTeamMember": "Add team member",
+    "removeTeamMember": "Remove",
+    "backToFlips": "Back to flips"
+  },
+  "create": {
+    "title": "Create flip from deal analysis",
+    "description": "Baseline numbers are locked from the deal analysis for later comparison.",
+    "nameLabel": "Flip name",
+    "nameHelp": "Internal name used to refer to this flip.",
+    "stageLabel": "Starting stage",
+    "hasInvestorLabel": "Uses investor capital",
+    "submit": "Create flip",
+    "submitting": "Creating..."
+  },
+  "kill": {
+    "title": "Kill flip",
+    "description": "Killing a flip moves it to the terminal \"killed\" stage.",
+    "reasonLabel": "Reason",
+    "notesLabel": "Notes (optional)",
+    "reasons": {
+      "pivoted_to_rental": "Pivoted to rental",
+      "deal_collapsed": "Deal collapsed",
+      "market_change": "Market change",
+      "other": "Other"
+    },
+    "confirm": "Kill flip",
+    "confirming": "Killing..."
+  },
+  "stage": {
+    "confirmTerminal": "This is a terminal stage. You won't be able to change the stage afterwards. Continue?",
+    "blockedFromTerminal": "Sold or killed flips can't change stage."
+  },
+  "team": {
+    "title": "Team",
+    "empty": "No team members assigned yet.",
+    "role": "Role",
+    "user": "User",
+    "assignedAt": "Assigned",
+    "roles": {
+      "pm_lead": "PM lead",
+      "sourcing_lead": "Sourcing lead",
+      "contractor_lead": "Contractor lead",
+      "sales_lead": "Sales lead",
+      "contributor": "Contributor"
+    }
+  },
+  "stages": {
+    "sourcing": "Sourcing",
+    "underwriting": "Underwriting",
+    "negotiating": "Negotiating",
+    "acquiring": "Acquiring",
+    "renovating": "Renovating",
+    "listing": "Listing",
+    "under_offer": "Under offer",
+    "sold": "Sold",
+    "killed": "Killed"
+  },
+  "toast": {
+    "created": "Flip {code} created",
+    "updated": "Changes saved",
+    "stageChanged": "Stage updated",
+    "killed": "Flip killed",
+    "memberAdded": "Team member added",
+    "memberRemoved": "Team member removed",
+    "error": "Something went wrong"
+  }
+}

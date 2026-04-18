@@ -7,6 +7,7 @@ import {
   Search as SearchIcon,
   SlidersHorizontal,
   Store,
+  UserCog,
   Users,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
@@ -29,6 +30,7 @@ const NAV_ITEMS = [
   { key: 'contractors', href: '/contractors', icon: HardHat },
   { key: 'investors', href: '/investors', icon: Users },
   { key: 'listings', href: '/listings', icon: Store },
+  { key: 'members', href: '/settings/members', icon: UserCog },
 ] as const;
 
 const MOBILE_TABS = [

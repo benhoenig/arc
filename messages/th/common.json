@@ -10,7 +10,8 @@
     "contractors": "ผู้รับเหมา",
     "investors": "นักลงทุน",
     "listings": "ประกาศขาย",
-    "settings": "ตั้งค่า"
+    "settings": "ตั้งค่า",
+    "members": "สมาชิก"
   },
   "auth": {
     "login": {
@@ -59,7 +60,8 @@
     "loading": "กำลังโหลด...",
     "noResults": "ไม่พบข้อมูล",
     "confirm": "ยืนยัน",
-    "back": "กลับ"
+    "back": "กลับ",
+    "copy": "คัดลอก"
   },
   "errors": {
     "page": {
