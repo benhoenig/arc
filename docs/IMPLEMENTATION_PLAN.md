@@ -27,9 +27,9 @@ Five principles that drive the sequencing:
 
 | ✓ | # | Milestone | Goal | Est. hours | Cumulative | Week |
 |---|---|---|---|---|---|---|
-| [ ] | M0 | Bootstrap | Empty app running on Vercel, connected to Supabase | 8–12 | 12 | 1 |
-| [ ] | M1 | Foundation | Auth + multi-tenancy + i18n + app shell | 20–30 | 42 | 1–2 |
-| [ ] | M2 | Properties & Deal Analysis | Add properties, run underwriting | 16–24 | 66 | 2–3 |
+| [x] | M0 | Bootstrap | Empty app running on Vercel, connected to Supabase | 8–12 | 12 | 1 |
+| [x] | M1 | Foundation | Auth + multi-tenancy + i18n + app shell | 20–30 | 42 | 1–2 |
+| [x] | M2 | Properties & Deal Analysis | Add properties, run underwriting | 16–24 | 66 | 2–3 |
 | [ ] | M3 | Flips (core) | Create flips, flip detail page, stages, team | 20–28 | 94 | 3–4 |
 | [ ] | M4 | Budget | Three-state budget tracking, categories, variance | 20–28 | 122 | 4–6 |
 | [ ] | M5 | Contractors (directory + assignments) | Contractor library + scope of work per flip | 20–28 | 150 | 6–7 |
@@ -217,53 +217,62 @@ Sign up as a new user → see the sidebar with your org name → toggle language
 - [x] `seed_organization_flip_stages()` function for new org creation
 
 **Feature: `/src/features/sourcing`**
-- [x] Queries: `listProperties` (with project + contact joins), `getProperty` (with deal analyses)
-- [x] Actions: `createProperty` (auto-creates project + contact records), `createDealAnalysis` (with computed fields), `recordDealDecision`
-- [ ] Actions: `updateProperty`, `updateDealAnalysis`
-- [x] Validators: `propertySchema`, `dealAnalysisSchema`, `dealDecisionSchema`, `computeDealFields`
+- [x] Queries: `listProperties`, `getProperty`, `listContacts`, `getContact`, `listProjects`, `getProject`, `listPickerOptions` (project + contact name lists for the combobox)
+- [x] Actions: `createProperty` (auto-creates project + contact), `updateProperty`, `createDealAnalysis`, `updateDealAnalysis` (recomputes totals), `deleteDealAnalysis` (soft), `recordDealDecision`, `createContact`, `updateContact`, `createProject`, `updateProject`, `updateSourcingStatus`
+- [x] Validators: `propertySchema`, `updatePropertySchema`, `dealAnalysisSchema`, `updateDealAnalysisSchema`, `dealDecisionSchema`, `createContactSchema`, `updateContactSchema`, `createProjectSchema`, `updateProjectSchema`, `computeDealFields`
 - [x] Components:
-  - [x] `<PropertyLibraryTable>` — all properties with project, type, specs, asking price, sourcing status columns
-  - [x] `<CreatePropertyDialog>` — 4-section form: Basic (listing name, project, type, URL) → Specs (bed/bath/area/floors/floor level/land) → Pricing (asking price, terms) → Contact (type, name, phone, LINE, email)
-  - [x] `<DealAnalysisForm>` — underwriting calculator with ฟลิบลอย/โอนเข้า toggle + live profit/margin/ROI computation panel
-  - [ ] `<DealPipelineKanban>` — Kanban view of sourcing pipeline stages — **DEFERRED: Kanban added as visual layer after core management is complete**
-  - [x] `<PropertyDetailPage>` — property info + deal analyses list + inline analysis form
+  - [x] `<PropertyLibraryTable>` — thumbnails + project, type, specs, asking price, sourcing status columns
+  - [x] `<PropertyDialog>` — unified create + edit (4 sections: Basic incl. thumbnail upload, Specs, Pricing, Contact) with combobox pickers for project/contact
+  - [x] `<DealAnalysisForm>` — underwriting calculator with ฟลิบลอย/โอนเข้า toggle + live profit/margin/ROI computation panel; supports both create and edit modes
+  - [x] `<DealAnalysisCard>` — analysis card with label, edit/delete/pursue/pass actions
+  - [x] `<DealPipelineKanban>` — drag-and-drop Kanban across 8 sourcing status columns (dnd-kit + DragOverlay); view toggle on /sourcing/properties
+  - [x] `<ContactTable>`, `<ContactEditForm>`, `<CreateContactDialog>` — contacts directory CRUD
+  - [x] `<ProjectTable>`, `<ProjectEditForm>`, `<CreateProjectDialog>` — projects directory CRUD
+  - [x] `<SourcingSubNav>` — sub-nav bar: อสังหาฯ | ผู้ติดต่อ | โครงการ
+  - [x] `<PropertyDetailPage>` — property info + deal analyses list + inline analysis form + edit dialog trigger
 
-**Deal analysis management (required before M2 is done):**
-- [ ] Analysis label/name field — prominent at top of form, displayed on cards (e.g. "conservative", "best case")
-- [ ] Delete analysis — button on each card with `<ConfirmDeleteDialog>`
-- [ ] Decision buttons (pursue/pass) — inline on each analysis card, triggers `recordDealDecision`
-- [ ] Action: `deleteDealAnalysis` (soft delete)
-
-**Sourcing sub-navigation (contacts + projects management):**
-- [ ] Sub-nav bar at top of sourcing section: อสังหาฯ | ผู้ติดต่อ | โครงการ
-- [ ] `/sourcing/contacts` → contact directory table (all agents/sellers, linked properties count, phone/LINE)
-- [ ] `/sourcing/contacts/[contactId]` → contact detail with linked properties list
-- [ ] `/sourcing/projects` → project directory table (all developments, unit count, avg price)
-- [ ] `/sourcing/projects/[projectId]` → project detail with linked properties + future comp analysis view
+**Shared form primitives (built during M2):**
+- [x] `<NumberInput>` — locale thousand separators, raw digits on focus (used for all numeric + currency fields)
+- [x] `<ComboboxPicker>` — searchable dropdown with inline "create new" option (project/contact pickers)
+- [x] `<ThumbnailUpload>` — direct-to-Supabase-Storage upload, preview, hover-to-replace
 
 **Routes:**
 - [x] `/sourcing` → redirects to `/sourcing/properties`
-- [x] `/sourcing/properties` → property library table
+- [x] `/sourcing/properties` → property library (table / Kanban toggle)
 - [x] `/sourcing/properties/[propertyId]` → property detail page with deal analyses
-- [ ] `/sourcing/contacts` → contact directory — **NEW**
-- [ ] `/sourcing/projects` → project directory — **NEW**
+- [x] `/sourcing/contacts` → contact directory
+- [x] `/sourcing/contacts/[contactId]` → contact detail with linked properties
+- [x] `/sourcing/projects` → project directory
+- [x] `/sourcing/projects/[projectId]` → project detail with properties in project
 
-**i18n:** `/messages/{th,en}/sourcing.json` with all strings — [x] done, includes contact types, sourcing statuses, all form fields
+**Storage:**
+- [x] Supabase Storage bucket `property-thumbnails` — public, 5MB limit, image MIME only; RLS allows authenticated insert, owner-scoped update/delete; path pattern `{orgId}/{uuid}.{ext}`
+
+**i18n:** `/messages/{th,en}/sourcing.json` — [x] done, includes contact types, sourcing statuses, deal-analysis label/delete, sub-nav, contacts/projects directory, thumbnail messages, view toggle
+
+**Schema additions made during M2 (post-initial migration):**
+- [x] `deal_analyses.label` VARCHAR(100) — user-facing analysis name
+- [x] `deal_analyses.other_cost_thb` NUMERIC(14,2) NOT NULL DEFAULT 0 — catch-all cost bucket used in totals for both flip types
+- [x] `properties.thumbnail_path` TEXT — path into `property-thumbnails` bucket
+- [x] Contact type cleanup: `seller` merged into `owner` (DB rows migrated, enum now `owner | agent | developer | other`)
 
 ### 5.2 Test criteria
 
 **Automated:**
 - [ ] Unit tests: deal analysis computed fields (`total_cost`, `est_profit`, `est_margin_pct`, `est_roi_pct`) — edge cases: zero ARV, negative profit, very high ROI — **DEFERRED to when Playwright + vitest are wired**
 - [ ] Integration test: `createDealAnalysis` creates the row, logs activity, recomputes totals correctly — **DEFERRED**
-- [ ] Playwright: Sourcing team user creates property → runs analysis → marks as "pursue" — **DEFERRED**
+- [ ] Playwright: Sourcing team user creates property → runs analysis → marks as "pursue" — **DEFERRED to M3/M4 when more stable flows exist**
 
 **Manual:**
 - [x] Create a property with Thai listing name, project, specs → renders correctly
 - [x] Run a deal analysis → live totals update as inputs change
-- [x] Seed data: 8 properties, 3 projects, 5 contacts, 6 deal analyses — all in Thai, realistic Bangkok data
-- [ ] Pipeline Kanban → drag a card between stages → DB updated — **DEFERRED: Kanban comes after core CRUD validated**
-- [ ] Contact directory: view all contacts, see linked properties — **TODO**
-- [ ] Project directory: view all projects, see linked units — **TODO**
+- [x] Edit a property, edit a deal analysis → changes persist and re-render
+- [x] Delete a deal analysis → soft-deleted, no longer appears on detail page
+- [x] Pursue / pass decision buttons → update analysis and pill re-colors
+- [x] Thumbnail upload → image stored in Supabase Storage, visible in table + kanban + detail header
+- [x] Pipeline Kanban → drag a card between columns → DB updates and card stays in new column
+- [x] Contact directory: view all contacts, see linked properties, add/edit contacts directly
+- [x] Project directory: view all projects, see linked units, add/edit projects directly
 
 ### 5.3 Demo script
 
@@ -272,7 +281,7 @@ Open `/sourcing/properties` → see 8 seeded Thai properties across 3 projects (
 ### 5.4 What's explicitly NOT in M2
 
 - Converting a pursued deal into a Flip — that's M3
-- Property photos (deferred to M11 when we do document upload everywhere)
+- **Property photo gallery** — single thumbnail per property IS in M2 (landed late in M2 because the pipeline Kanban needed visuals to be scannable); full gallery with multiple images + reordering stays in M11 with document upload everywhere
 - Map view (Mapbox deferred)
 - Property search / full-text filtering (v1.5)
 - Project comp analysis (data collection starts in M2 via projects table; analysis UI is v1.5)
