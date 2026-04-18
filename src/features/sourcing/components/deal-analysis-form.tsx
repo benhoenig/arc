@@ -88,7 +88,17 @@ export function DealAnalysisForm({ propertyId, onSuccess }: Props) {
         e.preventDefault();
         form.handleSubmit((values) => {
           startTransition(async () => {
-            const result = await createDealAnalysis(values as unknown as Record<string, unknown>);
+            // For float flip: derive timeline days from contract months
+            const submitted = {
+              ...values,
+              estTimelineDays:
+                values.flipType === 'float_flip'
+                  ? (values.contractMonths ?? 3) * 30
+                  : values.estTimelineDays,
+            };
+            const result = await createDealAnalysis(
+              submitted as unknown as Record<string, unknown>,
+            );
             if (!result.ok) {
               form.setError('root', { message: tErr('server') });
               return;
@@ -171,17 +181,16 @@ export function DealAnalysisForm({ propertyId, onSuccess }: Props) {
           />
         </div>
 
-        <div className={cn('grid gap-3', isFloatFlip ? 'grid-cols-2' : 'grid-cols-1')}>
-          {isFloatFlip && (
-            <div className="flex flex-col gap-1.5">
-              <Label>{t('contractMonths')}</Label>
-              <Input
-                type="number"
-                className="tabular"
-                {...form.register('contractMonths', { valueAsNumber: true })}
-              />
-            </div>
-          )}
+        {isFloatFlip ? (
+          <div className="flex flex-col gap-1.5">
+            <Label>{t('contractMonths')}</Label>
+            <Input
+              type="number"
+              className="max-w-[200px] tabular"
+              {...form.register('contractMonths', { valueAsNumber: true })}
+            />
+          </div>
+        ) : (
           <div className="flex flex-col gap-1.5">
             <Label>{t('timeline')}</Label>
             <Input
@@ -190,7 +199,7 @@ export function DealAnalysisForm({ propertyId, onSuccess }: Props) {
               {...form.register('estTimelineDays', { valueAsNumber: true })}
             />
           </div>
-        </div>
+        )}
       </div>
 
       <Separator />
