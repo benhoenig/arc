@@ -84,6 +84,7 @@
 }
 
 @theme inline {
+  /* ── ARC design tokens ── */
   --color-background: var(--background);
   --color-surface: var(--surface);
   --color-surface-raised: var(--surface-raised);
@@ -102,6 +103,27 @@
   --color-warning-fill: var(--warning-fill);
   --color-destructive: var(--destructive);
   --color-destructive-fill: var(--destructive-fill);
+
+  /* ── shadcn compatibility aliases ── */
+  /* Maps shadcn's expected variable names to ARC tokens so all
+     shadcn/ui primitives (Select, Dialog, Popover, etc.) render
+     with correct backgrounds, borders, and text colors. */
+  --color-foreground: var(--text-default);
+  --color-muted: var(--surface);
+  --color-muted-foreground: var(--text-muted);
+  --color-popover: var(--surface-raised);
+  --color-popover-foreground: var(--text-default);
+  --color-card: var(--surface-raised);
+  --color-card-foreground: var(--text-default);
+  --color-primary: var(--text-strong);
+  --color-primary-foreground: var(--background);
+  --color-secondary: var(--surface);
+  --color-secondary-foreground: var(--text-strong);
+  --color-accent: var(--fill-hover);
+  --color-accent-foreground: var(--text-strong);
+  --color-destructive-foreground: #ffffff;
+  --color-input: var(--border);
+  --color-ring: var(--border-strong);
 
   --font-sans: var(--font-plex-sans-thai), 'IBM Plex Sans', 'Inter', ui-sans-serif, system-ui,
     sans-serif;
