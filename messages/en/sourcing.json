@@ -99,6 +99,7 @@
     "holdingCost": "Holding costs",
     "transactionCost": "Transaction costs (buy)",
     "sellingCost": "Selling commission",
+    "otherCost": "Other expenses",
     "targetSellingPrice": "Target selling price",
     "arv": "After-repair value (ARV)",
     "timeline": "Timeline (days)",

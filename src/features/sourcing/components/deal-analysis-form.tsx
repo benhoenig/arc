@@ -40,6 +40,7 @@ type ExistingAnalysis = {
   depositAmountThb: number | null;
   contractMonths: number | null;
   marketingCostThb: number;
+  otherCostThb: number;
 };
 
 type Props = {
@@ -112,6 +113,7 @@ export function DealAnalysisForm({ propertyId, initialAnalysis, onSuccess, onCan
           depositAmountThb: initialAnalysis.depositAmountThb ?? 0,
           contractMonths: initialAnalysis.contractMonths ?? 3,
           marketingCostThb: initialAnalysis.marketingCostThb,
+          otherCostThb: initialAnalysis.otherCostThb,
         }
       : {
           propertyId,
@@ -127,6 +129,7 @@ export function DealAnalysisForm({ propertyId, initialAnalysis, onSuccess, onCan
           depositAmountThb: 0,
           contractMonths: 3,
           marketingCostThb: 0,
+          otherCostThb: 0,
         },
   });
 
@@ -144,6 +147,7 @@ export function DealAnalysisForm({ propertyId, initialAnalysis, onSuccess, onCan
     estTransactionCostThb: Number(watched.estTransactionCostThb) || 0,
     depositAmountThb: Number(watched.depositAmountThb) || 0,
     marketingCostThb: Number(watched.marketingCostThb) || 0,
+    otherCostThb: Number(watched.otherCostThb) || 0,
   });
 
   const fmt = (n: number) =>
@@ -272,6 +276,7 @@ export function DealAnalysisForm({ propertyId, initialAnalysis, onSuccess, onCan
           )}
 
           <CurrencyField label={t('sellingCost')} name="estSellingCostThb" control={form.control} />
+          <CurrencyField label={t('otherCost')} name="otherCostThb" control={form.control} />
           <CurrencyField
             label={isFloatFlip ? t('targetSellingPrice') : t('arv')}
             name="estArvThb"

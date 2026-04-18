@@ -45,6 +45,7 @@ export async function updateDealAnalysis(
           fields.depositAmountThb ??
           (existing.depositAmountThb != null ? Number(existing.depositAmountThb) : undefined),
         marketingCostThb: fields.marketingCostThb ?? Number(existing.marketingCostThb),
+        otherCostThb: fields.otherCostThb ?? Number(existing.otherCostThb),
       };
 
       const computed = computeDealFields(mergedForCompute);

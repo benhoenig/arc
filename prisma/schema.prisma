@@ -315,6 +315,9 @@ model DealAnalysis {
   contractMonths          Int?      @map("contract_months")
   marketingCostThb        Decimal   @default(0) @map("marketing_cost_thb") @db.Decimal(14, 2)
 
+  // Both types
+  otherCostThb            Decimal   @default(0) @map("other_cost_thb") @db.Decimal(14, 2)
+
   // Computed (stored for snapshot integrity)
   totalCostThb            Decimal   @map("total_cost_thb") @db.Decimal(14, 2)
   estProfitThb            Decimal   @map("est_profit_thb") @db.Decimal(14, 2)

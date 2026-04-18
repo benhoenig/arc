@@ -37,6 +37,7 @@ export async function getProperty(orgId: string, propertyId: string) {
       estTransactionCostThb: Number(da.estTransactionCostThb),
       depositAmountThb: da.depositAmountThb != null ? Number(da.depositAmountThb) : null,
       marketingCostThb: Number(da.marketingCostThb),
+      otherCostThb: Number(da.otherCostThb),
       totalCostThb: Number(da.totalCostThb),
       estProfitThb: Number(da.estProfitThb),
       estMarginPct: Number(da.estMarginPct),

@@ -99,6 +99,7 @@
     "holdingCost": "ค่าใช้จ่ายระหว่างถือ",
     "transactionCost": "ค่าธรรมเนียมซื้อ",
     "sellingCost": "ค่านายหน้าขาย",
+    "otherCost": "ค่าใช้จ่ายอื่นๆ",
     "targetSellingPrice": "ราคาขายเป้าหมาย",
     "arv": "มูลค่าหลังปรับปรุง (ARV)",
     "timeline": "ระยะเวลา (วัน)",

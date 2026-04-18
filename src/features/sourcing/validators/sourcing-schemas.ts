@@ -105,6 +105,9 @@ export const dealAnalysisSchema = z.object({
   contractMonths: z.number().int().positive().optional(),
   marketingCostThb: z.number().nonnegative().optional(),
 
+  // Both types
+  otherCostThb: z.number().nonnegative().optional(),
+
   notes: z.string().max(5000).optional(),
 });
 
@@ -132,18 +135,23 @@ type DealInput = {
   // Float-flip
   depositAmountThb?: number;
   marketingCostThb?: number;
+  // Both types
+  otherCostThb?: number;
 };
 
 export function computeDealFields(input: DealInput) {
+  const other = input.otherCostThb ?? 0;
+
   if (input.flipType === 'float_flip') {
-    // Float flip: capital deployed = deposit + reno + marketing + commission
+    // Float flip: capital deployed = deposit + reno + marketing + commission + other
     const deposit = input.depositAmountThb ?? 0;
     const reno = input.estRenovationCostThb;
     const marketing = input.marketingCostThb ?? 0;
     const commission = input.estSellingCostThb;
 
-    const capitalDeployed = deposit + reno + marketing + commission;
-    const profit = input.estArvThb - input.estPurchasePriceThb - reno - marketing - commission;
+    const capitalDeployed = deposit + reno + marketing + commission + other;
+    const profit =
+      input.estArvThb - input.estPurchasePriceThb - reno - marketing - commission - other;
     const marginPct = input.estArvThb === 0 ? 0 : (profit / input.estArvThb) * 100;
     const roiPct = capitalDeployed === 0 ? 0 : (profit / capitalDeployed) * 100;
 
@@ -161,7 +169,8 @@ export function computeDealFields(input: DealInput) {
     input.estRenovationCostThb +
     (input.estHoldingCostThb ?? 0) +
     (input.estTransactionCostThb ?? 0) +
-    input.estSellingCostThb;
+    input.estSellingCostThb +
+    other;
 
   const estProfitThb = input.estArvThb - totalCostThb;
   const estMarginPct = input.estArvThb === 0 ? 0 : (estProfitThb / input.estArvThb) * 100;

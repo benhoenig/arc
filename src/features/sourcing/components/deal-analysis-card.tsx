@@ -27,6 +27,7 @@ type DealAnalysis = {
   depositAmountThb: number | null;
   contractMonths: number | null;
   marketingCostThb: number;
+  otherCostThb: number;
   totalCostThb: number;
   estProfitThb: number;
   estMarginPct: number;

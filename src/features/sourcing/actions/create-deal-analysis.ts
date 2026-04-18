@@ -40,6 +40,8 @@ export async function createDealAnalysis(
           depositAmountThb: parsed.data.depositAmountThb ?? null,
           contractMonths: parsed.data.contractMonths ?? null,
           marketingCostThb: parsed.data.marketingCostThb ?? 0,
+          // Both types
+          otherCostThb: parsed.data.otherCostThb ?? 0,
           // Computed
           totalCostThb: computed.totalCostThb,
           estProfitThb: computed.estProfitThb,
