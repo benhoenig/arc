@@ -515,8 +515,8 @@ CREATE INDEX idx_flip_revisions_flip ON flip_revisions(flip_id);
 
 **RLS:** standard org-member SELECT + INSERT. Revisions are append-only — no UPDATE policy; if a past revision needs correcting, the team records a new revision on top.
 
-**What's NOT here (deferred to M4+):**
-- No automatic source for the `sunk_*` columns — user enters them manually. Once `budget_lines` actuals exist in M4, pre-fill from `SUM(actual_amount_thb)` per category. See `memory/project_post_m4_autofill.md`.
+**What's NOT here (deferred past M4):**
+- No automatic source for the `sunk_*` columns — user enters them manually. After M4.5 `flip_transactions` lands, pre-fill from `SUM(flip_transactions.amount_thb) WHERE budget_line_id IN (<lines in category>)` (auto-fill plan previously targeted `budget_lines.actual_amount_thb` directly, but that column becomes trigger-maintained from transactions in M4.5). See `memory/project_post_m4_autofill.md` and `memory/project_m4_5_transactions_and_m10_investor_link.md`.
 
 ---
 

@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Pill } from '@/components/data-display/pill';
 import { Button } from '@/components/ui/button';
+import { BudgetVariancePill } from '@/features/budget/components/budget-variance-pill';
 import { Link } from '@/i18n/navigation';
 import { getThumbnailUrl } from '@/lib/property-thumbnail';
 import type { FlipStageOption } from '../queries/list-flip-stages';
@@ -36,6 +37,10 @@ type Props = {
     revisedTargetArvThb?: number;
     revisedTargetTimelineDays?: number;
   };
+  budgetSummary: {
+    variancePct: number | null;
+    lineCount: number;
+  };
 };
 
 export function FlipDetailHeader({
@@ -52,6 +57,7 @@ export function FlipDetailHeader({
   stages,
   flipType,
   revisionDefaults,
+  budgetSummary,
 }: Props) {
   const t = useTranslations('flips');
   const [killOpen, setKillOpen] = useState(false);
@@ -65,30 +71,35 @@ export function FlipDetailHeader({
   const isTerminal = locked;
 
   return (
-    <div className="mb-6 flex items-start justify-between gap-4">
-      <div className="flex items-start gap-4">
+    <div className="mb-6 flex flex-wrap items-start justify-between gap-x-4 gap-y-3">
+      <div className="flex min-w-0 flex-1 items-start gap-4">
         {property.thumbnailPath ? (
           // biome-ignore lint/performance/noImgElement: user-uploaded dynamic URL
           <img
             src={getThumbnailUrl(property.thumbnailPath) ?? ''}
             alt=""
-            className="h-24 w-24 rounded-md border border-border-subtle object-cover"
+            className="h-24 w-24 shrink-0 rounded-md border border-border-subtle object-cover"
           />
         ) : (
-          <div className="h-24 w-24 rounded-md border border-border-subtle bg-surface" />
+          <div className="h-24 w-24 shrink-0 rounded-md border border-border-subtle bg-surface" />
         )}
-        <div>
+        <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="font-mono text-xs text-text-muted">{code}</span>
             {isOnHold && !isTerminal ? <Pill variant="warning">{t('detail.onHold')}</Pill> : null}
           </div>
-          <div className="mt-1 flex items-center gap-3">
+          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1.5">
             <h1
               className={`text-2xl font-semibold ${isTerminal ? 'text-text-muted' : 'text-text-strong'}`}
             >
               {name}
             </h1>
             <Pill variant={isTerminal ? 'muted' : 'neutral'}>{stageLabel}</Pill>
+            <BudgetVariancePill
+              variancePct={budgetSummary.variancePct}
+              lineCount={budgetSummary.lineCount}
+              href={`/flips/${flipId}/budget`}
+            />
           </div>
           <Link
             href={`/sourcing/properties/${property.id}`}
@@ -99,7 +110,7 @@ export function FlipDetailHeader({
         </div>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center justify-end gap-2">
         <FlipStageSelect flipId={flipId} currentStageId={stageId} locked={locked} stages={stages} />
         {!locked ? (
           <>

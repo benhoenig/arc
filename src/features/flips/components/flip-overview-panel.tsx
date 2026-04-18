@@ -29,6 +29,10 @@ export function FlipOverviewPanel({ baseline, actuals, hasInvestorCapital, notes
       <section className="rounded-md border border-border p-4">
         <h3 className="mb-3 text-sm font-semibold text-text-strong">{t('baseline')}</h3>
         <dl className="grid grid-cols-2 gap-y-2 text-sm">
+          {/* P&L order: revenue → acquisition cost → improvement cost → profit → metadata */}
+          <Row label={t('baselineArv')}>
+            {baseline.targetArvThb != null ? <Currency amount={baseline.targetArvThb} /> : '—'}
+          </Row>
           <Row label={t('baselinePurchase')}>
             {baseline.purchasePriceThb != null ? (
               <Currency amount={baseline.purchasePriceThb} />
@@ -42,9 +46,6 @@ export function FlipOverviewPanel({ baseline, actuals, hasInvestorCapital, notes
             ) : (
               '—'
             )}
-          </Row>
-          <Row label={t('baselineArv')}>
-            {baseline.targetArvThb != null ? <Currency amount={baseline.targetArvThb} /> : '—'}
           </Row>
           <Row label={t('baselineProfit')}>
             {baseline.targetArvThb != null && baseline.targetMarginPct != null ? (
@@ -77,16 +78,17 @@ export function FlipOverviewPanel({ baseline, actuals, hasInvestorCapital, notes
       <section className="rounded-md border border-border p-4">
         <h3 className="mb-3 text-sm font-semibold text-text-strong">{t('actuals')}</h3>
         <dl className="grid grid-cols-2 gap-y-2 text-sm">
-          <Row label={t('actualPurchase')}>
-            {actuals.actualPurchasePriceThb != null ? (
-              <Currency amount={actuals.actualPurchasePriceThb} />
+          {/* P&L order: sale price → purchase price → dates → capital flag */}
+          <Row label={t('actualSale')}>
+            {actuals.actualSalePriceThb != null ? (
+              <Currency amount={actuals.actualSalePriceThb} />
             ) : (
               '—'
             )}
           </Row>
-          <Row label={t('actualSale')}>
-            {actuals.actualSalePriceThb != null ? (
-              <Currency amount={actuals.actualSalePriceThb} />
+          <Row label={t('actualPurchase')}>
+            {actuals.actualPurchasePriceThb != null ? (
+              <Currency amount={actuals.actualPurchasePriceThb} />
             ) : (
               '—'
             )}

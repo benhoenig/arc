@@ -33,7 +33,9 @@ Five principles that drive the sequencing:
 | [x] | M3 | Flips (core) | Create flips, flip detail page, stages, team | 20–28 | 94 | 3–4 |
 | [x] | M3.5 | Invitations & Members | Admin-issued invite links + members page | 4–6 | 100 | 4 |
 | [x] | M3.6 | Pivot / Re-underwriting | Float re-underwrite (spread math) + pivot-to-transfer + revive + remove member | 6–8 | 108 | 4 |
-| [ ] | M4 | Budget | Three-state budget tracking, categories, variance | 20–28 | 136 | 4–6 |
+| [x] | M4 | Budget | Three-state budget tracking, categories, variance | 20–28 | 136 | 4–6 |
+| [ ] | M4.5 | Flip transactions & receipts | Signed-amount ledger per flip, receipt uploads, trigger-maintained actuals, cash balance on flip header | 10–14 | 150 | 6 |
+| [ ] | M4.6 | Live P&L / feasibility | Read-only feasibility panel on flip detail composing latest revision + baseline + budget summary + deal analysis | 4–6 | 156 | 6 |
 | [ ] | M5 | Contractors (directory + assignments) | Contractor library + scope of work per flip | 20–28 | 150 | 6–7 |
 | [ ] | M6 | Contractor Payments | Milestones, T&M entries, payment queue | 24–32 | 182 | 7–9 |
 | [ ] | M7 | Tasks & Timeline | Tasks per flip, milestone timeline, due dates | 12–18 | 200 | 9 |
@@ -554,6 +556,107 @@ Total budgeted 800k / actual 685k → -14% variance (under budget, positive/gree
 - A flip has a real working budget. You could run your current 10+ flips in this view today and not miss the Google Sheets.
 - Variance is visible at-a-glance on the flip list and flip detail
 - The three-state model (budgeted/committed/actual) is explicit and editable
+
+### 7.6 Retrospective (shipped 2026-04-18)
+
+Built end-to-end against the spec with one material scope shift discovered during smoke-test:
+
+- **What shipped:** `budget_categories` (15 seeded defaults) + `budget_lines` tables with RLS, `flip_budget_summary` + `category_budget_summary` views, extended `flip_portfolio_dashboard`, full feature module (validators / queries / actions / UI), inline-editable table with thousand-separator inputs, `BudgetVarianceCard` + `BudgetBurnBar` + `CategoryBreakdownChart`, clickable variance pill on flip header linking to `/flips/[id]/budget`, read-only summary panel on the flip detail page (keeps the flip page coherent without duplicating edit surfaces), admin-only `/settings/budget-categories`.
+- **Deferred automated tests** — consistent with prior milestones (no vitest/playwright wired). Item §7.2 Playwright remains outstanding.
+- **Sidebar link for `/settings/budget-categories`** intentionally skipped — no shared "Settings" landing yet; revisit when it exists.
+- **Scope shift surfaced in smoke-test:** direct-edit of `actual_amount_thb` is too low-fidelity for a production ledger — need per-transaction logging with receipts. Bumped to an interstitial milestone **M4.5** before M5. Documented in memory `project_m4_5_transactions_and_m10_investor_link.md`.
+- **Second scope item surfaced:** flip detail page lacks a live P&L that unifies baseline + latest revision + actuals + deal-analysis overhead costs. Captured as **M4.6** after M4.5.
+- **Key architectural calls** (see `CLAUDE.md` "Key architectural decisions made during M4" section): partial unique indexes vs inline constraints, views + `$queryRaw` for rollup queries, deferred FK columns for cross-milestone dependencies, thousand-separator input helpers, clickable-pill pattern, inline-summary-with-sub-route-editing pattern, Turbopack `.next/` cache behavior after `prisma generate`.
+
+---
+
+## 7.7. M4.5 — Flip Transactions & Receipts (interstitial)
+
+**Goal:** Replace directly-edited `actual_amount_thb` with a real ledger: every money event on a flip is a `flip_transactions` row (signed amount), optionally tagged to a budget line, with an optional receipt upload. Actuals become trigger-maintained rollups. Flip cash balance becomes a real first-class number. Lays the foundation for M6 contractor payments (payments become one `kind` of transaction) and M10 investor capital (inflow transactions get an `investor_id` FK later).
+
+**Duration:** ~2–3 days (10–14 hours)
+
+### 7.7.1 Deliverables
+
+**Database:**
+- [ ] `flip_transactions` table with RLS. Columns: `id, organization_id, flip_id, budget_line_id (nullable), date, amount_thb (signed numeric(14,2)), description, source_note, kind, receipt_path, notes, created_by, created_at, updated_at, deleted_at`.
+- [ ] `kind` enum: `investor_deposit | loan_disbursement | spend | refund | sale_proceeds | distribution`. (Last two are deferred to later milestones but the enum value exists so no schema change is needed when they land.)
+- [ ] CHECK constraint: `budget_line_id IS NULL OR kind IN ('spend','refund')` — inflows can't be tagged to a budget line.
+- [ ] Trigger `recompute_budget_line_actual` after INSERT/UPDATE/DELETE on `flip_transactions` → updates `budget_lines.actual_amount_thb = SUM(flip_transactions.amount_thb) WHERE budget_line_id = NEW.budget_line_id AND deleted_at IS NULL`. Runs for both OLD.budget_line_id and NEW.budget_line_id on UPDATE.
+- [ ] Supabase Storage bucket `budget-receipts` with org-scoped RLS. Same `{orgId}/{uuid}.{ext}` path pattern as `property-thumbnails`. Private bucket + signed URLs.
+- [ ] `flip_cash_summary` view: per-flip `SUM(amount_thb)` current balance, `SUM(... WHERE kind IN ('investor_deposit','loan_disbursement'))` inflows, etc.
+
+**Feature: `/src/features/budget`** (expanded; no new feature folder):
+- [ ] Queries: `listTransactionsForFlip`, `listTransactionsForBudgetLine`, `getFlipCashSummary`.
+- [ ] Actions: `createFlipTransaction`, `updateFlipTransaction`, `deleteFlipTransaction` (soft), `uploadReceipt` (signed-URL flow matching `property-thumbnails` pattern).
+- [ ] Validators: `flipTransactionSchema` (discriminated union by kind — outflow kinds require `budget_line_id`, inflow kinds require `source_note`).
+- [ ] Components: `<FlipTransactionList>` per budget line, `<AddTransactionDialog>` with category/line picker + date picker + receipt upload, `<FlipCashBalanceIndicator>` for the flip header, `<ReceiptThumbnail>` with signed-URL resolution.
+
+**Migration of existing data:** any `budget_lines` rows with non-zero `actual_amount_thb` either:
+  - (a) get backfilled as a single `kind='spend'` transaction with `description='Migrated from M4 actuals'`, dated `created_at`, no receipt; OR
+  - (b) zeroed out and the operator re-enters with real receipts. Preferred because M4 actuals are test data, not production.
+
+**UI impact on M4:**
+- [ ] Remove inline `actual` input from `<BudgetLineRow>`. The `actual` column becomes a computed read-only number. Clicking a line row opens a transaction list drawer / expanded view.
+- [ ] `<BudgetVarianceCard>` + `<BudgetBurnBar>` unchanged — they consume the view.
+- [ ] `<FlipDetailHeader>` adds a `<FlipCashBalanceIndicator>` pill next to the variance pill.
+
+**i18n:** expand `/messages/{th,en}/budget.json` with `transactions.*` keys.
+
+### 7.7.2 Test criteria
+
+**Automated:**
+- [ ] Unit tests: `flipTransactionSchema` discriminated union correctly enforces `budget_line_id`-vs-`source_note` requirements.
+- [ ] Integration test: inserting a transaction updates the correct `budget_lines.actual_amount_thb` (trigger correctness).
+- [ ] Integration test: updating a transaction's `budget_line_id` decrements the old line's actual and increments the new one.
+- [ ] Integration test: soft-deleting a transaction removes it from the rollup.
+- [ ] Playwright: add flip → create budget line → add three transactions (one refund) → see correct actual → upload receipt → verify signed URL resolves.
+
+**Manual:**
+- [ ] Flip cash balance indicator matches `SUM(transactions.amount_thb)` manually computed.
+- [ ] Receipt upload works end-to-end (no CORS, no RLS false-denies).
+- [ ] Thai + English labels for every new field and kind.
+
+### 7.7.3 Done when
+
+- Every "ใช้จริง" number on a flip has at least one transaction backing it (new operational rule).
+- Auditors / investors / Ben can answer "where did that 280k go?" from within ARC without leaving to Google Drive for receipts.
+- M4 direct-edit path is removed — no user can type a free-text actual without creating a transaction.
+
+### 7.7.4 What's explicitly NOT in M4.5
+
+- Contractor payments as a specific transaction kind — that's M6. For now, `kind='spend'` is the catch-all for outflows.
+- Investor FK on `investor_deposit` / `loan_disbursement` kinds — free-text `source_note` only. M10 adds `investor_id uuid` and backfills. **Ship blocker for M10.** (Memory `project_m4_5_transactions_and_m10_investor_link.md`.)
+- Distribution / sale-proceeds transaction UX — M9 / M10.
+- Reconciliation with a real bank feed — out of scope for v1.
+
+---
+
+## 7.8. M4.6 — Live P&L / Feasibility Panel (interstitial)
+
+**Goal:** A read-only "is this flip still profitable?" view on the flip detail page that pulls numbers from baseline, latest revision, `flip_transactions` rollup, and the original deal analysis. Currently operators have to mentally piece together the answer from three panels.
+
+**Duration:** ~1 day (4–6 hours)
+
+### 7.8.1 Deliverables
+
+- [ ] Query `getFlipPnl(orgId, flipId)` that composes: latest revision numbers (if any) OR baseline, deal-analysis overhead costs (holding, transaction, selling, marketing, deposit), `flip_transactions` rollup, computed profit/ROI/margin.
+- [ ] Component `<FlipFeasibilityPanel>` on the flip detail page between overview and budget panels. Layout: income row (ARV), cost rows (purchase, reno, holding, transaction, marketing, other), profit row, margin + ROI row. All currency formatted with thousand separators. Variance vs plan highlighted per DESIGN_SYSTEM.md §2.2 directionality rules.
+- [ ] i18n: new `feasibility.*` keys in `flips.json`.
+
+**Not building:** editable form (everything is derived), separate route (inline on detail page), deal-analysis feasibility fork (that one stays on the deal side).
+
+### 7.8.2 Test criteria
+
+- [ ] P&L sum exactly matches baseline deal analysis numbers when no revision exists and no transactions exist.
+- [ ] Post-revision, P&L shows revised targets, not original baseline.
+- [ ] Post-transactions, P&L actual spend matches `flip_transactions` rollup.
+- [ ] Playwright: create flip → re-underwrite → add transactions → verify P&L updates correctly at each step.
+
+### 7.8.3 Done when
+
+- An operator can answer "is this flip still making money?" from the flip detail page in ≤5 seconds.
+- The number on the P&L matches what they'd compute in a spreadsheet from the same inputs.
 
 ---
 

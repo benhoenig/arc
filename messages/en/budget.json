@@ -1,0 +1,71 @@
+{
+  "title": "Budget",
+  "table": {
+    "title": "Budget lines",
+    "empty": "No budget lines yet. Add your first line to start tracking.",
+    "description": "Description",
+    "budgeted": "Budgeted",
+    "committed": "Committed",
+    "actual": "Actual",
+    "subtotal": "Subtotal",
+    "total": "Total"
+  },
+  "totals": {
+    "budgeted": "Budgeted",
+    "committed": "Committed",
+    "actual": "Actual",
+    "variance": "Variance"
+  },
+  "variance": {
+    "title": "Budget variance"
+  },
+  "burn": {
+    "utilization": "Budget utilization"
+  },
+  "pill": {
+    "label": "Budget",
+    "noBudget": "No budget"
+  },
+  "panel": {
+    "viewFull": "View full budget"
+  },
+  "line": {
+    "category": "Category",
+    "description": "Description",
+    "descriptionPlaceholder": "e.g. Main floor electrical rewire",
+    "budgeted": "Budgeted (THB)",
+    "committed": "Committed (THB)",
+    "actual": "Actual (THB)"
+  },
+  "lineRow": {
+    "description": "Description",
+    "confirmDelete": "Delete this budget line?"
+  },
+  "actions": {
+    "addLine": "Add line",
+    "deleteLine": "Delete line"
+  },
+  "categoryChart": {
+    "title": "By category",
+    "empty": "No category data yet — add a budget line to see the breakdown."
+  },
+  "categories": {
+    "title": "Budget categories",
+    "description": "These categories are used when creating budget lines on any flip. System categories can be renamed but not deleted.",
+    "empty": "No categories yet.",
+    "slug": "Slug",
+    "nameTh": "Name (Thai)",
+    "nameEn": "Name (English)",
+    "sortOrder": "Sort order",
+    "system": "System",
+    "add": "Add category",
+    "edit": "Edit {name}",
+    "delete": "Delete {name}",
+    "addTitle": "New category",
+    "editTitle": "Edit category",
+    "confirmDelete": "Delete category \"{name}\"? This cannot be undone.",
+    "invalidSortOrder": "Sort order must be a non-negative number.",
+    "systemSlugLocked": "System categories have a fixed slug.",
+    "forbidden": "Only admins can edit budget categories."
+  }
+}

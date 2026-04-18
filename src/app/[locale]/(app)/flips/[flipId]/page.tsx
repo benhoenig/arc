@@ -1,6 +1,9 @@
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { FlipBudgetPanel } from '@/features/budget/components/flip-budget-panel';
+import { getCategoryBreakdownForFlip } from '@/features/budget/queries/get-category-breakdown';
+import { getFlipBudgetSummary } from '@/features/budget/queries/get-flip-budget-summary';
 import { FlipDetailHeader } from '@/features/flips/components/flip-detail-header';
 import { FlipOverviewPanel } from '@/features/flips/components/flip-overview-panel';
 import { FlipRevisionsPanel } from '@/features/flips/components/flip-revisions-panel';
@@ -21,11 +24,13 @@ export default async function FlipDetailPage({ params }: Props) {
   setRequestLocale(locale);
 
   const orgId = await getActiveOrgId();
-  const [flip, stages, candidates, revisions] = await Promise.all([
+  const [flip, stages, candidates, revisions, budgetSummary, budgetBreakdown] = await Promise.all([
     getFlipById(orgId, flipId),
     listFlipStages(orgId),
     listOrgUsers(orgId),
     listFlipRevisions(orgId, flipId),
+    getFlipBudgetSummary(orgId, flipId),
+    getCategoryBreakdownForFlip(orgId, flipId),
   ]);
 
   if (!flip) {
@@ -73,6 +78,10 @@ export default async function FlipDetailPage({ params }: Props) {
           revisedTargetArvThb: flip.baselineTargetArvThb ?? undefined,
           revisedTargetTimelineDays: flip.baselineTargetTimelineDays ?? undefined,
         }}
+        budgetSummary={{
+          variancePct: budgetSummary?.variancePct ?? null,
+          lineCount: budgetSummary?.lineCount ?? 0,
+        }}
       />
 
       <div className="mb-8">
@@ -93,6 +102,21 @@ export default async function FlipDetailPage({ params }: Props) {
           }}
           hasInvestorCapital={flip.hasInvestorCapital}
           notes={flip.notes}
+        />
+      </div>
+
+      <div className="mb-8">
+        <FlipBudgetPanel
+          flipId={flip.id}
+          summary={{
+            totalBudgetedThb: budgetSummary?.totalBudgetedThb ?? 0,
+            totalCommittedThb: budgetSummary?.totalCommittedThb ?? 0,
+            totalActualThb: budgetSummary?.totalActualThb ?? 0,
+            varianceThb: budgetSummary?.varianceThb ?? 0,
+            variancePct: budgetSummary?.variancePct ?? null,
+            lineCount: budgetSummary?.lineCount ?? 0,
+          }}
+          breakdown={budgetBreakdown}
         />
       </div>
 
