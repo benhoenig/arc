@@ -9,6 +9,7 @@ import { PropertyHeaderActions } from '@/features/sourcing/components/property-h
 import { getProperty } from '@/features/sourcing/queries/get-property';
 import { listPickerOptions } from '@/features/sourcing/queries/list-picker-options';
 import { Link } from '@/i18n/navigation';
+import { getThumbnailUrl } from '@/lib/property-thumbnail';
 import { getActiveOrgId } from '@/server/supabase/auth';
 
 type Props = {
@@ -43,24 +44,34 @@ export default async function PropertyDetailPage({ params }: Props) {
       </Link>
 
       <div className="mb-6 flex items-start justify-between gap-4">
-        <div>
-          <div className="flex items-center gap-3">
-            <h1 className="text-2xl font-semibold text-text-strong">{property.listingName}</h1>
-            <Pill>{tTypes(property.propertyType)}</Pill>
+        <div className="flex items-start gap-4">
+          {property.thumbnailPath && (
+            // biome-ignore lint/performance/noImgElement: user-uploaded dynamic URL
+            <img
+              src={getThumbnailUrl(property.thumbnailPath) ?? ''}
+              alt=""
+              className="h-24 w-24 rounded-md border border-border-subtle object-cover"
+            />
+          )}
+          <div>
+            <div className="flex items-center gap-3">
+              <h1 className="text-2xl font-semibold text-text-strong">{property.listingName}</h1>
+              <Pill>{tTypes(property.propertyType)}</Pill>
+            </div>
+            {property.project && (
+              <p className="mt-1 text-sm text-text-muted">{property.project.name}</p>
+            )}
+            {property.askingPriceThb && (
+              <p className="mt-1 text-sm font-medium">
+                <Currency amount={Number(property.askingPriceThb)} />
+                {property.priceRemark && (
+                  <span className="ml-2 font-normal text-text-muted">({property.priceRemark})</span>
+                )}
+              </p>
+            )}
           </div>
-          {property.project && (
-            <p className="mt-1 text-sm text-text-muted">{property.project.name}</p>
-          )}
-          {property.askingPriceThb && (
-            <p className="mt-1 text-sm font-medium">
-              <Currency amount={Number(property.askingPriceThb)} />
-              {property.priceRemark && (
-                <span className="ml-2 font-normal text-text-muted">({property.priceRemark})</span>
-              )}
-            </p>
-          )}
         </div>
-        <PropertyHeaderActions property={property} pickerOptions={pickerOptions} />
+        <PropertyHeaderActions property={property} pickerOptions={pickerOptions} orgId={orgId} />
       </div>
 
       <div className="mb-8">

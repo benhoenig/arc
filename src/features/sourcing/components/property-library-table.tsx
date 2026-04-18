@@ -13,6 +13,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { Link } from '@/i18n/navigation';
+import { getThumbnailUrl } from '@/lib/property-thumbnail';
 import type { PropertyListItem } from '../queries/list-properties';
 
 type Props = {
@@ -54,9 +55,19 @@ export function PropertyLibraryTable({ properties, onAdd }: Props) {
             <TableCell>
               <Link
                 href={`/sourcing/properties/${p.id}`}
-                className="font-medium text-text-strong hover:underline"
+                className="flex items-center gap-3 font-medium text-text-strong hover:underline"
               >
-                {p.listingName}
+                {p.thumbnailPath ? (
+                  // biome-ignore lint/performance/noImgElement: user-uploaded dynamic URL
+                  <img
+                    src={getThumbnailUrl(p.thumbnailPath) ?? ''}
+                    alt=""
+                    className="size-10 shrink-0 rounded border border-border-subtle object-cover"
+                  />
+                ) : (
+                  <div className="size-10 shrink-0 rounded border border-border-subtle bg-surface" />
+                )}
+                <span>{p.listingName}</span>
               </Link>
             </TableCell>
             <TableCell className="text-text-muted">{p.project?.name ?? '—'}</TableCell>

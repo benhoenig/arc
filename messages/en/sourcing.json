@@ -3,6 +3,8 @@
   "properties": {
     "title": "Properties",
     "addProperty": "Add property",
+    "viewTable": "Table",
+    "viewKanban": "Pipeline",
     "empty": "No properties yet",
     "emptyDescription": "Add a property to start analyzing deals",
     "columns": {
@@ -30,6 +32,13 @@
     "projectCreateNew": "Add project",
     "listingUrl": "Listing URL",
     "listingUrlPlaceholder": "https://...",
+    "thumbnail": "Thumbnail",
+    "thumbnailUpload": "Upload image",
+    "thumbnailReplace": "Replace",
+    "thumbnailRemove": "Remove",
+    "thumbnailInvalidType": "JPG, PNG, WebP, or GIF only",
+    "thumbnailTooLarge": "File must be under 5MB",
+    "thumbnailUploadFailed": "Upload failed, please try again",
     "propertyType": "Type",
     "bedrooms": "Bedrooms",
     "bathrooms": "Bathrooms",

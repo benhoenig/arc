@@ -232,6 +232,7 @@ model Property {
   projectId      String?   @map("project_id") @db.Uuid
   contactId      String?   @map("contact_id") @db.Uuid
   listingUrl     String?   @map("listing_url")
+  thumbnailPath  String?   @map("thumbnail_path")
 
   // Address (optional — hidden from default form, kept for future map features)
   addressLine1   String?   @map("address_line1")

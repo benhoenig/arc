@@ -11,9 +11,10 @@ import { PropertyDialog } from './property-dialog';
 type Props = {
   property: PropertyDetail;
   pickerOptions: PickerOptions;
+  orgId: string;
 };
 
-export function PropertyHeaderActions({ property, pickerOptions }: Props) {
+export function PropertyHeaderActions({ property, pickerOptions, orgId }: Props) {
   const t = useTranslations('sourcing.propertyForm');
   const [open, setOpen] = useState(false);
 
@@ -27,6 +28,7 @@ export function PropertyHeaderActions({ property, pickerOptions }: Props) {
         open={open}
         onOpenChange={setOpen}
         pickerOptions={pickerOptions}
+        orgId={orgId}
         property={property}
       />
     </>

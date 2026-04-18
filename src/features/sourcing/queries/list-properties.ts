@@ -16,6 +16,7 @@ export async function listProperties(orgId: string) {
       floorLevel: true,
       askingPriceThb: true,
       sourcingStatus: true,
+      thumbnailPath: true,
       project: { select: { name: true } },
       contact: { select: { name: true, contactType: true } },
       createdAt: true,

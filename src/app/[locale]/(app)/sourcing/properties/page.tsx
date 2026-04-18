@@ -25,6 +25,7 @@ export default async function PropertiesPage({ params }: Props) {
       title={t('title')}
       addLabel={t('addProperty')}
       pickerOptions={pickerOptions}
+      orgId={orgId}
     />
   );
 }

@@ -9,6 +9,7 @@ export const propertySchema = z.object({
   listingName: z.string().min(1).max(200),
   projectName: z.string().max(200).optional(),
   listingUrl: z.string().url().or(z.literal('')).optional(),
+  thumbnailPath: z.string().max(500).nullable().optional(),
   propertyType: z.enum([
     'condo',
     'townhouse',

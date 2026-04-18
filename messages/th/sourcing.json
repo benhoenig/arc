@@ -3,6 +3,8 @@
   "properties": {
     "title": "อสังหาริมทรัพย์",
     "addProperty": "เพิ่มอสังหาฯ",
+    "viewTable": "ตาราง",
+    "viewKanban": "ไปป์ไลน์",
     "empty": "ยังไม่มีอสังหาริมทรัพย์",
     "emptyDescription": "เพิ่มอสังหาริมทรัพย์เพื่อเริ่มวิเคราะห์ดีล",
     "columns": {
@@ -30,6 +32,13 @@
     "projectCreateNew": "เพิ่มโครงการ",
     "listingUrl": "ลิงก์ประกาศ",
     "listingUrlPlaceholder": "https://...",
+    "thumbnail": "รูปหน้าปก",
+    "thumbnailUpload": "อัปโหลดรูป",
+    "thumbnailReplace": "เปลี่ยนรูป",
+    "thumbnailRemove": "ลบรูป",
+    "thumbnailInvalidType": "รองรับเฉพาะ JPG, PNG, WebP, GIF",
+    "thumbnailTooLarge": "ไฟล์ต้องไม่เกิน 5MB",
+    "thumbnailUploadFailed": "อัปโหลดไม่สำเร็จ กรุณาลองใหม่",
     "propertyType": "ประเภท",
     "bedrooms": "ห้องนอน",
     "bathrooms": "ห้องน้ำ",

@@ -60,6 +60,7 @@ export async function createProperty(
           projectId,
           contactId,
           listingUrl: parsed.data.listingUrl || null,
+          thumbnailPath: parsed.data.thumbnailPath || null,
           propertyType: parsed.data.propertyType,
           bedrooms: parsed.data.bedrooms,
           bathrooms: parsed.data.bathrooms,

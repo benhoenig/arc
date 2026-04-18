@@ -7,6 +7,7 @@ import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { ComboboxPicker } from '@/components/form/combobox-picker';
 import { NumberInput } from '@/components/form/number-input';
+import { ThumbnailUpload } from '@/components/form/thumbnail-upload';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
@@ -29,6 +30,7 @@ type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   pickerOptions: PickerOptions;
+  orgId: string;
   /** If provided, dialog is in edit mode */
   property?: PropertyDetail | null;
 };
@@ -49,6 +51,7 @@ type FormValues = {
   listingName: string;
   projectName: string;
   listingUrl: string;
+  thumbnailPath: string | null;
   propertyType: (typeof PROPERTY_TYPES)[number];
   bedrooms: number;
   bathrooms: number;
@@ -72,6 +75,7 @@ function buildDefaults(property?: PropertyDetail | null): FormValues {
       listingName: '',
       projectName: '',
       listingUrl: '',
+      thumbnailPath: null,
       propertyType: 'condo',
       bedrooms: 0,
       bathrooms: 0,
@@ -94,6 +98,7 @@ function buildDefaults(property?: PropertyDetail | null): FormValues {
     listingName: property.listingName,
     projectName: property.project?.name ?? '',
     listingUrl: property.listingUrl ?? '',
+    thumbnailPath: property.thumbnailPath ?? null,
     propertyType: property.propertyType as (typeof PROPERTY_TYPES)[number],
     bedrooms: property.bedrooms ?? 0,
     bathrooms: property.bathrooms ?? 0,
@@ -112,7 +117,7 @@ function buildDefaults(property?: PropertyDetail | null): FormValues {
   };
 }
 
-export function PropertyDialog({ open, onOpenChange, pickerOptions, property }: Props) {
+export function PropertyDialog({ open, onOpenChange, pickerOptions, orgId, property }: Props) {
   const isEdit = !!property;
   const t = useTranslations('sourcing.propertyForm');
   const tTypes = useTranslations('sourcing.propertyTypes');
@@ -195,6 +200,15 @@ export function PropertyDialog({ open, onOpenChange, pickerOptions, property }: 
           <div className="flex flex-col gap-1.5">
             <Label>{t('listingName')} *</Label>
             <Input placeholder={t('listingNamePlaceholder')} {...form.register('listingName')} />
+          </div>
+
+          <div className="flex flex-col gap-1.5">
+            <Label>{t('thumbnail')}</Label>
+            <ThumbnailUpload
+              orgId={orgId}
+              value={form.watch('thumbnailPath') ?? null}
+              onChange={(path) => form.setValue('thumbnailPath', path)}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3">
