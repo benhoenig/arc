@@ -3,8 +3,10 @@ import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { FlipDetailHeader } from '@/features/flips/components/flip-detail-header';
 import { FlipOverviewPanel } from '@/features/flips/components/flip-overview-panel';
+import { FlipRevisionsPanel } from '@/features/flips/components/flip-revisions-panel';
 import { FlipTeamPanel } from '@/features/flips/components/flip-team-panel';
 import { getFlipById } from '@/features/flips/queries/get-flip';
+import { listFlipRevisions } from '@/features/flips/queries/list-flip-revisions';
 import { listFlipStages } from '@/features/flips/queries/list-flip-stages';
 import { listOrgUsers } from '@/features/flips/queries/list-org-users';
 import { Link } from '@/i18n/navigation';
@@ -19,10 +21,11 @@ export default async function FlipDetailPage({ params }: Props) {
   setRequestLocale(locale);
 
   const orgId = await getActiveOrgId();
-  const [flip, stages, candidates] = await Promise.all([
+  const [flip, stages, candidates, revisions] = await Promise.all([
     getFlipById(orgId, flipId),
     listFlipStages(orgId),
     listOrgUsers(orgId),
+    listFlipRevisions(orgId, flipId),
   ]);
 
   if (!flip) {
@@ -64,6 +67,12 @@ export default async function FlipDetailPage({ params }: Props) {
         soldAt={flip.soldAt}
         killedAt={flip.killedAt}
         stages={stages}
+        flipType={flip.flipType as 'float_flip' | 'transfer_in'}
+        revisionDefaults={{
+          originalContractPriceThb: flip.baselinePurchasePriceThb ?? undefined,
+          revisedTargetArvThb: flip.baselineTargetArvThb ?? undefined,
+          revisedTargetTimelineDays: flip.baselineTargetTimelineDays ?? undefined,
+        }}
       />
 
       <div className="mb-8">
@@ -98,6 +107,10 @@ export default async function FlipDetailPage({ params }: Props) {
         candidates={candidates}
         readOnly={locked}
       />
+
+      <div className="mt-8">
+        <FlipRevisionsPanel revisions={revisions} />
+      </div>
     </div>
   );
 }

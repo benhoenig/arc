@@ -32,7 +32,8 @@ Five principles that drive the sequencing:
 | [x] | M2 | Properties & Deal Analysis | Add properties, run underwriting | 16–24 | 66 | 2–3 |
 | [x] | M3 | Flips (core) | Create flips, flip detail page, stages, team | 20–28 | 94 | 3–4 |
 | [x] | M3.5 | Invitations & Members | Admin-issued invite links + members page | 4–6 | 100 | 4 |
-| [ ] | M4 | Budget | Three-state budget tracking, categories, variance | 20–28 | 128 | 4–6 |
+| [x] | M3.6 | Pivot / Re-underwriting | Float re-underwrite (spread math) + pivot-to-transfer + revive + remove member | 6–8 | 108 | 4 |
+| [ ] | M4 | Budget | Three-state budget tracking, categories, variance | 20–28 | 136 | 4–6 |
 | [ ] | M5 | Contractors (directory + assignments) | Contractor library + scope of work per flip | 20–28 | 150 | 6–7 |
 | [ ] | M6 | Contractor Payments | Milestones, T&M entries, payment queue | 24–32 | 182 | 7–9 |
 | [ ] | M7 | Tasks & Timeline | Tasks per flip, milestone timeline, due dates | 12–18 | 200 | 9 |
@@ -420,6 +421,61 @@ Take the "pursue" deal from M2's demo → convert to Flip. See FLIP-2026-001 cre
 - **Org switcher UI** — deferred.
 - **Email delivery.** Links are generated in-app; admin pastes into LINE/email manually. No transactional email service wired.
 - **Role permission enforcement** beyond `admin`. See `memory/project_role_permissions_gap.md`.
+
+---
+
+## 6.5.2 M3.6 — Pivot / Re-underwriting + Revive + Remove Member
+
+**Goal:** Handle mid-flight flip economics honestly. A float-flip contract expiring must offer re-underwriting (spread math, extension fees) or a pivot-to-transfer-in (full-ARV math with added capital). Killed flips need an undo. Members need a way to be removed from the org. All shipped as a single bundle immediately after M3.5 because each piece surfaced real gaps from earlier milestones.
+
+**Duration:** ~6–8 hours.
+
+### 6.5.2.1 Deliverables
+
+**Database:**
+- [x] `flip_revisions` table (DATA_MODEL.md §3.6) — per-flip dated snapshots of re-underwriting events. Stores both the full inputs (sunk + new capital + targets) and the computed totals for history.
+- [x] `flips.flip_type` column (`float_flip` | `transfer_in`, default `float_flip`), backfilled from the originating deal analysis. Pivots flip this column to `transfer_in` so subsequent re-underwrites use the right profit math.
+- [x] Additional revision fields: `original_contract_price_thb`, `new_marketing_budget_thb`, `new_commission_thb`, `new_additional_deposit_thb`, `new_additional_expense_thb` — for float-flip-specific inputs (SPA spread + contract-extension line items).
+- [x] Extended `chk_flips_killed_reason` CHECK to include `contract_expired` (float-flip walkaway).
+
+**Actions (`/src/features/flips/actions`):**
+- [x] `createFlipRevision` — atomic: allocates next `revision_number`, computes totals via a mode-specific helper, inserts the revision, updates `flips.baseline_*` to reflect the new plan, flips `flip_type` on pivot, logs activity.
+- [x] `reviveFlip` — undo a kill. Clears `killed_at` / `killed_reason`, moves to a user-chosen non-terminal stage, logs activity.
+- [x] `removeMember` (in `/src/features/members/actions`) — admin-only; refuses self-removal and last-admin removal; soft-deletes the `user_roles` row.
+
+**Compute modes** (`computeFlipRevisionTotals` in `validators/flip-schemas.ts`):
+- `float_reunderwrite` — profit = (new sale price − SPA contract price) − total reno − total marketing − commission − other − additional expense. Capital deployed = deposit + reno + marketing + commission + other + additional deposit + additional expense. The additional deposit is refundable on success, so counts in capital-at-risk but NOT in cost.
+- `transfer_reunderwrite` — profit = revised ARV − total capital deployed. Standard full-ARV math.
+- `pivot_to_transfer_in` — same full-ARV math; collects remaining property cost + transfer fees (cash/loan split) + loan origination fields the re-underwrite doesn't need.
+
+**UI:**
+- [x] `<ReUnderwriteDialog>` — branches on flip_type. Float variant shows SPA price + new sale price + extension line items (additional deposit/expense with hints). Transfer variant uses ARV + standard additions. Live-computed summary + walk-away-vs-continue comparison panel.
+- [x] `<PivotToTransferInDialog>` — shown only on float flips. Collects sunk + transfer-acquisition capital; shows walk-away vs pivot comparison.
+- [x] `<ReviveFlipDialog>` — picks a non-terminal stage to return to; `killed` and `sold` are excluded from the target list.
+- [x] `<FlipRevisionsPanel>` — history list below the team panel; shows each revision's rollups and type.
+- [x] FlipDetailHeader buttons gated by state: `Re-underwrite` always (when not terminal); `Pivot (buy-in)` only for float_flip; `Revive` only on killed flips; `Kill` hidden on terminal.
+- [x] Members page gets a trash-icon column for removing other members (admin-only, hidden for self).
+
+**Overview panel polish:**
+- [x] `กำไรเป้าหมาย / Target profit` row computed from `ARV × margin% / 100`, colored green (`text-positive`) when ≥ 0, red (`text-destructive`) when < 0. Margin % row also colored.
+
+**i18n:** [x] namespaces restructured — `flips.revisionShared` for cross-mode labels, `flips.reunderwrite` and `flips.pivot` for each variant, `flips.revisions` for the history panel. `flips.kill.reasons.contract_expired` added.
+
+### 6.5.2.2 What's explicitly NOT in M3.6
+
+- **Auto-fill of sunk costs** in the revision dialogs. Intentionally manual until M4 ships actuals tracking — see `memory/project_post_m4_autofill.md`.
+- **Removing a revision / undoing a pivot.** Revisions are append-only history; if a revision was wrong, add a new correcting revision.
+- **Multi-revision-per-session workflow.** One revision at a time; the flip's `baseline_*` columns always reflect the latest.
+- **Budget-line synchronization.** After a pivot, M4's budget categories don't auto-adjust. When M4 lands, we'll need to decide how baseline changes propagate to budget lines.
+
+### 6.5.2.3 Done when
+
+- [x] A float flip with an expiring contract can be re-underwritten with the correct spread math (not full-ARV).
+- [x] The same float flip can alternatively pivot to transfer-in; subsequent re-underwrites use transfer math.
+- [x] Each revision is preserved with its inputs, computed totals, and who/when.
+- [x] A killed flip can be revived to a chosen active stage.
+- [x] An admin can remove any other member (with the two safety guards).
+- [x] Flip overview shows target profit in both ฿ and %, colored by sign.
 
 ---
 

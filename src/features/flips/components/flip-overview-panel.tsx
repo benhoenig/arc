@@ -46,8 +46,27 @@ export function FlipOverviewPanel({ baseline, actuals, hasInvestorCapital, notes
           <Row label={t('baselineArv')}>
             {baseline.targetArvThb != null ? <Currency amount={baseline.targetArvThb} /> : '—'}
           </Row>
+          <Row label={t('baselineProfit')}>
+            {baseline.targetArvThb != null && baseline.targetMarginPct != null ? (
+              <span
+                className={baseline.targetMarginPct >= 0 ? 'text-positive' : 'text-destructive'}
+              >
+                <Currency amount={(baseline.targetArvThb * baseline.targetMarginPct) / 100} />
+              </span>
+            ) : (
+              '—'
+            )}
+          </Row>
           <Row label={t('baselineMargin')}>
-            {baseline.targetMarginPct != null ? `${baseline.targetMarginPct.toFixed(1)}%` : '—'}
+            {baseline.targetMarginPct != null ? (
+              <span
+                className={`tabular ${baseline.targetMarginPct >= 0 ? 'text-positive' : 'text-destructive'}`}
+              >
+                {baseline.targetMarginPct.toFixed(1)}%
+              </span>
+            ) : (
+              '—'
+            )}
           </Row>
           <Row label={t('baselineTimeline')}>
             {baseline.targetTimelineDays != null ? `${baseline.targetTimelineDays}` : '—'}

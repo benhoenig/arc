@@ -51,6 +51,7 @@ model Organization {
   flips            Flip[]
   flipTeamMembers  FlipTeamMember[]
   flipCodeCounters FlipCodeCounter[]
+  flipRevisions    FlipRevision[]
   invitations      OrgInvitation[]
 
   @@map("organizations")
@@ -83,6 +84,7 @@ model User {
   flipsUpdated            Flip[]           @relation("FlipUpdatedBy")
   flipTeamMemberships     FlipTeamMember[] @relation("FlipTeamMemberUser")
   flipAssignmentsMade     FlipTeamMember[] @relation("FlipTeamMemberAssignedBy")
+  flipRevisionsCreated    FlipRevision[]   @relation("FlipRevisionCreatedBy")
   invitationsCreated      OrgInvitation[]  @relation("OrgInvitationInvitedBy")
   invitationsAccepted     OrgInvitation[]  @relation("OrgInvitationAcceptedBy")
   invitationsRevoked      OrgInvitation[]  @relation("OrgInvitationRevokedBy")
@@ -378,6 +380,7 @@ model Flip {
   code                          String
   name                          String
   stageId                       String    @map("stage_id") @db.Uuid
+  flipType                      String    @default("float_flip") @map("flip_type")
 
   baselinePurchasePriceThb      Decimal?  @map("baseline_purchase_price_thb") @db.Decimal(14, 2)
   baselineRenovationBudgetThb   Decimal?  @map("baseline_renovation_budget_thb") @db.Decimal(14, 2)
@@ -414,11 +417,61 @@ model Flip {
   updatedByUser User?            @relation("FlipUpdatedBy", fields: [updatedBy], references: [id])
   teamMembers   FlipTeamMember[]
   dealAnalyses  DealAnalysis[]
+  revisions     FlipRevision[]
 
   @@index([organizationId], map: "idx_flips_org")
   @@index([propertyId], map: "idx_flips_property")
   @@index([stageId], map: "idx_flips_stage")
   @@map("flips")
+}
+
+model FlipRevision {
+  id                          String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId              String   @map("organization_id") @db.Uuid
+  flipId                      String   @map("flip_id") @db.Uuid
+
+  revisionNumber              Int      @map("revision_number")
+  revisionType                String   @map("revision_type")
+  reasonNotes                 String?  @map("reason_notes")
+
+  sunkDepositThb              Decimal  @default(0) @map("sunk_deposit_thb") @db.Decimal(14, 2)
+  sunkRenoSpentThb            Decimal  @default(0) @map("sunk_reno_spent_thb") @db.Decimal(14, 2)
+  sunkMarketingSpentThb       Decimal  @default(0) @map("sunk_marketing_spent_thb") @db.Decimal(14, 2)
+  sunkOtherThb                Decimal  @default(0) @map("sunk_other_thb") @db.Decimal(14, 2)
+
+  newRemainingPropertyCostThb Decimal  @default(0) @map("new_remaining_property_cost_thb") @db.Decimal(14, 2)
+  newTransferFeesCashThb      Decimal  @default(0) @map("new_transfer_fees_cash_thb") @db.Decimal(14, 2)
+  newTransferFeesLoanThb      Decimal  @default(0) @map("new_transfer_fees_loan_thb") @db.Decimal(14, 2)
+  newLoanOriginationThb       Decimal  @default(0) @map("new_loan_origination_thb") @db.Decimal(14, 2)
+  newRenoBudgetThb            Decimal  @default(0) @map("new_reno_budget_thb") @db.Decimal(14, 2)
+  newMarketingBudgetThb       Decimal  @default(0) @map("new_marketing_budget_thb") @db.Decimal(14, 2)
+  newCommissionThb            Decimal  @default(0) @map("new_commission_thb") @db.Decimal(14, 2)
+  newAdditionalDepositThb     Decimal  @default(0) @map("new_additional_deposit_thb") @db.Decimal(14, 2)
+  newAdditionalExpenseThb     Decimal  @default(0) @map("new_additional_expense_thb") @db.Decimal(14, 2)
+  originalContractPriceThb    Decimal? @map("original_contract_price_thb") @db.Decimal(14, 2)
+
+  revisedTargetArvThb         Decimal  @map("revised_target_arv_thb") @db.Decimal(14, 2)
+  revisedTargetTimelineDays   Int      @map("revised_target_timeline_days")
+
+  totalCapitalDeployedThb     Decimal  @map("total_capital_deployed_thb") @db.Decimal(14, 2)
+  projectedProfitThb          Decimal  @map("projected_profit_thb") @db.Decimal(14, 2)
+  projectedRoiPct             Decimal  @map("projected_roi_pct") @db.Decimal(6, 2)
+  projectedMarginPct          Decimal  @map("projected_margin_pct") @db.Decimal(6, 2)
+
+  walkAwayLossThb             Decimal  @map("walk_away_loss_thb") @db.Decimal(14, 2)
+
+  metadata                    Json     @default("{}")
+  createdAt                   DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  createdBy                   String?  @map("created_by") @db.Uuid
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  flip          Flip         @relation(fields: [flipId], references: [id], onDelete: Cascade)
+  createdByUser User?        @relation("FlipRevisionCreatedBy", fields: [createdBy], references: [id])
+
+  @@unique([flipId, revisionNumber], map: "idx_flip_revisions_flip_number")
+  @@index([organizationId], map: "idx_flip_revisions_org")
+  @@index([flipId], map: "idx_flip_revisions_flip")
+  @@map("flip_revisions")
 }
 
 model FlipTeamMember {

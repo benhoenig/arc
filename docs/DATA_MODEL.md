@@ -308,6 +308,7 @@ CREATE TABLE flips (
   code                 text NOT NULL,                        -- human-friendly flip code, e.g. "FLIP-2026-014"
   name                 text NOT NULL,                        -- internal name, usually derived from property nickname
   stage_id             uuid NOT NULL REFERENCES flip_stages(id),
+  flip_type            text NOT NULL DEFAULT 'float_flip',   -- 'float_flip' | 'transfer_in'; copied from originating deal analysis, flipped to 'transfer_in' on a pivot revision
 
   -- underwriting baseline (locked at flip creation, from Deal Analysis)
   baseline_purchase_price_thb     numeric(14, 2),
@@ -330,7 +331,7 @@ CREATE TABLE flips (
   is_on_hold                      boolean NOT NULL DEFAULT false,
   on_hold_reason                  text,
   killed_at                       timestamptz,
-  killed_reason                   text,                      -- 'pivoted_to_rental' | 'deal_collapsed' | 'market_change' | 'other'
+  killed_reason                   text,                      -- 'pivoted_to_rental' | 'deal_collapsed' | 'market_change' | 'contract_expired' | 'other'
 
   notes                           text,
   metadata                        jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -433,6 +434,89 @@ CREATE TABLE flip_code_counters (
 RLS: org-member read/insert/update. No SECURITY DEFINER needed — the insert is always performed by an authenticated user who already has membership.
 
 This table pattern is intentionally generic. Reuse it for any future sequential entity codes (POs, budget line refs, etc.) by adding rows with different `year` granularity or a discriminator column.
+
+### 3.6 `flip_revisions`
+
+Dated snapshots of re-underwriting and pivot events on a flip. Introduced in M3.6. A revision captures three things:
+
+1. **Sunk costs at the moment of decision** (deposit, reno spent so far, marketing spent, other) — unrecoverable if the team walks.
+2. **New capital going in** (the specific line items depend on the revision type — see compute modes below).
+3. **Revised targets** (ARV / sale price and timeline) plus the **computed totals** so a historical revision remains a self-contained record even if the compute helper changes shape later.
+
+The flip's `baseline_*` columns are updated to the latest revision's values on commit; `flip_revisions` holds the history.
+
+```sql
+CREATE TABLE flip_revisions (
+  id                              uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  organization_id                 uuid NOT NULL REFERENCES organizations(id) ON DELETE CASCADE,
+  flip_id                         uuid NOT NULL REFERENCES flips(id) ON DELETE CASCADE,
+
+  revision_number                 integer NOT NULL,          -- sequential per flip, allocated inside createFlipRevision tx
+  revision_type                   text NOT NULL,             -- 'reunderwrite' | 'pivot_to_transfer_in'
+  reason_notes                    text,
+
+  -- Sunk (pre-existing, unrecoverable if the team walks now)
+  sunk_deposit_thb                numeric(14, 2) NOT NULL DEFAULT 0,
+  sunk_reno_spent_thb             numeric(14, 2) NOT NULL DEFAULT 0,
+  sunk_marketing_spent_thb        numeric(14, 2) NOT NULL DEFAULT 0,
+  sunk_other_thb                  numeric(14, 2) NOT NULL DEFAULT 0,
+
+  -- New capital — pivot-only line items
+  new_remaining_property_cost_thb numeric(14, 2) NOT NULL DEFAULT 0,
+  new_transfer_fees_cash_thb      numeric(14, 2) NOT NULL DEFAULT 0,
+  new_transfer_fees_loan_thb      numeric(14, 2) NOT NULL DEFAULT 0,
+  new_loan_origination_thb        numeric(14, 2) NOT NULL DEFAULT 0,
+
+  -- New capital — re-underwrite + pivot shared
+  new_reno_budget_thb             numeric(14, 2) NOT NULL DEFAULT 0,
+  new_marketing_budget_thb        numeric(14, 2) NOT NULL DEFAULT 0,
+  new_commission_thb              numeric(14, 2) NOT NULL DEFAULT 0,
+
+  -- New capital — float extension (contract-extension line items)
+  new_additional_deposit_thb      numeric(14, 2) NOT NULL DEFAULT 0, -- refundable on success; counts toward capital-at-risk, NOT toward projected cost
+  new_additional_expense_thb      numeric(14, 2) NOT NULL DEFAULT 0, -- non-refundable fee the owner demands; subtracts from profit
+
+  -- Context (for float spread math; NULL for transfer-in revisions)
+  original_contract_price_thb     numeric(14, 2),
+
+  -- Revised targets
+  revised_target_arv_thb          numeric(14, 2) NOT NULL,           -- ARV for transfer modes; new-buyer sale price for float
+  revised_target_timeline_days    integer NOT NULL,
+
+  -- Computed totals (snapshot)
+  total_capital_deployed_thb      numeric(14, 2) NOT NULL,
+  projected_profit_thb            numeric(14, 2) NOT NULL,
+  projected_roi_pct               numeric(6, 2) NOT NULL,
+  projected_margin_pct            numeric(6, 2) NOT NULL,
+  walk_away_loss_thb              numeric(14, 2) NOT NULL,
+
+  metadata                        jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at                      timestamptz NOT NULL DEFAULT now(),
+  created_by                      uuid REFERENCES users(id),
+
+  CONSTRAINT chk_revision_type CHECK (revision_type IN ('pivot_to_transfer_in', 'reunderwrite'))
+);
+
+CREATE UNIQUE INDEX idx_flip_revisions_flip_number ON flip_revisions(flip_id, revision_number);
+CREATE INDEX idx_flip_revisions_org ON flip_revisions(organization_id);
+CREATE INDEX idx_flip_revisions_flip ON flip_revisions(flip_id);
+```
+
+**Compute modes** (implemented in `src/features/flips/validators/flip-schemas.ts::computeFlipRevisionTotals`):
+
+- **`float_reunderwrite`** — used when `revision_type = 'reunderwrite'` AND the flip's current `flip_type = 'float_flip'`. Profit uses spread math:
+  `profit = (revised_target_arv − original_contract_price) − total_reno − total_marketing − commission − sunk_other − additional_expense`.
+  Capital deployed includes `sunk_deposit + total_reno + total_marketing + commission + sunk_other + additional_deposit + additional_expense`.
+  `additional_deposit` counts in capital-at-risk (for ROI) but NOT in cost subtraction — it's refundable on success.
+
+- **`transfer_reunderwrite`** — used when `revision_type = 'reunderwrite'` AND the flip's `flip_type = 'transfer_in'`. Standard full-ARV math: `profit = revised_target_arv − total_capital_deployed`.
+
+- **`pivot_to_transfer_in`** — used when `revision_type = 'pivot_to_transfer_in'`. Requires the flip to currently be a float flip (action rejects otherwise). Same full-ARV math as transfer-reunderwrite; on commit the action ALSO updates `flips.flip_type = 'transfer_in'` so subsequent re-underwrites use transfer math.
+
+**RLS:** standard org-member SELECT + INSERT. Revisions are append-only — no UPDATE policy; if a past revision needs correcting, the team records a new revision on top.
+
+**What's NOT here (deferred to M4+):**
+- No automatic source for the `sunk_*` columns — user enters them manually. Once `budget_lines` actuals exist in M4, pre-fill from `SUM(actual_amount_thb)` per category. See `memory/project_post_m4_autofill.md`.
 
 ---
 

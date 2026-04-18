@@ -1,6 +1,6 @@
 'use client';
 
-import { MoreHorizontal } from 'lucide-react';
+import { Calculator, MoreHorizontal, Repeat, Undo2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState } from 'react';
 import { Pill } from '@/components/data-display/pill';
@@ -10,6 +10,9 @@ import { getThumbnailUrl } from '@/lib/property-thumbnail';
 import type { FlipStageOption } from '../queries/list-flip-stages';
 import { FlipStageSelect } from './flip-stage-select';
 import { KillFlipDialog } from './kill-flip-dialog';
+import { PivotToTransferInDialog } from './pivot-to-transfer-in-dialog';
+import { ReUnderwriteDialog } from './re-underwrite-dialog';
+import { ReviveFlipDialog } from './revive-flip-dialog';
 
 type Props = {
   flipId: string;
@@ -27,6 +30,12 @@ type Props = {
   soldAt: Date | null;
   killedAt: Date | null;
   stages: FlipStageOption[];
+  flipType: 'float_flip' | 'transfer_in';
+  revisionDefaults: {
+    originalContractPriceThb?: number;
+    revisedTargetArvThb?: number;
+    revisedTargetTimelineDays?: number;
+  };
 };
 
 export function FlipDetailHeader({
@@ -41,12 +50,18 @@ export function FlipDetailHeader({
   soldAt,
   killedAt,
   stages,
+  flipType,
+  revisionDefaults,
 }: Props) {
   const t = useTranslations('flips');
   const [killOpen, setKillOpen] = useState(false);
+  const [reviveOpen, setReviveOpen] = useState(false);
+  const [reunderwriteOpen, setReunderwriteOpen] = useState(false);
+  const [pivotOpen, setPivotOpen] = useState(false);
 
-  const locked =
-    stageSlug === 'sold' || stageSlug === 'killed' || soldAt != null || killedAt != null;
+  const isKilled = stageSlug === 'killed' || killedAt != null;
+  const isSold = stageSlug === 'sold' || soldAt != null;
+  const locked = isKilled || isSold;
   const isTerminal = locked;
 
   return (
@@ -87,19 +102,64 @@ export function FlipDetailHeader({
       <div className="flex items-center gap-2">
         <FlipStageSelect flipId={flipId} currentStageId={stageId} locked={locked} stages={stages} />
         {!locked ? (
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => setKillOpen(true)}
-            className="text-text-muted hover:text-destructive"
-          >
-            <MoreHorizontal size={14} strokeWidth={1.5} className="mr-1" />
-            {t('actions.kill')}
+          <>
+            <Button variant="outline" size="sm" onClick={() => setReunderwriteOpen(true)}>
+              <Calculator size={14} strokeWidth={1.5} className="mr-1" />
+              {t('actions.reunderwrite')}
+            </Button>
+            {flipType === 'float_flip' ? (
+              <Button variant="outline" size="sm" onClick={() => setPivotOpen(true)}>
+                <Repeat size={14} strokeWidth={1.5} className="mr-1" />
+                {t('actions.pivot')}
+              </Button>
+            ) : null}
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setKillOpen(true)}
+              className="text-text-muted hover:text-destructive"
+            >
+              <MoreHorizontal size={14} strokeWidth={1.5} className="mr-1" />
+              {t('actions.kill')}
+            </Button>
+          </>
+        ) : null}
+        {isKilled ? (
+          <Button variant="outline" size="sm" onClick={() => setReviveOpen(true)}>
+            <Undo2 size={14} strokeWidth={1.5} className="mr-1" />
+            {t('actions.revive')}
           </Button>
         ) : null}
       </div>
 
       <KillFlipDialog flipId={flipId} open={killOpen} onOpenChange={setKillOpen} />
+      {isKilled ? (
+        <ReviveFlipDialog
+          flipId={flipId}
+          open={reviveOpen}
+          onOpenChange={setReviveOpen}
+          stages={stages}
+        />
+      ) : null}
+      {!locked ? (
+        <>
+          <ReUnderwriteDialog
+            flipId={flipId}
+            flipType={flipType}
+            open={reunderwriteOpen}
+            onOpenChange={setReunderwriteOpen}
+            defaults={revisionDefaults}
+          />
+          {flipType === 'float_flip' ? (
+            <PivotToTransferInDialog
+              flipId={flipId}
+              open={pivotOpen}
+              onOpenChange={setPivotOpen}
+              defaults={revisionDefaults}
+            />
+          ) : null}
+        </>
+      ) : null}
     </div>
   );
 }
