@@ -576,15 +576,17 @@ Built end-to-end against the spec with one material scope shift discovered durin
 
 **Duration:** ~2–3 days (10–14 hours)
 
+**Canonical schema:** `DATA_MODEL.md` §5.3 (`flip_transactions` table + constraints), §13.4 (`flip_cash_summary` view), §14.5 (`recompute_budget_line_actual` trigger). Read those before touching migrations.
+
 ### 7.7.1 Deliverables
 
-**Database:**
-- [ ] `flip_transactions` table with RLS. Columns: `id, organization_id, flip_id, budget_line_id (nullable), date, amount_thb (signed numeric(14,2)), description, source_note, kind, receipt_path, notes, created_by, created_at, updated_at, deleted_at`.
-- [ ] `kind` enum: `investor_deposit | loan_disbursement | spend | refund | sale_proceeds | distribution`. (Last two are deferred to later milestones but the enum value exists so no schema change is needed when they land.)
-- [ ] CHECK constraint: `budget_line_id IS NULL OR kind IN ('spend','refund')` — inflows can't be tagged to a budget line.
-- [ ] Trigger `recompute_budget_line_actual` after INSERT/UPDATE/DELETE on `flip_transactions` → updates `budget_lines.actual_amount_thb = SUM(flip_transactions.amount_thb) WHERE budget_line_id = NEW.budget_line_id AND deleted_at IS NULL`. Runs for both OLD.budget_line_id and NEW.budget_line_id on UPDATE.
-- [ ] Supabase Storage bucket `budget-receipts` with org-scoped RLS. Same `{orgId}/{uuid}.{ext}` path pattern as `property-thumbnails`. Private bucket + signed URLs.
-- [ ] `flip_cash_summary` view: per-flip `SUM(amount_thb)` current balance, `SUM(... WHERE kind IN ('investor_deposit','loan_disbursement'))` inflows, etc.
+**Database** (full SQL in DATA_MODEL.md §5.3 / §13.4 / §14.5 — summary here):
+- [ ] `flip_transactions` table with RLS (org-member read/insert/update/delete, same pattern as `budget_lines`).
+- [ ] CHECK constraints: `chk_flip_tx_kind` (enum values), `chk_flip_tx_budget_line` (budget_line_id only on spend/refund), `chk_flip_tx_sign` (amount sign matches kind).
+- [ ] Trigger `recompute_budget_line_actual` — handles OLD + NEW budget_line_id on UPDATE; uses full recompute (SUM) per line for simplicity.
+- [ ] Supabase Storage bucket `budget-receipts` — **private** (not public — receipts contain bank details / invoices). Path `{orgId}/{flipId}/{uuid}.{ext}`. Reads via server-action-minted signed URLs (5-min TTL), not direct public URLs like property-thumbnails uses.
+- [ ] `flip_cash_summary` view for the cash-balance indicator.
+- [ ] Data migration: `UPDATE budget_lines SET actual_amount_thb = 0` (see migration decision below).
 
 **Feature: `/src/features/budget`** (expanded; no new feature folder):
 - [ ] Queries: `listTransactionsForFlip`, `listTransactionsForBudgetLine`, `getFlipCashSummary`.
@@ -592,9 +594,7 @@ Built end-to-end against the spec with one material scope shift discovered durin
 - [ ] Validators: `flipTransactionSchema` (discriminated union by kind — outflow kinds require `budget_line_id`, inflow kinds require `source_note`).
 - [ ] Components: `<FlipTransactionList>` per budget line, `<AddTransactionDialog>` with category/line picker + date picker + receipt upload, `<FlipCashBalanceIndicator>` for the flip header, `<ReceiptThumbnail>` with signed-URL resolution.
 
-**Migration of existing data:** any `budget_lines` rows with non-zero `actual_amount_thb` either:
-  - (a) get backfilled as a single `kind='spend'` transaction with `description='Migrated from M4 actuals'`, dated `created_at`, no receipt; OR
-  - (b) zeroed out and the operator re-enters with real receipts. Preferred because M4 actuals are test data, not production.
+**Migration of existing data (decided 2026-04-19):** zero out `actual_amount_thb` on all `budget_lines` as part of the M4.5 migration. M4 test values (Electrical / Kitchen / Bathroom / etc. entered during smoke-testing) are not production data. Operators re-enter real spend as transactions with receipts post-M4.5. Include a single-statement `UPDATE budget_lines SET actual_amount_thb = 0` in the migration file so the column starts consistent with the new trigger invariant (`SUM(flip_transactions)` = 0 on migration day).
 
 **UI impact on M4:**
 - [ ] Remove inline `actual` input from `<BudgetLineRow>`. The `actual` column becomes a computed read-only number. Clicking a line row opens a transaction list drawer / expanded view.
