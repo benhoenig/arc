@@ -1,21 +1,26 @@
 'use client';
 
-import { Trash2 } from 'lucide-react';
+import { Plus, Trash2 } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useState, useTransition } from 'react';
+import { Currency } from '@/components/data-display/currency';
 import { deleteBudgetLine } from '../actions/delete-budget-line';
 import { updateBudgetLine } from '../actions/update-budget-line';
 import type { BudgetLineItem } from '../queries/list-budget-lines';
+import { AddTransactionDialog } from './add-transaction-dialog';
 import { cleanNumericInput, formatWithCommas, parseAmount } from './amount-input-helpers';
 
-type AmountField = 'budgetedAmountThb' | 'committedAmountThb' | 'actualAmountThb';
+type AmountField = 'budgetedAmountThb' | 'committedAmountThb';
 
 type Props = {
   line: BudgetLineItem;
+  flipId: string;
+  orgId: string;
+  allLines: BudgetLineItem[];
   readOnly?: boolean;
 };
 
-export function BudgetLineRow({ line, readOnly = false }: Props) {
+export function BudgetLineRow({ line, flipId, orgId, allLines, readOnly = false }: Props) {
   const t = useTranslations('budget');
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
@@ -99,22 +104,39 @@ export function BudgetLineRow({ line, readOnly = false }: Props) {
         onCommit={(v) => commitAmount('committedAmountThb', v, line.committedAmountThb)}
         disabled={readOnly || isPending}
       />
-      <AmountCell
-        initial={line.actualAmountThb}
-        onCommit={(v) => commitAmount('actualAmountThb', v, line.actualAmountThb)}
-        disabled={readOnly || isPending}
-      />
-      <td className="w-10 py-1.5 pl-2 text-right">
+      <td className="py-1.5 pr-2 text-right">
+        <Currency amount={line.actualAmountThb} className="text-text-default" />
+      </td>
+      <td className="w-24 py-1.5 pl-2 text-right">
         {readOnly ? null : (
-          <button
-            type="button"
-            onClick={handleDelete}
-            disabled={isPending}
-            className="rounded p-1 text-text-muted hover:bg-fill-hover hover:text-destructive disabled:opacity-50"
-            aria-label={t('actions.deleteLine')}
-          >
-            <Trash2 size={14} strokeWidth={1.5} />
-          </button>
+          <div className="flex items-center justify-end gap-1">
+            <AddTransactionDialog
+              flipId={flipId}
+              orgId={orgId}
+              budgetLines={allLines}
+              defaultKind="spend"
+              defaultBudgetLineId={line.id}
+              trigger={
+                <button
+                  type="button"
+                  className="rounded p-1 text-text-muted hover:bg-fill-hover hover:text-text-default"
+                  aria-label={t('actions.addSpend')}
+                  title={t('actions.addSpend')}
+                >
+                  <Plus size={14} strokeWidth={1.5} />
+                </button>
+              }
+            />
+            <button
+              type="button"
+              onClick={handleDelete}
+              disabled={isPending}
+              className="rounded p-1 text-text-muted hover:bg-fill-hover hover:text-destructive disabled:opacity-50"
+              aria-label={t('actions.deleteLine')}
+            >
+              <Trash2 size={14} strokeWidth={1.5} />
+            </button>
+          </div>
         )}
         {error ? <span className="sr-only">{error}</span> : null}
       </td>

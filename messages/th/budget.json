@@ -43,7 +43,50 @@
   },
   "actions": {
     "addLine": "เพิ่มรายการ",
-    "deleteLine": "ลบรายการ"
+    "deleteLine": "ลบรายการ",
+    "addTransaction": "บันทึกธุรกรรม",
+    "addSpend": "บันทึกการใช้"
+  },
+  "transactions": {
+    "title": "ธุรกรรม",
+    "empty": "ยังไม่มีธุรกรรม",
+    "date": "วันที่",
+    "description": "รายละเอียด",
+    "amount": "จำนวนเงิน",
+    "category": "หมวด",
+    "kind": "ประเภท",
+    "source": "แหล่งที่มา",
+    "receipt": "ใบเสร็จ",
+    "uploadReceipt": "อัปโหลดใบเสร็จ",
+    "changeReceipt": "เปลี่ยนใบเสร็จ",
+    "removeReceipt": "ลบใบเสร็จ",
+    "viewReceipt": "ดูใบเสร็จ",
+    "receiptFailed": "ไม่สามารถเปิดใบเสร็จได้",
+    "addTitle": "ธุรกรรมใหม่",
+    "noBudgetLine": "ไม่มีรายการงบประมาณ",
+    "confirmDelete": "ต้องการลบธุรกรรมนี้หรือไม่?",
+    "amountPlaceholder": "0.00",
+    "sourcePlaceholder": "เช่น คุณ Nong — นักลงทุน, สินเชื่อธนาคารกรุงเทพ",
+    "descriptionPlaceholder": "บันทึกวัตถุประสงค์ของเงิน",
+    "uploadFailed": "อัปโหลดใบเสร็จไม่สำเร็จ",
+    "uploadTooLarge": "ใบเสร็จต้องมีขนาดน้อยกว่า 10MB",
+    "uploadInvalidType": "รับเฉพาะรูปภาพหรือไฟล์ PDF เท่านั้น",
+    "cashBalanceLabel": "เงินสด",
+    "cashBalanceEmpty": "ยังไม่มีเงินสด",
+    "chooseBudgetLine": "เลือกรายการงบประมาณ",
+    "flipClosed": "Flip นี้ปิดแล้ว — ไม่สามารถแก้ไขได้",
+    "kinds": {
+      "investor_deposit": "เงินลงทุนจากนักลงทุน",
+      "loan_disbursement": "เงินกู้ที่เบิก",
+      "spend": "ใช้จ่าย",
+      "refund": "เงินคืน",
+      "sale_proceeds": "เงินจากการขาย",
+      "distribution": "จ่ายคืนผู้ลงทุน"
+    },
+    "directions": {
+      "inflow": "เข้า",
+      "outflow": "ออก"
+    }
   },
   "categoryChart": {
     "title": "แยกตามหมวด",

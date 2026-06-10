@@ -3,8 +3,8 @@ import { MembersPageClient } from '@/features/members/components/members-page-cl
 import { listInvitations } from '@/features/members/queries/list-invitations';
 import { listMembers } from '@/features/members/queries/list-members';
 import { listOrgRoles } from '@/features/members/queries/list-org-roles';
+import { getActiveOrgId, requireAuth } from '@/server/auth';
 import { isOrgAdmin } from '@/server/shared/require-admin';
-import { getActiveOrgId, requireAuth } from '@/server/supabase/auth';
 
 type Props = {
   params: Promise<{ locale: string }>;

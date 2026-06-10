@@ -14,11 +14,14 @@ const envSchema = z.object({
 
   NEXT_PUBLIC_APP_URL: z.string().url(),
 
-  NEXT_PUBLIC_SUPABASE_URL: z.string().url(),
-  NEXT_PUBLIC_SUPABASE_ANON_KEY: z.string().min(1),
-  SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-  SUPABASE_DB_URL: z.string().url(),
-  SUPABASE_DB_URL_POOLED: z.string().url(),
+  // Neon — Postgres + Neon Auth (migration target, replacing Supabase).
+  DATABASE_URL: z.string().url(),
+  DATABASE_URL_UNPOOLED: z.string().url(),
+  NEON_AUTH_BASE_URL: z.string().url(),
+  NEON_AUTH_COOKIE_SECRET: z.string().min(32),
+
+  // Vercel Blob — private store for property thumbnails + receipts.
+  BLOB_READ_WRITE_TOKEN: z.string().min(1),
 
   LINE_NOTIFY_CLIENT_ID: z.string().min(1),
   LINE_NOTIFY_CLIENT_SECRET: z.string().min(1),

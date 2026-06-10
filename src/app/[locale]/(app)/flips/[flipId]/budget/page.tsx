@@ -1,17 +1,22 @@
 import { ArrowLeft } from 'lucide-react';
 import { notFound } from 'next/navigation';
 import { getTranslations, setRequestLocale } from 'next-intl/server';
+import { AddTransactionDialog } from '@/features/budget/components/add-transaction-dialog';
 import { BudgetBurnBar } from '@/features/budget/components/budget-burn-bar';
 import { BudgetTable } from '@/features/budget/components/budget-table';
 import { BudgetVarianceCard } from '@/features/budget/components/budget-variance-card';
 import { CategoryBreakdownChart } from '@/features/budget/components/category-breakdown-chart';
+import { FlipCashBalanceIndicator } from '@/features/budget/components/flip-cash-balance-indicator';
+import { FlipTransactionList } from '@/features/budget/components/flip-transaction-list';
 import { getCategoryBreakdownForFlip } from '@/features/budget/queries/get-category-breakdown';
 import { getFlipBudgetSummary } from '@/features/budget/queries/get-flip-budget-summary';
+import { getFlipCashSummary } from '@/features/budget/queries/get-flip-cash-summary';
 import { listBudgetCategories } from '@/features/budget/queries/list-budget-categories';
 import { listBudgetLinesForFlip } from '@/features/budget/queries/list-budget-lines';
+import { listTransactionsForFlip } from '@/features/budget/queries/list-flip-transactions';
 import { getFlipById } from '@/features/flips/queries/get-flip';
 import { Link } from '@/i18n/navigation';
-import { getActiveOrgId } from '@/server/supabase/auth';
+import { getActiveOrgId } from '@/server/auth';
 
 type Props = {
   params: Promise<{ locale: string; flipId: string }>;
@@ -22,13 +27,16 @@ export default async function FlipBudgetPage({ params }: Props) {
   setRequestLocale(locale);
 
   const orgId = await getActiveOrgId();
-  const [flip, lines, categories, summary, breakdown] = await Promise.all([
-    getFlipById(orgId, flipId),
-    listBudgetLinesForFlip(orgId, flipId),
-    listBudgetCategories(orgId),
-    getFlipBudgetSummary(orgId, flipId),
-    getCategoryBreakdownForFlip(orgId, flipId),
-  ]);
+  const [flip, lines, categories, summary, breakdown, cashSummary, transactions] =
+    await Promise.all([
+      getFlipById(orgId, flipId),
+      listBudgetLinesForFlip(orgId, flipId),
+      listBudgetCategories(orgId),
+      getFlipBudgetSummary(orgId, flipId),
+      getCategoryBreakdownForFlip(orgId, flipId),
+      getFlipCashSummary(orgId, flipId),
+      listTransactionsForFlip(orgId, flipId),
+    ]);
 
   if (!flip) {
     notFound();
@@ -61,7 +69,13 @@ export default async function FlipBudgetPage({ params }: Props) {
         {flip.code} · {flip.name}
       </Link>
 
-      <h1 className="mb-4 text-xl font-semibold text-text-strong">{t('title')}</h1>
+      <div className="mb-4 flex items-center justify-between gap-4">
+        <h1 className="text-xl font-semibold text-text-strong">{t('title')}</h1>
+        <FlipCashBalanceIndicator
+          cashBalanceThb={cashSummary?.cashBalanceThb ?? 0}
+          transactionCount={cashSummary?.transactionCount ?? 0}
+        />
+      </div>
 
       <div className="mb-6 flex flex-col gap-4">
         <BudgetVarianceCard
@@ -81,7 +95,28 @@ export default async function FlipBudgetPage({ params }: Props) {
       </div>
 
       <div className="mb-6">
-        <BudgetTable flipId={flip.id} lines={lines} categories={categories} readOnly={locked} />
+        <BudgetTable
+          flipId={flip.id}
+          orgId={orgId}
+          lines={lines}
+          categories={categories}
+          readOnly={locked}
+        />
+      </div>
+
+      <div className="mb-6 rounded-md border border-border">
+        <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
+          <h2 className="text-sm font-semibold text-text-strong">{t('transactions.title')}</h2>
+          {!locked ? (
+            <AddTransactionDialog
+              flipId={flip.id}
+              orgId={orgId}
+              budgetLines={lines}
+              defaultKind="investor_deposit"
+            />
+          ) : null}
+        </div>
+        <FlipTransactionList transactions={transactions} readOnly={locked} />
       </div>
 
       <div className="rounded-md border border-border p-4">

@@ -9,9 +9,13 @@
 // Prisma 7: connection URLs live in prisma.config.ts, not here. Runtime
 // uses a driver adapter in src/server/db.ts.
 
+// Output lives outside src/ so Turbopack's file watcher doesn't pick up
+// generated files on every `prisma generate` — keeping the generated client
+// in src/ caused 11GB cache bloat + 2000% CPU spikes in dev. See memory
+// `project_dev_perf_footguns.md`.
 generator client {
   provider = "prisma-client"
-  output   = "../src/generated/prisma"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -55,6 +59,9 @@ model Organization {
   invitations      OrgInvitation[]
   budgetCategories BudgetCategory[]
   budgetLines      BudgetLine[]
+  flipTransactions FlipTransaction[]
+  contractors      Contractor[]
+  contractorAssignments ContractorAssignment[]
 
   @@map("organizations")
 }
@@ -92,6 +99,12 @@ model User {
   invitationsRevoked      OrgInvitation[]  @relation("OrgInvitationRevokedBy")
   budgetLinesCreated      BudgetLine[]     @relation("BudgetLineCreatedBy")
   budgetLinesUpdated      BudgetLine[]     @relation("BudgetLineUpdatedBy")
+  flipTransactionsCreated FlipTransaction[] @relation("FlipTransactionCreatedBy")
+  flipTransactionsUpdated FlipTransaction[] @relation("FlipTransactionUpdatedBy")
+  contractorsCreated      Contractor[]     @relation("ContractorCreatedBy")
+  contractorsUpdated      Contractor[]     @relation("ContractorUpdatedBy")
+  contractorAssignmentsCreated ContractorAssignment[] @relation("ContractorAssignmentCreatedBy")
+  contractorAssignmentsUpdated ContractorAssignment[] @relation("ContractorAssignmentUpdatedBy")
 
   @@map("users")
 }
@@ -423,6 +436,8 @@ model Flip {
   dealAnalyses  DealAnalysis[]
   revisions     FlipRevision[]
   budgetLines   BudgetLine[]
+  transactions  FlipTransaction[]
+  contractorAssignments ContractorAssignment[]
 
   @@index([organizationId], map: "idx_flips_org")
   @@index([propertyId], map: "idx_flips_property")
@@ -562,6 +577,7 @@ model BudgetCategory {
   parent       BudgetCategory?  @relation("BudgetCategoryParent", fields: [parentId], references: [id], onDelete: SetNull)
   children     BudgetCategory[] @relation("BudgetCategoryParent")
   budgetLines  BudgetLine[]
+  contractorAssignments ContractorAssignment[]
 
   @@index([organizationId, sortOrder], map: "idx_budget_cat_org")
   @@index([parentId], map: "idx_budget_cat_parent")
@@ -597,10 +613,160 @@ model BudgetLine {
   category      BudgetCategory @relation(fields: [categoryId], references: [id], onDelete: Restrict)
   createdByUser User?          @relation("BudgetLineCreatedBy", fields: [createdBy], references: [id])
   updatedByUser User?          @relation("BudgetLineUpdatedBy", fields: [updatedBy], references: [id])
+  transactions  FlipTransaction[]
+  contractorAssignment ContractorAssignment? @relation(fields: [contractorAssignmentId], references: [id], onDelete: SetNull)
 
   @@index([flipId], map: "idx_budget_lines_flip")
   @@index([categoryId], map: "idx_budget_lines_category")
   @@index([contractorAssignmentId], map: "idx_budget_lines_assignment")
   @@index([organizationId], map: "idx_budget_lines_org")
   @@map("budget_lines")
+}
+
+// ============================================
+// Flip transactions (M4.5)
+// ============================================
+
+model FlipTransaction {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String    @map("organization_id") @db.Uuid
+  flipId          String    @map("flip_id") @db.Uuid
+  budgetLineId    String?   @map("budget_line_id") @db.Uuid
+
+  date            DateTime  @db.Date
+
+  // Signed: positive = inflow, negative = outflow.
+  amountThb       Decimal   @map("amount_thb") @db.Decimal(14, 2)
+
+  description     String
+
+  // Free-text inflow source until M10 adds investor_id FK.
+  sourceNote      String?   @map("source_note")
+
+  // 'investor_deposit' | 'loan_disbursement' | 'spend' | 'refund'
+  // | 'sale_proceeds' | 'distribution'
+  kind            String
+
+  // Supabase Storage path in private `budget-receipts` bucket.
+  receiptPath     String?   @map("receipt_path")
+
+  notes           String?
+  metadata        Json      @default("{}")
+
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy       String?   @map("created_by") @db.Uuid
+  updatedBy       String?   @map("updated_by") @db.Uuid
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  flip          Flip         @relation(fields: [flipId], references: [id], onDelete: Cascade)
+  budgetLine    BudgetLine?  @relation(fields: [budgetLineId], references: [id], onDelete: SetNull)
+  createdByUser User?        @relation("FlipTransactionCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser User?        @relation("FlipTransactionUpdatedBy", fields: [updatedBy], references: [id])
+
+  @@index([flipId, date(sort: Desc)], map: "idx_flip_tx_flip")
+  @@index([budgetLineId], map: "idx_flip_tx_budget_line")
+  @@index([organizationId], map: "idx_flip_tx_org")
+  @@index([flipId, kind], map: "idx_flip_tx_kind")
+  @@map("flip_transactions")
+}
+
+// ============================================
+// Contractors (M5)
+// ============================================
+
+model Contractor {
+  id                    String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId        String    @map("organization_id") @db.Uuid
+
+  name                  String
+  contractorType        String    @map("contractor_type")
+  primaryTrade          String?   @map("primary_trade")
+  additionalTrades      String[]  @default([]) @map("additional_trades")
+
+  contactPerson         String?   @map("contact_person")
+  phone                 String?
+  lineId                String?   @map("line_id")
+  email                 String?
+  address               String?
+  taxId                 String?   @map("tax_id")
+
+  defaultDailyRateThb   Decimal?  @map("default_daily_rate_thb") @db.Decimal(10, 2)
+  defaultHourlyRateThb  Decimal?  @map("default_hourly_rate_thb") @db.Decimal(10, 2)
+
+  totalAssignmentsCount Int       @default(0) @map("total_assignments_count")
+  totalPaidThb          Decimal   @default(0) @map("total_paid_thb") @db.Decimal(14, 2)
+  avgOnTimePct          Decimal?  @map("avg_on_time_pct") @db.Decimal(5, 2)
+  avgQualityRating      Decimal?  @map("avg_quality_rating") @db.Decimal(3, 2)
+  lastAssignmentAt      DateTime? @map("last_assignment_at") @db.Timestamptz(6)
+
+  notes                 String?
+  metadata              Json      @default("{}")
+
+  createdAt             DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt             DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy             String?   @map("created_by") @db.Uuid
+  updatedBy             String?   @map("updated_by") @db.Uuid
+  deletedAt             DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdByUser User?        @relation("ContractorCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser User?        @relation("ContractorUpdatedBy", fields: [updatedBy], references: [id])
+  assignments   ContractorAssignment[]
+
+  @@index([organizationId], map: "idx_contractors_org")
+  @@index([organizationId, primaryTrade], map: "idx_contractors_trade")
+  @@map("contractors")
+}
+
+model ContractorAssignment {
+  id                   String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId       String    @map("organization_id") @db.Uuid
+  flipId               String    @map("flip_id") @db.Uuid
+  contractorId         String    @map("contractor_id") @db.Uuid
+  budgetCategoryId     String?   @map("budget_category_id") @db.Uuid
+
+  title                String
+  scopeOfWork          String?   @map("scope_of_work")
+  startDate            DateTime? @map("start_date") @db.Date
+  targetEndDate        DateTime? @map("target_end_date") @db.Date
+  actualEndDate        DateTime? @map("actual_end_date") @db.Date
+
+  paymentModel         String    @map("payment_model")
+
+  contractAmountThb    Decimal?  @map("contract_amount_thb") @db.Decimal(14, 2)
+
+  tmDailyRateThb       Decimal?  @map("tm_daily_rate_thb") @db.Decimal(10, 2)
+  tmHourlyRateThb      Decimal?  @map("tm_hourly_rate_thb") @db.Decimal(10, 2)
+  tmMaterialMarkupPct  Decimal?  @map("tm_material_markup_pct") @db.Decimal(5, 2)
+
+  totalCommittedThb    Decimal   @default(0) @map("total_committed_thb") @db.Decimal(14, 2)
+  totalPaidThb         Decimal   @default(0) @map("total_paid_thb") @db.Decimal(14, 2)
+
+  status               String    @default("draft")
+
+  notes                String?
+  metadata             Json      @default("{}")
+
+  createdAt            DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt            DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy            String?   @map("created_by") @db.Uuid
+  updatedBy            String?   @map("updated_by") @db.Uuid
+  deletedAt            DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization   Organization    @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  flip           Flip            @relation(fields: [flipId], references: [id], onDelete: Cascade)
+  contractor     Contractor      @relation(fields: [contractorId], references: [id], onDelete: Restrict)
+  budgetCategory BudgetCategory? @relation(fields: [budgetCategoryId], references: [id], onDelete: SetNull)
+  createdByUser  User?           @relation("ContractorAssignmentCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser  User?           @relation("ContractorAssignmentUpdatedBy", fields: [updatedBy], references: [id])
+  budgetLines    BudgetLine[]
+
+  @@index([flipId], map: "idx_assignments_flip")
+  @@index([contractorId], map: "idx_assignments_contractor")
+  @@index([organizationId, contractorId], map: "idx_assignments_active")
+  @@index([contractorId, startDate, targetEndDate], map: "idx_assignments_date_range")
+  @@index([budgetCategoryId], map: "idx_assignments_category")
+  @@map("contractor_assignments")
 }

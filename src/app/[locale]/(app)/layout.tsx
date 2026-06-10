@@ -1,6 +1,6 @@
 import { AppShell } from '@/components/layout/app-shell';
+import { getActiveOrgId, requireAuth } from '@/server/auth';
 import { db } from '@/server/db';
-import { getActiveOrgId, requireAuth } from '@/server/supabase/auth';
 
 type Props = {
   children: React.ReactNode;

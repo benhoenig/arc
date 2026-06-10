@@ -2,7 +2,7 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { PropertiesPageClient } from '@/features/sourcing/components/properties-page-client';
 import { listPickerOptions } from '@/features/sourcing/queries/list-picker-options';
 import { listProperties } from '@/features/sourcing/queries/list-properties';
-import { getActiveOrgId } from '@/server/supabase/auth';
+import { getActiveOrgId } from '@/server/auth';
 
 type Props = {
   params: Promise<{ locale: string }>;

@@ -1,5 +1,5 @@
 import { redirect } from 'next/navigation';
-import { getCurrentUser } from '@/server/supabase/auth';
+import { getCurrentUser } from '@/server/auth';
 
 type Props = {
   children: React.ReactNode;

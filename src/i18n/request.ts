@@ -6,12 +6,13 @@ export default getRequestConfig(async ({ requestLocale }) => {
   const requested = await requestLocale;
   const locale = hasLocale(routing.locales, requested) ? requested : routing.defaultLocale;
 
-  const [common, sourcing, flips, members, budget] = await Promise.all([
+  const [common, sourcing, flips, members, budget, contractors] = await Promise.all([
     import(`../../messages/${locale}/common.json`),
     import(`../../messages/${locale}/sourcing.json`),
     import(`../../messages/${locale}/flips.json`),
     import(`../../messages/${locale}/members.json`),
     import(`../../messages/${locale}/budget.json`),
+    import(`../../messages/${locale}/contractors.json`),
   ]);
 
   return {
@@ -22,6 +23,7 @@ export default getRequestConfig(async ({ requestLocale }) => {
       flips: flips.default,
       members: members.default,
       budget: budget.default,
+      contractors: contractors.default,
     },
   };
 });

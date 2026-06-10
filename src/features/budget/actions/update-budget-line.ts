@@ -1,9 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getActiveOrgId, requireAuth } from '@/server/auth';
 import { db } from '@/server/db';
 import { logActivity } from '@/server/shared/activity-log';
-import { getActiveOrgId, requireAuth } from '@/server/supabase/auth';
 import type { ActionResult } from '@/types/common';
 import { type UpdateBudgetLineInput, updateBudgetLineSchema } from '../validators/budget-schemas';
 
@@ -16,15 +16,7 @@ export async function updateBudgetLine(input: UpdateBudgetLineInput): Promise<Ac
     return { ok: false, error: 'validation', issues: parsed.error.issues };
   }
 
-  const {
-    id,
-    categoryId,
-    description,
-    budgetedAmountThb,
-    committedAmountThb,
-    actualAmountThb,
-    notes,
-  } = parsed.data;
+  const { id, categoryId, description, budgetedAmountThb, committedAmountThb, notes } = parsed.data;
 
   // Require at least one field to change beyond the id itself.
   const hasChange =
@@ -32,7 +24,6 @@ export async function updateBudgetLine(input: UpdateBudgetLineInput): Promise<Ac
     description !== undefined ||
     budgetedAmountThb !== undefined ||
     committedAmountThb !== undefined ||
-    actualAmountThb !== undefined ||
     notes !== undefined;
   if (!hasChange) {
     return { ok: false, error: 'validation', issues: [] };
@@ -68,7 +59,6 @@ export async function updateBudgetLine(input: UpdateBudgetLineInput): Promise<Ac
           ...(description !== undefined ? { description } : {}),
           ...(budgetedAmountThb !== undefined ? { budgetedAmountThb } : {}),
           ...(committedAmountThb !== undefined ? { committedAmountThb } : {}),
-          ...(actualAmountThb !== undefined ? { actualAmountThb } : {}),
           ...(notes !== undefined ? { notes } : {}),
           updatedBy: user.id,
         },
@@ -85,7 +75,6 @@ export async function updateBudgetLine(input: UpdateBudgetLineInput): Promise<Ac
           ...(description !== undefined ? { description } : {}),
           ...(budgetedAmountThb !== undefined ? { budgetedAmountThb } : {}),
           ...(committedAmountThb !== undefined ? { committedAmountThb } : {}),
-          ...(actualAmountThb !== undefined ? { actualAmountThb } : {}),
         },
       });
 

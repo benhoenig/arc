@@ -4,16 +4,21 @@ import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { FlipBudgetPanel } from '@/features/budget/components/flip-budget-panel';
 import { getCategoryBreakdownForFlip } from '@/features/budget/queries/get-category-breakdown';
 import { getFlipBudgetSummary } from '@/features/budget/queries/get-flip-budget-summary';
+import { getFlipCashSummary } from '@/features/budget/queries/get-flip-cash-summary';
+import { FlipContractorsPanel } from '@/features/contractors/components/flip-contractors-panel';
+import { listAssignmentsForFlip } from '@/features/contractors/queries/list-assignments-for-flip';
 import { FlipDetailHeader } from '@/features/flips/components/flip-detail-header';
+import { FlipFeasibilityPanel } from '@/features/flips/components/flip-feasibility-panel';
 import { FlipOverviewPanel } from '@/features/flips/components/flip-overview-panel';
 import { FlipRevisionsPanel } from '@/features/flips/components/flip-revisions-panel';
 import { FlipTeamPanel } from '@/features/flips/components/flip-team-panel';
 import { getFlipById } from '@/features/flips/queries/get-flip';
+import { getFlipPnl } from '@/features/flips/queries/get-flip-pnl';
 import { listFlipRevisions } from '@/features/flips/queries/list-flip-revisions';
 import { listFlipStages } from '@/features/flips/queries/list-flip-stages';
 import { listOrgUsers } from '@/features/flips/queries/list-org-users';
 import { Link } from '@/i18n/navigation';
-import { getActiveOrgId } from '@/server/supabase/auth';
+import { getActiveOrgId } from '@/server/auth';
 
 type Props = {
   params: Promise<{ locale: string; flipId: string }>;
@@ -24,13 +29,26 @@ export default async function FlipDetailPage({ params }: Props) {
   setRequestLocale(locale);
 
   const orgId = await getActiveOrgId();
-  const [flip, stages, candidates, revisions, budgetSummary, budgetBreakdown] = await Promise.all([
+  const [
+    flip,
+    stages,
+    candidates,
+    revisions,
+    budgetSummary,
+    budgetBreakdown,
+    cashSummary,
+    pnl,
+    assignments,
+  ] = await Promise.all([
     getFlipById(orgId, flipId),
     listFlipStages(orgId),
     listOrgUsers(orgId),
     listFlipRevisions(orgId, flipId),
     getFlipBudgetSummary(orgId, flipId),
     getCategoryBreakdownForFlip(orgId, flipId),
+    getFlipCashSummary(orgId, flipId),
+    getFlipPnl(orgId, flipId),
+    listAssignmentsForFlip(orgId, flipId),
   ]);
 
   if (!flip) {
@@ -82,28 +100,30 @@ export default async function FlipDetailPage({ params }: Props) {
           variancePct: budgetSummary?.variancePct ?? null,
           lineCount: budgetSummary?.lineCount ?? 0,
         }}
+        cashSummary={{
+          cashBalanceThb: cashSummary?.cashBalanceThb ?? 0,
+          transactionCount: cashSummary?.transactionCount ?? 0,
+        }}
       />
 
       <div className="mb-8">
         <FlipOverviewPanel
-          baseline={{
-            purchasePriceThb: flip.baselinePurchasePriceThb,
-            renovationBudgetThb: flip.baselineRenovationBudgetThb,
-            targetArvThb: flip.baselineTargetArvThb,
-            targetMarginPct: flip.baselineTargetMarginPct,
-            targetTimelineDays: flip.baselineTargetTimelineDays,
-          }}
           actuals={{
-            actualPurchasePriceThb: flip.actualPurchasePriceThb,
             acquiredAt: flip.acquiredAt,
             listedAt: flip.listedAt,
             soldAt: flip.soldAt,
-            actualSalePriceThb: flip.actualSalePriceThb,
           }}
+          targetTimelineDays={flip.baselineTargetTimelineDays}
           hasInvestorCapital={flip.hasInvestorCapital}
           notes={flip.notes}
         />
       </div>
+
+      {pnl ? (
+        <div className="mb-8">
+          <FlipFeasibilityPanel pnl={pnl} />
+        </div>
+      ) : null}
 
       <div className="mb-8">
         <FlipBudgetPanel
@@ -118,6 +138,10 @@ export default async function FlipDetailPage({ params }: Props) {
           }}
           breakdown={budgetBreakdown}
         />
+      </div>
+
+      <div className="mb-8">
+        <FlipContractorsPanel flipId={flip.id} assignments={assignments} />
       </div>
 
       <FlipTeamPanel

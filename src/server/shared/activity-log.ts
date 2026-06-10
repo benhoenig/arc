@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { Prisma, PrismaClient } from '@/generated/prisma/client';
+import type { Prisma, PrismaClient } from '@prisma-client/client';
 
 type LogActivityParams = {
   orgId: string;

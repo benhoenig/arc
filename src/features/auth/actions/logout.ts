@@ -1,10 +1,9 @@
 'use server';
 
 import { redirect } from 'next/navigation';
-import { getSupabaseServerClient } from '@/server/supabase/server-client';
+import { auth } from '@/server/auth/neon-auth';
 
 export async function logout(): Promise<void> {
-  const supabase = await getSupabaseServerClient();
-  await supabase.auth.signOut();
+  await auth.signOut();
   redirect('/login');
 }

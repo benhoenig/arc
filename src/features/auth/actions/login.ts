@@ -1,7 +1,7 @@
 'use server';
 
 import type { z } from 'zod';
-import { getSupabaseServerClient } from '@/server/supabase/server-client';
+import { auth } from '@/server/auth/neon-auth';
 import type { ActionResult } from '@/types/common';
 import { loginSchema } from '../validators/auth-schemas';
 
@@ -11,9 +11,7 @@ export async function login(input: z.infer<typeof loginSchema>): Promise<ActionR
     return { ok: false, error: 'validation', issues: parsed.error.issues };
   }
 
-  const supabase = await getSupabaseServerClient();
-
-  const { error } = await supabase.auth.signInWithPassword({
+  const { error } = await auth.signIn.email({
     email: parsed.data.email,
     password: parsed.data.password,
   });

@@ -6,6 +6,7 @@ import { useState } from 'react';
 import { Pill } from '@/components/data-display/pill';
 import { Button } from '@/components/ui/button';
 import { BudgetVariancePill } from '@/features/budget/components/budget-variance-pill';
+import { FlipCashBalanceIndicator } from '@/features/budget/components/flip-cash-balance-indicator';
 import { Link } from '@/i18n/navigation';
 import { getThumbnailUrl } from '@/lib/property-thumbnail';
 import type { FlipStageOption } from '../queries/list-flip-stages';
@@ -41,6 +42,10 @@ type Props = {
     variancePct: number | null;
     lineCount: number;
   };
+  cashSummary: {
+    cashBalanceThb: number;
+    transactionCount: number;
+  };
 };
 
 export function FlipDetailHeader({
@@ -58,6 +63,7 @@ export function FlipDetailHeader({
   flipType,
   revisionDefaults,
   budgetSummary,
+  cashSummary,
 }: Props) {
   const t = useTranslations('flips');
   const [killOpen, setKillOpen] = useState(false);
@@ -99,6 +105,10 @@ export function FlipDetailHeader({
               variancePct={budgetSummary.variancePct}
               lineCount={budgetSummary.lineCount}
               href={`/flips/${flipId}/budget`}
+            />
+            <FlipCashBalanceIndicator
+              cashBalanceThb={cashSummary.cashBalanceThb}
+              transactionCount={cashSummary.transactionCount}
             />
           </div>
           <Link

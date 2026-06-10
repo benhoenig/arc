@@ -1,5 +1,13 @@
 # TECH_STACK.md
 
+> ⚠️ **OUTDATED re: infrastructure (2026-06 migration).** ARC moved off **Supabase** →
+> **Neon** (Postgres + **Neon Auth** / managed Better Auth) + **Vercel Blob** (file storage).
+> Wherever this doc says Supabase Auth / Storage / Postgres / `service_role` / RLS-as-tenant-gate,
+> the current truth is: Neon Auth (`src/server/auth/`), Vercel Blob (`src/app/api/blob/*`,
+> `src/lib/blob-paths.ts`), Neon Postgres via Prisma + `@prisma/adapter-pg` on `DATABASE_URL`, and
+> app-level `organizationId` filtering (RLS is armed-but-policy-less). See `db/README.md` and
+> memory `project_neon_migration.md`. The rest (framework versions, conventions, tooling) still applies.
+
 ## Property Flipping Management System — Technology Stack
 ### The full technology inventory. Every tool, every version, every reason.
 

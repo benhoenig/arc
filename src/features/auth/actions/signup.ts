@@ -1,9 +1,9 @@
 'use server';
 
 import type { z } from 'zod';
+import { auth } from '@/server/auth/neon-auth';
 import { db } from '@/server/db';
 import { logActivity } from '@/server/shared/activity-log';
-import { getSupabaseServerClient } from '@/server/supabase/server-client';
 import type { ActionResult } from '@/types/common';
 import { signupSchema } from '../validators/auth-schemas';
 
@@ -24,31 +24,48 @@ export async function signup(
     return { ok: false, error: 'validation', issues: parsed.error.issues };
   }
 
-  const supabase = await getSupabaseServerClient();
+  const email = parsed.data.email.toLowerCase();
 
-  const { data: authData, error: authError } = await supabase.auth.signUp({
-    email: parsed.data.email,
+  // Pre-check against the managed identity table for a deterministic
+  // "email taken" signal rather than parsing Better Auth's error text.
+  const existing = await db.$queryRaw<Array<{ exists: boolean }>>`
+    SELECT EXISTS (SELECT 1 FROM neon_auth."user" WHERE lower(email) = ${email}) AS "exists"
+  `;
+  if (existing[0]?.exists) {
+    return { ok: false, error: 'conflict', message: 'emailTaken' };
+  }
+
+  const { error: authError } = await auth.signUp.email({
+    email,
     password: parsed.data.password,
-    options: {
-      data: { full_name: parsed.data.fullName },
-    },
+    name: parsed.data.fullName,
   });
 
-  if (authError || !authData.user) {
-    if (authError?.message?.includes('already registered')) {
-      return { ok: false, error: 'conflict', message: 'emailTaken' };
-    }
+  if (authError) {
     return { ok: false, error: 'server' };
   }
 
-  const userId = authData.user.id;
+  // signUp.email auto-establishes the session; read it to get the new uuid.
+  const { data: session } = await auth.getSession();
+  const userId = session?.user?.id;
+  if (!userId) {
+    return { ok: false, error: 'server' };
+  }
 
   try {
     const result = await db.$transaction(async (tx) => {
-      // Update the public.users row created by the auth trigger
-      await tx.user.update({
+      // Mirror the auth identity into public.users (replaces the old
+      // handle_new_auth_user trigger). Upsert so a pre-existing row (e.g. an
+      // earlier lazy ensure) still gets the name backfilled.
+      await tx.user.upsert({
         where: { id: userId },
-        data: {
+        create: {
+          id: userId,
+          email,
+          fullName: parsed.data.fullName,
+          displayName: parsed.data.fullName,
+        },
+        update: {
           fullName: parsed.data.fullName,
           displayName: parsed.data.fullName,
         },

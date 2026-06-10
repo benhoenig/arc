@@ -1,7 +1,7 @@
 import { setRequestLocale } from 'next-intl/server';
 import { FlipsPageClient } from '@/features/flips/components/flips-page-client';
 import { listFlips } from '@/features/flips/queries/list-flips';
-import { getActiveOrgId } from '@/server/supabase/auth';
+import { getActiveOrgId } from '@/server/auth';
 
 type Props = {
   params: Promise<{ locale: string }>;

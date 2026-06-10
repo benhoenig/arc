@@ -1,134 +1,69 @@
 import { useTranslations } from 'next-intl';
-import { Currency } from '@/components/data-display/currency';
 import { DateDisplay } from '@/components/data-display/date-display';
+import { Pill } from '@/components/data-display/pill';
 
 type Props = {
-  baseline: {
-    purchasePriceThb: number | null;
-    renovationBudgetThb: number | null;
-    targetArvThb: number | null;
-    targetMarginPct: number | null;
-    targetTimelineDays: number | null;
-  };
   actuals: {
-    actualPurchasePriceThb: number | null;
     acquiredAt: Date | null;
     listedAt: Date | null;
     soldAt: Date | null;
-    actualSalePriceThb: number | null;
   };
+  targetTimelineDays: number | null;
   hasInvestorCapital: boolean;
   notes: string | null;
 };
 
-export function FlipOverviewPanel({ baseline, actuals, hasInvestorCapital, notes }: Props) {
+// Lifecycle metadata strip. Financial numbers live in FlipFeasibilityPanel —
+// this panel answers "where is this deal in its lifecycle?" not "is it
+// profitable?". Replaces the earlier baseline/actuals cards which duplicated
+// numbers the P&L panel presents better.
+export function FlipOverviewPanel({
+  actuals,
+  targetTimelineDays,
+  hasInvestorCapital,
+  notes,
+}: Props) {
   const t = useTranslations('flips.detail');
 
   return (
-    <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+    <div className="flex flex-col gap-3">
       <section className="rounded-md border border-border p-4">
-        <h3 className="mb-3 text-sm font-semibold text-text-strong">{t('baseline')}</h3>
-        <dl className="grid grid-cols-2 gap-y-2 text-sm">
-          {/* P&L order: revenue → acquisition cost → improvement cost → profit → metadata */}
-          <Row label={t('baselineArv')}>
-            {baseline.targetArvThb != null ? <Currency amount={baseline.targetArvThb} /> : '—'}
-          </Row>
-          <Row label={t('baselinePurchase')}>
-            {baseline.purchasePriceThb != null ? (
-              <Currency amount={baseline.purchasePriceThb} />
-            ) : (
-              '—'
-            )}
-          </Row>
-          <Row label={t('baselineReno')}>
-            {baseline.renovationBudgetThb != null ? (
-              <Currency amount={baseline.renovationBudgetThb} />
-            ) : (
-              '—'
-            )}
-          </Row>
-          <Row label={t('baselineProfit')}>
-            {baseline.targetArvThb != null && baseline.targetMarginPct != null ? (
-              <span
-                className={baseline.targetMarginPct >= 0 ? 'text-positive' : 'text-destructive'}
-              >
-                <Currency amount={(baseline.targetArvThb * baseline.targetMarginPct) / 100} />
-              </span>
-            ) : (
-              '—'
-            )}
-          </Row>
-          <Row label={t('baselineMargin')}>
-            {baseline.targetMarginPct != null ? (
-              <span
-                className={`tabular ${baseline.targetMarginPct >= 0 ? 'text-positive' : 'text-destructive'}`}
-              >
-                {baseline.targetMarginPct.toFixed(1)}%
-              </span>
-            ) : (
-              '—'
-            )}
-          </Row>
-          <Row label={t('baselineTimeline')}>
-            {baseline.targetTimelineDays != null ? `${baseline.targetTimelineDays}` : '—'}
-          </Row>
-        </dl>
-      </section>
-
-      <section className="rounded-md border border-border p-4">
-        <h3 className="mb-3 text-sm font-semibold text-text-strong">{t('actuals')}</h3>
-        <dl className="grid grid-cols-2 gap-y-2 text-sm">
-          {/* P&L order: sale price → purchase price → dates → capital flag */}
-          <Row label={t('actualSale')}>
-            {actuals.actualSalePriceThb != null ? (
-              <Currency amount={actuals.actualSalePriceThb} />
-            ) : (
-              '—'
-            )}
-          </Row>
-          <Row label={t('actualPurchase')}>
-            {actuals.actualPurchasePriceThb != null ? (
-              <Currency amount={actuals.actualPurchasePriceThb} />
-            ) : (
-              '—'
-            )}
-          </Row>
-          <Row label={t('acquiredAt')}>
+        <dl className="flex flex-wrap items-start gap-x-8 gap-y-3 text-sm">
+          <Stat label={t('acquiredAt')}>
             {actuals.acquiredAt ? <DateDisplay date={actuals.acquiredAt} format="short" /> : '—'}
-          </Row>
-          <Row label={t('listedAt')}>
+          </Stat>
+          <Stat label={t('listedAt')}>
             {actuals.listedAt ? <DateDisplay date={actuals.listedAt} format="short" /> : '—'}
-          </Row>
-          <Row label={t('soldAt')}>
+          </Stat>
+          <Stat label={t('soldAt')}>
             {actuals.soldAt ? <DateDisplay date={actuals.soldAt} format="short" /> : '—'}
-          </Row>
-          <Row label={t('hasInvestorCapital')}>{hasInvestorCapital ? '✓' : '—'}</Row>
+          </Stat>
+          <Stat label={t('baselineTimeline')}>
+            {targetTimelineDays != null ? `${targetTimelineDays}` : '—'}
+          </Stat>
+          {hasInvestorCapital ? (
+            <div className="ml-auto">
+              <Pill variant="neutral">{t('hasInvestorCapital')}</Pill>
+            </div>
+          ) : null}
         </dl>
       </section>
 
       {notes ? (
-        <section className="rounded-md border border-border p-4 lg:col-span-2">
+        <section className="rounded-md border border-border p-4">
           <h3 className="mb-2 text-sm font-semibold text-text-strong">{t('notes')}</h3>
           <p className="whitespace-pre-wrap text-sm text-text-default">{notes}</p>
         </section>
       ) : null}
-
-      <section className="rounded-md border border-border-subtle bg-surface p-4 text-sm text-text-muted lg:col-span-2">
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3">
-          <div>{t('placeholders.budget')}</div>
-          <div>{t('placeholders.timeline')}</div>
-          <div>{t('placeholders.documents')}</div>
-        </div>
-      </section>
     </div>
   );
 }
 
-function Row({ label, children }: { label: string; children: React.ReactNode }) {
+function Stat({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <>
-      <dt className="text-text-muted">{label}</dt>
-      <dd className="text-right tabular">{children}</dd>
-    </>
+    <div className="flex flex-col gap-0.5">
+      <dt className="text-xs uppercase tracking-wide text-text-muted">{label}</dt>
+      <dd className="text-sm font-medium text-text-default">{children}</dd>
+    </div>
   );
 }

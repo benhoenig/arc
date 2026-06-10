@@ -35,7 +35,6 @@ export function AddBudgetLineDialog({ flipId, categories, disabled }: Props) {
   const [description, setDescription] = useState('');
   const [budgeted, setBudgeted] = useState('0');
   const [committed, setCommitted] = useState('0');
-  const [actual, setActual] = useState('0');
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
 
@@ -43,7 +42,6 @@ export function AddBudgetLineDialog({ flipId, categories, disabled }: Props) {
     setDescription('');
     setBudgeted('0');
     setCommitted('0');
-    setActual('0');
     setError(null);
   }
 
@@ -60,7 +58,6 @@ export function AddBudgetLineDialog({ flipId, categories, disabled }: Props) {
         description: description.trim(),
         budgetedAmountThb: parseAmount(budgeted),
         committedAmountThb: parseAmount(committed),
-        actualAmountThb: parseAmount(actual),
       });
       if (!result.ok) {
         setError(
@@ -121,10 +118,9 @@ export function AddBudgetLineDialog({ flipId, categories, disabled }: Props) {
                 placeholder={t('line.descriptionPlaceholder')}
               />
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-2 gap-3">
               <AmountField label={t('line.budgeted')} value={budgeted} onChange={setBudgeted} />
               <AmountField label={t('line.committed')} value={committed} onChange={setCommitted} />
-              <AmountField label={t('line.actual')} value={actual} onChange={setActual} />
             </div>
             {error ? <p className="text-sm text-destructive">{error}</p> : null}
             <div className="flex justify-end gap-2 pt-2">

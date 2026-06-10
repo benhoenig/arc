@@ -1,0 +1,126 @@
+{
+  "title": "Contractors",
+  "add": "Add contractor",
+  "addTitle": "New contractor",
+  "editTitle": "Edit contractor",
+  "empty": "No contractors yet",
+  "emptyDescription": "Add your first contractor to start tracking assignments.",
+  "backToDirectory": "Back to contractors",
+  "columns": {
+    "name": "Name",
+    "type": "Type",
+    "trade": "Trade",
+    "phone": "Phone",
+    "rate": "Rate",
+    "activeAssignments": "Active",
+    "lastAssignment": "Last assigned",
+    "totalPaid": "Total paid"
+  },
+  "form": {
+    "name": "Name",
+    "namePlaceholder": "e.g. ช่างสมชาย ระบบไฟฟ้า, บริษัท ABC ก่อสร้าง",
+    "contractorType": "Type",
+    "primaryTrade": "Primary trade",
+    "additionalTrades": "Additional trades",
+    "contactPerson": "Contact person",
+    "phone": "Phone",
+    "lineId": "LINE ID",
+    "email": "Email",
+    "address": "Address",
+    "taxId": "Tax ID",
+    "defaultDailyRate": "Default daily rate (THB)",
+    "defaultHourlyRate": "Default hourly rate (THB)",
+    "notes": "Notes",
+    "noPrimaryTrade": "— None —"
+  },
+  "types": {
+    "individual": "Individual",
+    "company": "Company"
+  },
+  "trades": {
+    "general": "General",
+    "electrical": "Electrical",
+    "plumbing": "Plumbing",
+    "flooring": "Flooring",
+    "painting": "Painting",
+    "hvac": "HVAC",
+    "other": "Other"
+  },
+  "detail": {
+    "profile": "Profile",
+    "assignments": "Assignments",
+    "noAssignments": "This contractor hasn't been assigned to any flips yet.",
+    "performance": "Performance",
+    "totalAssignments": "Total assignments",
+    "totalPaid": "Total paid",
+    "onTimeRate": "On-time rate",
+    "qualityRating": "Quality rating",
+    "lastAssignment": "Last assignment",
+    "confirmDelete": "Delete contractor \"{name}\"? This cannot be undone.",
+    "deleteBlocked": "Cannot delete — this contractor has active or draft assignments. Complete or cancel them first."
+  },
+  "assignments": {
+    "title": "Assignments on this flip",
+    "empty": "No contractors assigned to this flip yet.",
+    "add": "Assign contractor",
+    "addTitle": "Assign contractor to flip",
+    "editTitle": "Edit assignment",
+    "confirmDelete": "Delete this assignment? This cannot be undone.",
+    "deleteOnlyDraft": "Only draft assignments can be deleted. Cancel it instead.",
+    "flipClosed": "This flip is closed — no changes allowed.",
+    "columns": {
+      "contractor": "Contractor",
+      "title": "Title",
+      "trade": "Trade",
+      "paymentModel": "Model",
+      "amount": "Amount",
+      "startDate": "Start",
+      "endDate": "Target end",
+      "status": "Status"
+    },
+    "form": {
+      "contractor": "Contractor",
+      "title": "Title",
+      "titlePlaceholder": "e.g. Kitchen renovation",
+      "scopeOfWork": "Scope of work",
+      "scopeOfWorkPlaceholder": "Detailed description of what's included",
+      "startDate": "Start date",
+      "targetEndDate": "Target end date",
+      "paymentModel": "Payment model",
+      "contractAmount": "Contract amount (THB)",
+      "tmDailyRate": "Daily rate (THB)",
+      "tmHourlyRate": "Hourly rate (THB)",
+      "tmMaterialMarkup": "Material markup (%)",
+      "budgetCategory": "Budget category (optional)",
+      "noCategory": "— None —",
+      "notes": "Notes"
+    }
+  },
+  "paymentModels": {
+    "fixed_milestone": "Fixed milestones (scope-based)",
+    "time_materials": "Time & materials"
+  },
+  "paymentModelHints": {
+    "fixed_milestone": "One total contract price, split into scoped deliverables (e.g. 30% demo + floor → 25% electrical + plumbing → 30% walls + paint → 15% final install). Pay each งวด only when that specific scope is inspected and done. Best for renovations with clear stages.",
+    "time_materials": "Bill by actual labor (daily or hourly rate) + actual materials (optional markup). Operator logs each day's hours/cost; payments are batched from approved entries. Use when scope is too entangled to pre-define, or for ongoing repairs / punch-list work."
+  },
+  "statuses": {
+    "draft": "Draft",
+    "active": "Active",
+    "completed": "Completed",
+    "canceled": "Canceled",
+    "disputed": "Disputed"
+  },
+  "statusActions": {
+    "activate": "Activate",
+    "complete": "Mark completed",
+    "cancel": "Cancel",
+    "dispute": "Mark disputed",
+    "reactivate": "Reactivate"
+  },
+  "conflicts": {
+    "title": "Schedule conflict warning",
+    "description": "This contractor already has {count, plural, one {# assignment} other {# assignments}} overlapping these dates:",
+    "proceedAnyway": "Assign anyway"
+  }
+}

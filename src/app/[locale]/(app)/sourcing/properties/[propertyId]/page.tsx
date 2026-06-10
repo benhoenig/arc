@@ -10,7 +10,7 @@ import { getProperty } from '@/features/sourcing/queries/get-property';
 import { listPickerOptions } from '@/features/sourcing/queries/list-picker-options';
 import { Link } from '@/i18n/navigation';
 import { getThumbnailUrl } from '@/lib/property-thumbnail';
-import { getActiveOrgId } from '@/server/supabase/auth';
+import { getActiveOrgId } from '@/server/auth';
 
 type Props = {
   params: Promise<{ locale: string; propertyId: string }>;

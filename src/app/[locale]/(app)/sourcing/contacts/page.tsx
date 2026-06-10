@@ -1,7 +1,7 @@
 import { getTranslations, setRequestLocale } from 'next-intl/server';
 import { ContactsPageClient } from '@/features/sourcing/components/contacts-page-client';
 import { listContacts } from '@/features/sourcing/queries/list-contacts';
-import { getActiveOrgId } from '@/server/supabase/auth';
+import { getActiveOrgId } from '@/server/auth';
 
 type Props = {
   params: Promise<{ locale: string }>;

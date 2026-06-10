@@ -1,9 +1,9 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getActiveOrgId, requireAuth } from '@/server/auth';
 import { db } from '@/server/db';
 import { logActivity } from '@/server/shared/activity-log';
-import { getActiveOrgId, requireAuth } from '@/server/supabase/auth';
 import type { ActionResult } from '@/types/common';
 import { type CreateBudgetLineInput, createBudgetLineSchema } from '../validators/budget-schemas';
 
@@ -47,7 +47,6 @@ export async function createBudgetLine(
           description: parsed.data.description,
           budgetedAmountThb: parsed.data.budgetedAmountThb,
           committedAmountThb: parsed.data.committedAmountThb,
-          actualAmountThb: parsed.data.actualAmountThb,
           notes: parsed.data.notes ?? null,
           createdBy: user.id,
           updatedBy: user.id,

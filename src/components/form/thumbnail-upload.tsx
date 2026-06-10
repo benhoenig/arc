@@ -1,10 +1,11 @@
 'use client';
 
+import { upload } from '@vercel/blob/client';
 import { ImagePlus, Loader2, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 import { useRef, useState } from 'react';
-import { getThumbnailUrl, PROPERTY_THUMBNAIL_BUCKET } from '@/lib/property-thumbnail';
-import { supabaseBrowser } from '@/lib/supabase/browser-client';
+import { buildThumbnailPath } from '@/lib/blob-paths';
+import { getThumbnailUrl } from '@/lib/property-thumbnail';
 import { cn } from '@/lib/utils';
 
 type Props = {
@@ -47,20 +48,19 @@ export function ThumbnailUpload({ orgId, value, onChange }: Props) {
     setUploading(true);
     try {
       const ext = getExtension(file);
-      const id = crypto.randomUUID();
-      const path = `${orgId}/${id}.${ext}`;
+      const path = buildThumbnailPath(orgId, ext);
 
-      const { error: uploadError } = await supabaseBrowser.storage
-        .from(PROPERTY_THUMBNAIL_BUCKET)
-        .upload(path, file, { cacheControl: '3600', upsert: false });
+      const result = await upload(path, file, {
+        access: 'private',
+        contentType: file.type,
+        handleUploadUrl: '/api/blob/upload',
+        clientPayload: JSON.stringify({ kind: 'thumbnail' }),
+      });
 
-      if (uploadError) {
-        console.error('thumbnail upload failed', uploadError);
-        setError(t('thumbnailUploadFailed'));
-        return;
-      }
-
-      onChange(path);
+      onChange(result.pathname);
+    } catch (uploadError) {
+      console.error('thumbnail upload failed', uploadError);
+      setError(t('thumbnailUploadFailed'));
     } finally {
       setUploading(false);
     }

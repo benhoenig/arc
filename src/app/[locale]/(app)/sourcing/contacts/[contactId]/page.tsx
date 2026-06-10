@@ -6,7 +6,7 @@ import { Pill } from '@/components/data-display/pill';
 import { ContactEditForm } from '@/features/sourcing/components/contact-edit-form';
 import { getContact } from '@/features/sourcing/queries/get-contact';
 import { Link } from '@/i18n/navigation';
-import { getActiveOrgId } from '@/server/supabase/auth';
+import { getActiveOrgId } from '@/server/auth';
 
 type Props = {
   params: Promise<{ locale: string; contactId: string }>;

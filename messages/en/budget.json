@@ -43,7 +43,50 @@
   },
   "actions": {
     "addLine": "Add line",
-    "deleteLine": "Delete line"
+    "deleteLine": "Delete line",
+    "addTransaction": "Add transaction",
+    "addSpend": "Add spend"
+  },
+  "transactions": {
+    "title": "Transactions",
+    "empty": "No transactions yet.",
+    "date": "Date",
+    "description": "Description",
+    "amount": "Amount",
+    "category": "Category",
+    "kind": "Type",
+    "source": "Source",
+    "receipt": "Receipt",
+    "uploadReceipt": "Upload receipt",
+    "changeReceipt": "Change receipt",
+    "removeReceipt": "Remove receipt",
+    "viewReceipt": "View receipt",
+    "receiptFailed": "Couldn't open receipt.",
+    "addTitle": "New transaction",
+    "noBudgetLine": "No budget line",
+    "confirmDelete": "Delete this transaction?",
+    "amountPlaceholder": "0.00",
+    "sourcePlaceholder": "e.g. Khun Nong — investor, Bangkok Bank loan",
+    "descriptionPlaceholder": "What the money moved for",
+    "uploadFailed": "Receipt upload failed.",
+    "uploadTooLarge": "Receipt must be under 10MB.",
+    "uploadInvalidType": "Only images or PDFs are accepted.",
+    "cashBalanceLabel": "Cash",
+    "cashBalanceEmpty": "No cash yet",
+    "chooseBudgetLine": "Choose a budget line",
+    "flipClosed": "This flip is closed — no changes allowed.",
+    "kinds": {
+      "investor_deposit": "Investor deposit",
+      "loan_disbursement": "Loan disbursement",
+      "spend": "Spend",
+      "refund": "Refund",
+      "sale_proceeds": "Sale proceeds",
+      "distribution": "Distribution"
+    },
+    "directions": {
+      "inflow": "In",
+      "outflow": "Out"
+    }
   },
   "categoryChart": {
     "title": "By category",

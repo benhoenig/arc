@@ -1,8 +1,8 @@
 import { setRequestLocale } from 'next-intl/server';
 import { BudgetCategoriesPageClient } from '@/features/budget/components/budget-categories-page-client';
 import { listBudgetCategories } from '@/features/budget/queries/list-budget-categories';
+import { getActiveOrgId, requireAuth } from '@/server/auth';
 import { isOrgAdmin } from '@/server/shared/require-admin';
-import { getActiveOrgId, requireAuth } from '@/server/supabase/auth';
 
 type Props = {
   params: Promise<{ locale: string }>;

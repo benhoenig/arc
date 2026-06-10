@@ -1,5 +1,14 @@
 # DATA_MODEL.md
 
+> ⚠️ **Infra migrated off Supabase → Neon (2026-06).** The table/column definitions below are
+> still accurate (the schema ported 1:1), but anything about **auth** (`auth.uid()`, `auth.users`,
+> SECURITY DEFINER RPCs), **RLS policies**, **Supabase Storage buckets**, or `service_role` is
+> superseded: auth is **Neon Auth** (`neon_auth.user.id` uuid = `public.users.id`), RLS is
+> enabled-but-policy-less (app-level `organizationId` filtering is the tenant gate), and storage is
+> **Vercel Blob**. The authoritative schema is `db/migrations/0000_baseline_neon.sql`. The
+> dropped/replaced auth objects are listed in `db/README.md`; migration context in memory
+> `project_neon_migration.md`.
+
 ## Property Flipping Management System — Database Schema
 ### Source of truth for all data structures. Referenced by every code generation.
 

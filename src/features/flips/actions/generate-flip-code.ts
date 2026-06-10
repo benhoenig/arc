@@ -1,6 +1,6 @@
 import 'server-only';
 
-import type { Prisma } from '@/generated/prisma/client';
+import type { Prisma } from '@prisma-client/client';
 
 /**
  * Allocates the next flip code for (org, current year) atomically.

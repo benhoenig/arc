@@ -2,13 +2,15 @@ import { z } from 'zod';
 
 const amount = z.number().nonnegative().max(1_000_000_000);
 
+// `actualAmountThb` is no longer accepted on create/update (M4.5) — it's a
+// trigger-maintained rollup of `flip_transactions`. To change actuals, add
+// a transaction. Keeping the column out of the schema closes the back door.
 export const createBudgetLineSchema = z.object({
   flipId: z.string().uuid(),
   categoryId: z.string().uuid(),
   description: z.string().min(1).max(500),
   budgetedAmountThb: amount.default(0),
   committedAmountThb: amount.default(0),
-  actualAmountThb: amount.default(0),
   notes: z.string().max(2000).optional(),
 });
 export type CreateBudgetLineInput = z.infer<typeof createBudgetLineSchema>;
@@ -21,7 +23,6 @@ export const updateBudgetLineSchema = z.object({
   description: z.string().min(1).max(500).optional(),
   budgetedAmountThb: amount.optional(),
   committedAmountThb: amount.optional(),
-  actualAmountThb: amount.optional(),
   notes: z.string().max(2000).nullable().optional(),
 });
 export type UpdateBudgetLineInput = z.infer<typeof updateBudgetLineSchema>;

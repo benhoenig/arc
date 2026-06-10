@@ -40,12 +40,7 @@
     "onHold": "พักไว้ชั่วคราว",
     "onHoldReason": "เหตุผล",
     "hasInvestorCapital": "มีเงินลงทุนจากนักลงทุน",
-    "notes": "บันทึก",
-    "placeholders": {
-      "budget": "งบประมาณจะปรากฏที่นี่ใน M4",
-      "timeline": "ไทม์ไลน์และงานจะปรากฏที่นี่ใน M7",
-      "documents": "เอกสารและรูปภาพจะปรากฏที่นี่ใน M11"
-    }
+    "notes": "บันทึก"
   },
   "actions": {
     "convertToFlip": "แปลงเป็นฟลิบ",
@@ -192,5 +187,35 @@
     "memberAdded": "เพิ่มสมาชิกทีมแล้ว",
     "memberRemoved": "ลบสมาชิกทีมแล้ว",
     "error": "ไม่สามารถดำเนินการได้"
+  },
+  "feasibility": {
+    "title": "กำไรขาดทุน / ความเป็นไปได้",
+    "subtitle": "ฟลิบนี้ยังทำกำไรอยู่หรือไม่?",
+    "revenue": "รายรับ (ARV)",
+    "costs": "ค่าใช้จ่าย",
+    "revenueSold": "ราคาขาย",
+    "planColumn": "แผน",
+    "actualColumn": "จริง",
+    "varianceColumn": "ส่วนต่าง",
+    "purchase": "ราคาซื้อ",
+    "renovation": "รีโนเวต",
+    "holding": "ค่าถือครอง",
+    "transaction": "ค่าธรรมเนียม/โอน",
+    "selling": "ค่านายหน้าขาย",
+    "marketing": "การตลาด",
+    "other": "อื่นๆ",
+    "totalCost": "รวมค่าใช้จ่าย",
+    "profit": "กำไร",
+    "margin": "Margin",
+    "roi": "ROI",
+    "plannedLabel": "ตามแผน",
+    "projectedLabel": "ประมาณการ",
+    "realizedLabel": "ที่เกิดขึ้นจริง",
+    "notTrackedYet": "—",
+    "notTrackedHint": "ยังไม่มีข้อมูลจริงต่อหมวด",
+    "revisionNote": "แผนอ้างอิงจากการทบทวนรอบที่ {number}",
+    "baselineNote": "แผนอ้างอิงจาก Deal analysis เริ่มต้น",
+    "noDealAnalysis": "ยังไม่ได้ผูก Deal analysis — ไม่สามารถดูค่าใช้จ่ายโอเวอร์เฮด",
+    "emptyState": "ข้อมูล baseline ไม่ครบ ต้องมีราคาซื้อและ ARV เป้าหมาย"
   }
 }

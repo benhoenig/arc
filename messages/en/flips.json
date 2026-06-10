@@ -40,12 +40,7 @@
     "onHold": "On hold",
     "onHoldReason": "Reason",
     "hasInvestorCapital": "Uses investor capital",
-    "notes": "Notes",
-    "placeholders": {
-      "budget": "Budget will appear here in M4.",
-      "timeline": "Timeline and tasks will appear here in M7.",
-      "documents": "Documents and photos will appear here in M11."
-    }
+    "notes": "Notes"
   },
   "actions": {
     "convertToFlip": "Convert to flip",
@@ -192,5 +187,35 @@
     "memberAdded": "Team member added",
     "memberRemoved": "Team member removed",
     "error": "Something went wrong"
+  },
+  "feasibility": {
+    "title": "P&L / Feasibility",
+    "subtitle": "Is this flip still profitable?",
+    "revenue": "Revenue (ARV)",
+    "costs": "Costs",
+    "revenueSold": "Sale price",
+    "planColumn": "Plan",
+    "actualColumn": "Actual",
+    "varianceColumn": "Variance",
+    "purchase": "Purchase price",
+    "renovation": "Renovation",
+    "holding": "Holding costs",
+    "transaction": "Transaction fees",
+    "selling": "Selling / commission",
+    "marketing": "Marketing",
+    "other": "Other",
+    "totalCost": "Total cost",
+    "profit": "Profit",
+    "margin": "Margin",
+    "roi": "ROI",
+    "plannedLabel": "Planned",
+    "projectedLabel": "Projected",
+    "realizedLabel": "Realized",
+    "notTrackedYet": "—",
+    "notTrackedHint": "No per-category actuals yet",
+    "revisionNote": "Plan reflects revision #{number}",
+    "baselineNote": "Plan reflects baseline from deal analysis",
+    "noDealAnalysis": "No deal analysis linked — overhead costs unavailable.",
+    "emptyState": "Baseline numbers incomplete. Purchase and target ARV are required."
   }
 }

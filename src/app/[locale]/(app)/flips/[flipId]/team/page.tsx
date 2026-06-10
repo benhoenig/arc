@@ -5,7 +5,7 @@ import { FlipTeamPanel } from '@/features/flips/components/flip-team-panel';
 import { getFlipById } from '@/features/flips/queries/get-flip';
 import { listOrgUsers } from '@/features/flips/queries/list-org-users';
 import { Link } from '@/i18n/navigation';
-import { getActiveOrgId } from '@/server/supabase/auth';
+import { getActiveOrgId } from '@/server/auth';
 
 type Props = {
   params: Promise<{ locale: string; flipId: string }>;

@@ -12,6 +12,7 @@ import { BudgetLineRow } from './budget-line-row';
 
 type Props = {
   flipId: string;
+  orgId: string;
   lines: BudgetLineItem[];
   categories: BudgetCategoryItem[];
   readOnly?: boolean;
@@ -47,7 +48,7 @@ function sumGroup(lines: BudgetLineItem[]) {
   );
 }
 
-export function BudgetTable({ flipId, lines, categories, readOnly = false }: Props) {
+export function BudgetTable({ flipId, orgId, lines, categories, readOnly = false }: Props) {
   const t = useTranslations('budget');
   const locale = useLocale() as Locale;
 
@@ -93,7 +94,14 @@ export function BudgetTable({ flipId, lines, categories, readOnly = false }: Pro
                       </td>
                     </tr>
                     {group.lines.map((line) => (
-                      <BudgetLineRow key={line.id} line={line} readOnly={readOnly} />
+                      <BudgetLineRow
+                        key={line.id}
+                        line={line}
+                        flipId={flipId}
+                        orgId={orgId}
+                        allLines={lines}
+                        readOnly={readOnly}
+                      />
                     ))}
                     <tr className="border-t border-border-subtle">
                       <td className="px-4 py-1.5 text-right text-xs font-medium text-text-muted">

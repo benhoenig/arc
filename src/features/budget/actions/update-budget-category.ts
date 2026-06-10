@@ -1,10 +1,10 @@
 'use server';
 
 import { revalidatePath } from 'next/cache';
+import { getActiveOrgId, requireAuth } from '@/server/auth';
 import { db } from '@/server/db';
 import { logActivity } from '@/server/shared/activity-log';
 import { isOrgAdmin } from '@/server/shared/require-admin';
-import { getActiveOrgId, requireAuth } from '@/server/supabase/auth';
 import type { ActionResult } from '@/types/common';
 import {
   type UpdateBudgetCategoryInput,
