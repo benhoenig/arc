@@ -91,7 +91,7 @@ export async function acceptInvitation(
   }
 
   // 2. Create the identity (auto-signs in).
-  const { error: authError } = await auth.signUp.email({
+  const { data: signUpData, error: authError } = await auth.signUp.email({
     email,
     password: parsed.data.password,
     name: parsed.data.fullName,
@@ -100,8 +100,9 @@ export async function acceptInvitation(
     return { ok: false, error: 'server' };
   }
 
-  const { data: session } = await auth.getSession();
-  const userId = session?.user?.id;
+  // Use the id returned by signUp directly — reading it back via getSession()
+  // in the same request is racy (the session cookie isn't on the request yet).
+  const userId = signUpData?.user?.id;
   if (!userId) {
     return { ok: false, error: 'server' };
   }
