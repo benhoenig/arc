@@ -121,8 +121,14 @@ export async function signup(
         },
       });
 
-      // Seed the 5 system roles via the DB function
+      // Seed the org's reference data via the DB functions: 5 system roles,
+      // 9 flip stages, and the default budget categories. All three are
+      // required before the org can create flips or budgets — seeding only
+      // roles here previously left new orgs without stages, surfacing as
+      // `stage_missing` on the first deal→flip conversion.
       await tx.$executeRawUnsafe('SELECT seed_organization_roles($1::uuid)', org.id);
+      await tx.$executeRawUnsafe('SELECT seed_organization_flip_stages($1::uuid)', org.id);
+      await tx.$executeRawUnsafe('SELECT seed_organization_budget_categories($1::uuid)', org.id);
 
       // Find the admin role we just seeded
       const adminRole = await tx.role.findFirst({
