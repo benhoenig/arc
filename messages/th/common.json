@@ -50,6 +50,9 @@
       "validation": "กรุณาตรวจสอบข้อมูลที่กรอก"
     }
   },
+  "localeSwitcher": {
+    "label": "เปลี่ยนภาษา"
+  },
   "common": {
     "cancel": "ยกเลิก",
     "save": "บันทึก",

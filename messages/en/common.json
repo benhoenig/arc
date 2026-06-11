@@ -50,6 +50,9 @@
       "validation": "Please check your input"
     }
   },
+  "localeSwitcher": {
+    "label": "Change language"
+  },
   "common": {
     "cancel": "Cancel",
     "save": "Save",
