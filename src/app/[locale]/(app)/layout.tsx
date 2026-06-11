@@ -10,15 +10,18 @@ export default async function AppLayout({ children }: Props) {
   const user = await requireAuth();
   const orgId = await getActiveOrgId();
 
-  const org = await db.organization.findUnique({
-    where: { id: orgId },
-    select: { name: true, slug: true },
-  });
-
-  const dbUser = await db.user.findUnique({
-    where: { id: user.id },
-    select: { fullName: true, displayName: true, email: true },
-  });
+  // org and user lookups are independent — run them concurrently rather than
+  // paying two sequential Neon round trips.
+  const [org, dbUser] = await Promise.all([
+    db.organization.findUnique({
+      where: { id: orgId },
+      select: { name: true, slug: true },
+    }),
+    db.user.findUnique({
+      where: { id: user.id },
+      select: { fullName: true, displayName: true, email: true },
+    }),
+  ]);
 
   return (
     <AppShell
