@@ -5,6 +5,7 @@ import { useTranslations } from 'next-intl';
 import { useTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { logout } from '@/features/auth/actions/logout';
+import { LocaleSwitcher } from './locale-switcher';
 
 type Props = {
   orgName: string;
@@ -31,6 +32,8 @@ export function Topbar({ userName, userEmail }: Props) {
       <div className="hidden md:block" />
 
       <div className="flex items-center gap-3">
+        <LocaleSwitcher />
+
         <div className="hidden text-right sm:block">
           <p className="text-sm font-medium text-text-default">{userName}</p>
           <p className="text-xs text-text-muted">{userEmail}</p>
