@@ -9,15 +9,18 @@ import { FlipContractorsPanel } from '@/features/contractors/components/flip-con
 import { listAssignmentsForFlip } from '@/features/contractors/queries/list-assignments-for-flip';
 import { FlipDetailHeader } from '@/features/flips/components/flip-detail-header';
 import { FlipFeasibilityPanel } from '@/features/flips/components/flip-feasibility-panel';
+import { FlipHistoryPanel } from '@/features/flips/components/flip-history-panel';
 import { FlipOverviewPanel } from '@/features/flips/components/flip-overview-panel';
 import { FlipRevisionsPanel } from '@/features/flips/components/flip-revisions-panel';
 import { FlipTeamPanel } from '@/features/flips/components/flip-team-panel';
 import { getFlipById } from '@/features/flips/queries/get-flip';
 import { getFlipPnl } from '@/features/flips/queries/get-flip-pnl';
+import { listFlipActivity } from '@/features/flips/queries/list-flip-activity';
 import { listFlipRevisions } from '@/features/flips/queries/list-flip-revisions';
 import { listFlipStages } from '@/features/flips/queries/list-flip-stages';
 import { listOrgUsers } from '@/features/flips/queries/list-org-users';
 import { Link } from '@/i18n/navigation';
+import type { Locale } from '@/lib/i18n';
 import { getActiveOrgId } from '@/server/auth';
 
 type Props = {
@@ -27,6 +30,8 @@ type Props = {
 export default async function FlipDetailPage({ params }: Props) {
   const { locale, flipId } = await params;
   setRequestLocale(locale);
+  // The [locale] segment is constrained to supported locales by the i18n middleware.
+  const typedLocale = locale as Locale;
 
   const orgId = await getActiveOrgId();
   const [
@@ -39,6 +44,7 @@ export default async function FlipDetailPage({ params }: Props) {
     cashSummary,
     pnl,
     assignments,
+    activity,
   ] = await Promise.all([
     getFlipById(orgId, flipId),
     listFlipStages(orgId),
@@ -49,6 +55,7 @@ export default async function FlipDetailPage({ params }: Props) {
     getFlipCashSummary(orgId, flipId),
     getFlipPnl(orgId, flipId),
     listAssignmentsForFlip(orgId, flipId),
+    listFlipActivity(orgId, flipId, typedLocale),
   ]);
 
   if (!flip) {
@@ -121,7 +128,7 @@ export default async function FlipDetailPage({ params }: Props) {
 
       {pnl ? (
         <div className="mb-8">
-          <FlipFeasibilityPanel pnl={pnl} />
+          <FlipFeasibilityPanel pnl={pnl} flipId={flip.id} readOnly={locked} />
         </div>
       ) : null}
 
@@ -158,6 +165,10 @@ export default async function FlipDetailPage({ params }: Props) {
 
       <div className="mt-8">
         <FlipRevisionsPanel revisions={revisions} />
+      </div>
+
+      <div className="mt-8">
+        <FlipHistoryPanel entries={activity} />
       </div>
     </div>
   );

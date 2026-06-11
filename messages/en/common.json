@@ -11,7 +11,9 @@
     "investors": "Investors",
     "listings": "Listings",
     "settings": "Settings",
-    "members": "Members"
+    "members": "Members",
+    "collapseSidebar": "Collapse sidebar",
+    "expandSidebar": "Expand sidebar"
   },
   "auth": {
     "login": {

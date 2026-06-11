@@ -25,6 +25,9 @@ export function BudgetLineRow({ line, flipId, orgId, allLines, readOnly = false 
   const [isPending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [description, setDescription] = useState(line.description);
+  const actualIsOverLimit =
+    (line.budgetedAmountThb > 0 && line.actualAmountThb > line.budgetedAmountThb) ||
+    (line.committedAmountThb > 0 && line.actualAmountThb > line.committedAmountThb);
 
   function commitAmount(field: AmountField, next: number, original: number) {
     if (Number.isNaN(next) || next < 0) {
@@ -105,7 +108,10 @@ export function BudgetLineRow({ line, flipId, orgId, allLines, readOnly = false 
         disabled={readOnly || isPending}
       />
       <td className="py-1.5 pr-2 text-right">
-        <Currency amount={line.actualAmountThb} className="text-text-default" />
+        <Currency
+          amount={line.actualAmountThb}
+          className={actualIsOverLimit ? 'font-medium text-destructive' : 'text-text-default'}
+        />
       </td>
       <td className="w-24 py-1.5 pl-2 text-right">
         {readOnly ? null : (

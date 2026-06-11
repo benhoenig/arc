@@ -216,6 +216,43 @@
     "revisionNote": "Plan reflects revision #{number}",
     "baselineNote": "Plan reflects baseline from deal analysis",
     "noDealAnalysis": "No deal analysis linked — overhead costs unavailable.",
-    "emptyState": "Baseline numbers incomplete. Purchase and target ARV are required."
+    "emptyState": "Baseline numbers incomplete. Purchase and target ARV are required.",
+    "overheadEditHint": "Click a cost to edit"
+  },
+  "history": {
+    "title": "Change history",
+    "subtitle": "Who changed what, and when",
+    "empty": "No changes recorded yet",
+    "system": "System",
+    "entity": {
+      "flip": "Flip",
+      "dealAnalysis": "Deal analysis",
+      "budgetLine": "Budget line",
+      "transaction": "Transaction"
+    },
+    "action": {
+      "created": "created",
+      "updated": "updated",
+      "deleted": "deleted",
+      "revised": "revised",
+      "pivoted": "pivoted",
+      "overheads_updated": "updated overheads"
+    },
+    "view": "View history ({count})",
+    "field": {
+      "category": "Category",
+      "budgetLine": "Budget line",
+      "description": "Description",
+      "budgeted": "Budgeted",
+      "committed": "Committed",
+      "amount": "Amount",
+      "source": "Source",
+      "kind": "Type",
+      "revisionNumber": "Revision #",
+      "revisionType": "Revision type",
+      "mode": "Mode",
+      "projectedProfit": "Projected profit",
+      "capitalDeployed": "Capital deployed"
+    }
   }
 }

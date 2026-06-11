@@ -11,7 +11,9 @@
     "investors": "นักลงทุน",
     "listings": "ประกาศขาย",
     "settings": "ตั้งค่า",
-    "members": "สมาชิก"
+    "members": "สมาชิก",
+    "collapseSidebar": "ย่อแถบเมนู",
+    "expandSidebar": "ขยายแถบเมนู"
   },
   "auth": {
     "login": {

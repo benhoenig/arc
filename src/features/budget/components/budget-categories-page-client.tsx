@@ -9,11 +9,19 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import type { Locale } from '@/lib/i18n';
 import { createBudgetCategory } from '../actions/create-budget-category';
 import { deleteBudgetCategory } from '../actions/delete-budget-category';
 import { updateBudgetCategory } from '../actions/update-budget-category';
 import type { BudgetCategoryItem } from '../queries/list-budget-categories';
+import { PNL_BUCKETS, type PnlBucket } from '../validators/budget-schemas';
 
 type Props = {
   isAdmin: boolean;
@@ -26,6 +34,7 @@ type EditState = {
   nameTh: string;
   nameEn: string;
   sortOrder: string;
+  pnlBucket: PnlBucket;
   isSystem: boolean;
 };
 
@@ -34,6 +43,7 @@ const emptyEdit: EditState = {
   nameTh: '',
   nameEn: '',
   sortOrder: '0',
+  pnlBucket: 'renovation',
   isSystem: false,
 };
 
@@ -60,6 +70,7 @@ export function BudgetCategoriesPageClient({ isAdmin, categories }: Props) {
       nameTh: cat.nameTh,
       nameEn: cat.nameEn ?? '',
       sortOrder: String(cat.sortOrder),
+      pnlBucket: cat.pnlBucket as PnlBucket,
       isSystem: cat.isSystem,
     });
     setError(null);
@@ -82,12 +93,14 @@ export function BudgetCategoriesPageClient({ isAdmin, categories }: Props) {
             nameTh: edit.nameTh,
             nameEn: edit.nameEn.trim() === '' ? null : edit.nameEn,
             sortOrder,
+            pnlBucket: edit.pnlBucket,
           })
         : await createBudgetCategory({
             slug: edit.slug,
             nameTh: edit.nameTh,
             nameEn: edit.nameEn.trim() === '' ? undefined : edit.nameEn,
             sortOrder,
+            pnlBucket: edit.pnlBucket,
           });
       if (!result.ok) {
         setError(
@@ -143,6 +156,7 @@ export function BudgetCategoriesPageClient({ isAdmin, categories }: Props) {
                 <th className="px-4 py-2 text-left font-medium">{t('categories.slug')}</th>
                 <th className="px-4 py-2 text-left font-medium">{t('categories.nameTh')}</th>
                 <th className="px-4 py-2 text-left font-medium">{t('categories.nameEn')}</th>
+                <th className="px-4 py-2 text-left font-medium">{t('categories.pnlBucket')}</th>
                 <th className="px-4 py-2 text-right font-medium">{t('categories.sortOrder')}</th>
                 <th className="w-32" />
               </tr>
@@ -162,6 +176,9 @@ export function BudgetCategoriesPageClient({ isAdmin, categories }: Props) {
                     </td>
                     <td className="px-4 py-2 text-text-default">{cat.nameTh}</td>
                     <td className="px-4 py-2 text-text-muted">{cat.nameEn ?? '—'}</td>
+                    <td className="px-4 py-2 text-text-muted">
+                      {t(`categories.pnlBuckets.${cat.pnlBucket}`)}
+                    </td>
                     <td className="px-4 py-2 text-right tabular text-text-muted">
                       {cat.sortOrder}
                     </td>
@@ -231,6 +248,24 @@ export function BudgetCategoriesPageClient({ isAdmin, categories }: Props) {
                 value={edit.nameEn}
                 onChange={(e) => setEdit({ ...edit, nameEn: e.target.value })}
               />
+            </div>
+            <div className="flex flex-col gap-1.5">
+              <Label>{t('categories.pnlBucket')} *</Label>
+              <Select
+                value={edit.pnlBucket}
+                onValueChange={(value) => setEdit({ ...edit, pnlBucket: value as PnlBucket })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {PNL_BUCKETS.map((bucket) => (
+                    <SelectItem key={bucket} value={bucket}>
+                      {t(`categories.pnlBuckets.${bucket}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>{t('categories.sortOrder')}</Label>

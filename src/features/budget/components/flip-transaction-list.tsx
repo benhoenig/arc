@@ -107,7 +107,13 @@ function TransactionRow({ tx, locale, readOnly, t }: RowProps) {
         )}
       </td>
       <td
-        className={`px-2 py-1.5 text-right font-medium ${outflow ? 'text-text-default' : 'text-positive'}`}
+        className={`px-2 py-1.5 text-right font-medium ${
+          tx.amountThb < 0
+            ? 'text-destructive'
+            : tx.amountThb > 0
+              ? 'text-positive'
+              : 'text-text-default'
+        }`}
       >
         <Currency amount={tx.amountThb} />
       </td>

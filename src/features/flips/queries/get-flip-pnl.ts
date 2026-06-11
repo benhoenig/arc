@@ -1,14 +1,17 @@
 import 'server-only';
 
-import { getFlipBudgetSummary } from '@/features/budget/queries/get-flip-budget-summary';
 import { getFlipCashSummary } from '@/features/budget/queries/get-flip-cash-summary';
+import type { PnlBucket } from '@/features/budget/validators/budget-schemas';
 import { db } from '@/server/db';
+
+type CostRow = { plan: number | null; actual: number | null };
 
 export type FlipPnl = {
   flipId: string;
   flipType: 'float_flip' | 'transfer_in';
   sold: boolean;
   hasRevision: boolean;
+  hasDealAnalysis: boolean;
   latestRevisionNumber: number | null;
 
   revenue: {
@@ -17,17 +20,17 @@ export type FlipPnl = {
   };
 
   // Each row: planned magnitude from baseline/revision/deal_analysis, and
-  // the actual magnitude from the ledger where tracked. Overheads that
-  // aren't categorised in the budget yet report null for actual — we show
-  // plan only and count them into projected cost so the math still balances.
+  // the actual magnitude from budget categories mapped to a P&L bucket.
+  // Buckets with no tracked budget lines report null for actual — we show
+  // plan only and count the plan into projected cost so the math still balances.
   costs: {
-    purchase: { plan: number | null; actual: number | null };
-    renovation: { plan: number | null; actual: number };
-    holding: { plan: number; actual: null };
-    transaction: { plan: number; actual: null };
-    selling: { plan: number; actual: null };
-    marketing: { plan: number; actual: null };
-    other: { plan: number; actual: null };
+    purchase: CostRow;
+    renovation: CostRow;
+    holding: CostRow;
+    transaction: CostRow;
+    selling: CostRow;
+    marketing: CostRow;
+    other: CostRow;
   };
 
   totalPlanCost: number;
@@ -46,6 +49,12 @@ export type FlipPnl = {
   realizedProfitThb: number | null; // when sold
   realizedMarginPct: number | null;
   realizedRoiPct: number | null;
+};
+
+type PnlBucketSummaryRow = {
+  pnl_bucket: PnlBucket;
+  total_actual_thb: string | number;
+  line_count: bigint | number;
 };
 
 function pct(numerator: number, denominator: number): number | null {
@@ -73,7 +82,7 @@ export async function getFlipPnl(orgId: string, flipId: string): Promise<FlipPnl
     return null;
   }
 
-  const [latestRevision, dealAnalysis, budgetSummary, cashSummary] = await Promise.all([
+  const [latestRevision, dealAnalysis, cashSummary] = await Promise.all([
     db.flipRevision.findFirst({
       where: { flipId, organizationId: orgId },
       orderBy: { revisionNumber: 'desc' },
@@ -94,9 +103,36 @@ export async function getFlipPnl(orgId: string, flipId: string): Promise<FlipPnl
         otherCostThb: true,
       },
     }),
-    getFlipBudgetSummary(orgId, flipId),
     getFlipCashSummary(orgId, flipId),
   ]);
+
+  const budgetBucketRows = await db.$queryRaw<PnlBucketSummaryRow[]>`
+    SELECT bc.pnl_bucket,
+           COALESCE(SUM(bl.actual_amount_thb), 0) AS total_actual_thb,
+           COUNT(bl.id) FILTER (WHERE bl.deleted_at IS NULL) AS line_count
+    FROM budget_categories bc
+    JOIN budget_lines bl
+      ON bl.category_id = bc.id
+     AND bl.deleted_at IS NULL
+    WHERE bl.flip_id = ${flipId}::uuid
+      AND bl.organization_id = ${orgId}::uuid
+      AND bc.organization_id = ${orgId}::uuid
+      AND bc.deleted_at IS NULL
+      AND bc.pnl_bucket <> 'exclude_from_pnl'
+    GROUP BY bc.pnl_bucket
+  `;
+
+  const actualByBucket = new Map<PnlBucket, number | null>();
+  for (const row of budgetBucketRows) {
+    actualByBucket.set(
+      row.pnl_bucket,
+      Number(row.line_count) > 0 ? Number(row.total_actual_thb) : null,
+    );
+  }
+
+  function bucketActual(bucket: PnlBucket): number | null {
+    return actualByBucket.get(bucket) ?? null;
+  }
 
   const flipType = flip.flipType as 'float_flip' | 'transfer_in';
 
@@ -112,9 +148,20 @@ export async function getFlipPnl(orgId: string, flipId: string): Promise<FlipPnl
   const planOther = dealAnalysis ? Number(dealAnalysis.otherCostThb) : 0;
 
   const actualPurchase =
-    flip.actualPurchasePriceThb != null ? Number(flip.actualPurchasePriceThb) : null;
-  const actualRenovation = budgetSummary?.totalActualThb ?? 0;
+    flip.actualPurchasePriceThb != null
+      ? Number(flip.actualPurchasePriceThb)
+      : bucketActual('purchase');
   const actualSalePrice = flip.actualSalePriceThb != null ? Number(flip.actualSalePriceThb) : null;
+
+  const costs: FlipPnl['costs'] = {
+    purchase: { plan: planPurchase, actual: actualPurchase },
+    renovation: { plan: planRenovation, actual: bucketActual('renovation') },
+    holding: { plan: planHolding, actual: bucketActual('holding') },
+    transaction: { plan: planTransaction, actual: bucketActual('transaction') },
+    selling: { plan: planSelling, actual: bucketActual('selling') },
+    marketing: { plan: planMarketing, actual: bucketActual('marketing') },
+    other: { plan: planOther, actual: bucketActual('other') },
+  };
 
   const totalPlanCost =
     (planPurchase ?? 0) +
@@ -125,15 +172,13 @@ export async function getFlipPnl(orgId: string, flipId: string): Promise<FlipPnl
     planMarketing +
     planOther;
 
-  // Tracked actuals: real purchase + budget rollup. Untracked overheads
-  // (holding, transaction, selling, marketing, other) fall back to their
-  // planned values for the projection since there's no per-category actual
-  // tracking yet — flagged in the UI so operators know not to trust them
-  // as "actual."
-  const trackedActualSpend = (actualPurchase ?? planPurchase ?? 0) + actualRenovation;
-  const untrackedPlanOverheads =
-    planHolding + planTransaction + planSelling + planMarketing + planOther;
-  const projectedTotalCost = trackedActualSpend + untrackedPlanOverheads;
+  // Projected cost uses tracked actuals where a bucket has budget lines, and
+  // falls back to the original plan where that bucket is not tracked yet.
+  const projectedTotalCost = Object.values(costs).reduce(
+    (sum, row) => sum + (row.actual ?? row.plan ?? 0),
+    0,
+  );
+  const trackedActualSpend = Object.values(costs).reduce((sum, row) => sum + (row.actual ?? 0), 0);
 
   const plannedProfitThb = planArv - totalPlanCost;
   const projectedProfitThb = planArv - projectedTotalCost;
@@ -144,19 +189,12 @@ export async function getFlipPnl(orgId: string, flipId: string): Promise<FlipPnl
     flipType,
     sold: flip.soldAt != null,
     hasRevision: latestRevision != null,
+    hasDealAnalysis: dealAnalysis != null,
     latestRevisionNumber: latestRevision?.revisionNumber ?? null,
 
     revenue: { plan: planArv, actual: actualSalePrice },
 
-    costs: {
-      purchase: { plan: planPurchase, actual: actualPurchase },
-      renovation: { plan: planRenovation, actual: actualRenovation },
-      holding: { plan: planHolding, actual: null },
-      transaction: { plan: planTransaction, actual: null },
-      selling: { plan: planSelling, actual: null },
-      marketing: { plan: planMarketing, actual: null },
-      other: { plan: planOther, actual: null },
-    },
+    costs,
 
     totalPlanCost,
     totalActualSpendThb: trackedActualSpend,

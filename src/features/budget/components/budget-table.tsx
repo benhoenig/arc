@@ -5,6 +5,7 @@ import { Fragment } from 'react';
 import { Currency } from '@/components/data-display/currency';
 import { EmptyState } from '@/components/data-display/empty-state';
 import type { Locale } from '@/lib/i18n';
+import { cn } from '@/lib/utils';
 import type { BudgetCategoryItem } from '../queries/list-budget-categories';
 import type { BudgetLineItem } from '../queries/list-budget-lines';
 import { AddBudgetLineDialog } from './add-budget-line-dialog';
@@ -47,6 +48,13 @@ function sumGroup(lines: BudgetLineItem[]) {
       actual: acc.actual + l.actualAmountThb,
     }),
     { budgeted: 0, committed: 0, actual: 0 },
+  );
+}
+
+function isActualOverLimit(amounts: { budgeted: number; committed: number; actual: number }) {
+  return (
+    (amounts.budgeted > 0 && amounts.actual > amounts.budgeted) ||
+    (amounts.committed > 0 && amounts.actual > amounts.committed)
   );
 }
 
@@ -128,7 +136,12 @@ export function BudgetTable({
                       <td className="px-2 py-1.5 text-right text-xs font-medium text-text-default">
                         <Currency amount={subtotals.committed} />
                       </td>
-                      <td className="px-2 py-1.5 text-right text-xs font-medium text-text-default">
+                      <td
+                        className={cn(
+                          'px-2 py-1.5 text-right text-xs font-medium',
+                          isActualOverLimit(subtotals) ? 'text-destructive' : 'text-text-default',
+                        )}
+                      >
                         <Currency amount={subtotals.actual} />
                       </td>
                       <td />
@@ -146,7 +159,12 @@ export function BudgetTable({
                 <td className="px-2 py-2 text-right text-sm font-semibold text-text-strong">
                   <Currency amount={grand.committed} />
                 </td>
-                <td className="px-2 py-2 text-right text-sm font-semibold text-text-strong">
+                <td
+                  className={cn(
+                    'px-2 py-2 text-right text-sm font-semibold',
+                    isActualOverLimit(grand) ? 'text-destructive' : 'text-text-strong',
+                  )}
+                >
                   <Currency amount={grand.actual} />
                 </td>
                 <td />

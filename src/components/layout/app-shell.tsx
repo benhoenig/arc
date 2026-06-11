@@ -4,6 +4,8 @@ import {
   HardHat,
   Layers,
   LayoutDashboard,
+  PanelLeftClose,
+  PanelLeftOpen,
   Search as SearchIcon,
   SlidersHorizontal,
   Store,
@@ -12,6 +14,8 @@ import {
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
+import { useEffect, useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Link } from '@/i18n/navigation';
 import { cn } from '@/lib/utils';
 import { Topbar } from './topbar';
@@ -41,9 +45,25 @@ const MOBILE_TABS = [
   { key: 'settings', href: '/settings', icon: SlidersHorizontal },
 ] as const;
 
+const SIDEBAR_STORAGE_KEY = 'arc.sidebarCollapsed';
+
 export function AppShell({ orgName, userName, userEmail, children }: Props) {
   const t = useTranslations('nav');
   const pathname = usePathname();
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [hasLoadedSidebarPreference, setHasLoadedSidebarPreference] = useState(false);
+
+  useEffect(() => {
+    setIsSidebarCollapsed(localStorage.getItem(SIDEBAR_STORAGE_KEY) === 'true');
+    setHasLoadedSidebarPreference(true);
+  }, []);
+
+  useEffect(() => {
+    if (!hasLoadedSidebarPreference) {
+      return;
+    }
+    localStorage.setItem(SIDEBAR_STORAGE_KEY, String(isSidebarCollapsed));
+  }, [hasLoadedSidebarPreference, isSidebarCollapsed]);
 
   function isActive(href: string): boolean {
     const clean = pathname.replace(/^\/(th|en)/, '') || '/';
@@ -53,24 +73,56 @@ export function AppShell({ orgName, userName, userEmail, children }: Props) {
   return (
     <div className="flex h-screen">
       {/* Desktop sidebar */}
-      <aside className="hidden w-60 shrink-0 flex-col border-r border-border-subtle bg-surface md:flex">
-        <div className="flex h-12 items-center px-4">
-          <span className="text-sm font-semibold text-text-strong">{orgName}</span>
+      <aside
+        className={cn(
+          'hidden shrink-0 flex-col border-r border-border-subtle bg-surface transition-[width] duration-200 md:flex',
+          isSidebarCollapsed ? 'w-14' : 'w-60',
+        )}
+      >
+        <div
+          className={cn(
+            'flex h-12 items-center gap-2 border-b border-border-subtle px-2',
+            isSidebarCollapsed ? 'justify-center' : 'justify-between',
+          )}
+        >
+          {isSidebarCollapsed ? null : (
+            <span className="min-w-0 truncate px-2 text-sm font-semibold text-text-strong">
+              {orgName}
+            </span>
+          )}
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon-sm"
+            onClick={() => setIsSidebarCollapsed((collapsed) => !collapsed)}
+            aria-label={isSidebarCollapsed ? t('expandSidebar') : t('collapseSidebar')}
+            aria-expanded={!isSidebarCollapsed}
+            title={isSidebarCollapsed ? t('expandSidebar') : t('collapseSidebar')}
+          >
+            {isSidebarCollapsed ? (
+              <PanelLeftOpen size={16} strokeWidth={1.5} />
+            ) : (
+              <PanelLeftClose size={16} strokeWidth={1.5} />
+            )}
+          </Button>
         </div>
         <nav className="flex flex-1 flex-col gap-0.5 px-2 py-2">
           {NAV_ITEMS.map(({ key, href, icon: Icon }) => (
             <Link
               key={key}
               href={href}
+              aria-label={isSidebarCollapsed ? t(key) : undefined}
+              title={isSidebarCollapsed ? t(key) : undefined}
               className={cn(
-                'flex items-center gap-3 rounded-md px-3 py-2 text-sm transition-colors',
+                'flex h-9 items-center rounded-md text-sm transition-colors',
+                isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3',
                 isActive(href)
                   ? 'bg-fill-selected font-medium text-text-strong'
                   : 'text-text-muted hover:bg-fill-hover hover:text-text-default',
               )}
             >
               <Icon size={16} strokeWidth={1.5} />
-              {t(key)}
+              {isSidebarCollapsed ? null : <span className="truncate">{t(key)}</span>}
             </Link>
           ))}
         </nav>
