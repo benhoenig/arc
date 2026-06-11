@@ -45,6 +45,16 @@ export const createBudgetCategorySchema = z.object({
 });
 export type CreateBudgetCategoryInput = z.infer<typeof createBudgetCategorySchema>;
 
+// Names-only payload for inline creation from the budget-line dropdown. The
+// slug and sort order are derived server-side (see createBudgetCategoryInline)
+// so operators don't hand-type a snake_case slug mid-budget-entry. Full control
+// over slug/sort order stays on the /settings/budget-categories page.
+export const createBudgetCategoryInlineSchema = z.object({
+  nameTh: z.string().min(1).max(120),
+  nameEn: z.string().min(1).max(120).optional(),
+});
+export type CreateBudgetCategoryInlineInput = z.infer<typeof createBudgetCategoryInlineSchema>;
+
 export const updateBudgetCategorySchema = z.object({
   id: z.string().uuid(),
   slug: slug.optional(),

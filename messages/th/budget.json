@@ -35,7 +35,9 @@
     "descriptionPlaceholder": "เช่น เดินไฟชั้นหลัก",
     "budgeted": "ตั้งงบ (บาท)",
     "committed": "ตกลงราคา (บาท)",
-    "actual": "ใช้จริง (บาท)"
+    "actual": "ใช้จริง (บาท)",
+    "newCategoryNameTh": "ชื่อหมวด (ไทย)",
+    "newCategoryNameEn": "ชื่อหมวด (อังกฤษ) — ไม่บังคับ"
   },
   "lineRow": {
     "description": "รายละเอียด",
@@ -45,7 +47,8 @@
     "addLine": "เพิ่มรายการ",
     "deleteLine": "ลบรายการ",
     "addTransaction": "บันทึกธุรกรรม",
-    "addSpend": "บันทึกการใช้"
+    "addSpend": "บันทึกการใช้",
+    "newCategory": "เพิ่มหมวดใหม่"
   },
   "transactions": {
     "title": "ธุรกรรม",

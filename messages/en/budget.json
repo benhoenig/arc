@@ -35,7 +35,9 @@
     "descriptionPlaceholder": "e.g. Main floor electrical rewire",
     "budgeted": "Budgeted (THB)",
     "committed": "Committed (THB)",
-    "actual": "Actual (THB)"
+    "actual": "Actual (THB)",
+    "newCategoryNameTh": "Category name (Thai)",
+    "newCategoryNameEn": "Category name (English) — optional"
   },
   "lineRow": {
     "description": "Description",
@@ -45,7 +47,8 @@
     "addLine": "Add line",
     "deleteLine": "Delete line",
     "addTransaction": "Add transaction",
-    "addSpend": "Add spend"
+    "addSpend": "Add spend",
+    "newCategory": "New category"
   },
   "transactions": {
     "title": "Transactions",
