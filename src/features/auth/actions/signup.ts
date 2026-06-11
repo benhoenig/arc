@@ -16,6 +16,66 @@ function slugify(text: string): string {
     .slice(0, 60);
 }
 
+/**
+ * Resolve the auth user id we should provision an org for.
+ *
+ * Returns one of:
+ *  - `{ kind: 'ready', userId }` — proceed to provisioning. Either a brand-new
+ *    sign-up, or an *orphaned* identity (auth row exists but never got a
+ *    `public.users` + org) whose ownership we just re-verified by password.
+ *  - `{ kind: 'conflict' }` — the email is already a fully-provisioned account.
+ *  - `{ kind: 'error' }` — the upstream auth call failed.
+ *
+ * The orphan-resume path is what makes signup recoverable: previously, if the
+ * post-`signUp` provisioning failed for any reason, the auth identity was left
+ * behind and every retry bounced with "email taken" forever.
+ */
+async function resolveSignupUserId(
+  email: string,
+  password: string,
+  fullName: string,
+): Promise<{ kind: 'ready'; userId: string } | { kind: 'conflict' } | { kind: 'error' }> {
+  const existing = await db.$queryRaw<Array<{ id: string }>>`
+    SELECT id FROM neon_auth."user" WHERE lower(email) = ${email} LIMIT 1
+  `;
+  const existingUserId = existing[0]?.id;
+
+  if (existingUserId) {
+    // An auth identity already exists. If it already has an org membership it's
+    // a genuine duplicate. Otherwise it's a half-finished signup we can resume —
+    // but only after proving the caller owns it (password must match).
+    const membership = await db.userRole.findFirst({
+      where: { userId: existingUserId, deletedAt: null },
+      select: { id: true },
+    });
+    if (membership) {
+      return { kind: 'conflict' };
+    }
+
+    const { error: signInError } = await auth.signIn.email({ email, password });
+    if (signInError) {
+      // Identity exists but the password doesn't match — treat as taken rather
+      // than leaking that the account is unprovisioned.
+      return { kind: 'conflict' };
+    }
+    return { kind: 'ready', userId: existingUserId };
+  }
+
+  const { data, error: authError } = await auth.signUp.email({ email, password, name: fullName });
+  if (authError) {
+    return { kind: 'error' };
+  }
+
+  // Use the id returned by signUp directly. Reading it back via getSession() in
+  // the same request is racy (the session cookie isn't on the request yet) and
+  // is exactly what orphaned the earlier signups.
+  const userId = data?.user?.id;
+  if (!userId) {
+    return { kind: 'error' };
+  }
+  return { kind: 'ready', userId };
+}
+
 export async function signup(
   input: z.infer<typeof signupSchema>,
 ): Promise<ActionResult<{ orgId: string }>> {
@@ -26,31 +86,14 @@ export async function signup(
 
   const email = parsed.data.email.toLowerCase();
 
-  // Pre-check against the managed identity table for a deterministic
-  // "email taken" signal rather than parsing Better Auth's error text.
-  const existing = await db.$queryRaw<Array<{ exists: boolean }>>`
-    SELECT EXISTS (SELECT 1 FROM neon_auth."user" WHERE lower(email) = ${email}) AS "exists"
-  `;
-  if (existing[0]?.exists) {
+  const resolved = await resolveSignupUserId(email, parsed.data.password, parsed.data.fullName);
+  if (resolved.kind === 'conflict') {
     return { ok: false, error: 'conflict', message: 'emailTaken' };
   }
-
-  const { error: authError } = await auth.signUp.email({
-    email,
-    password: parsed.data.password,
-    name: parsed.data.fullName,
-  });
-
-  if (authError) {
+  if (resolved.kind === 'error') {
     return { ok: false, error: 'server' };
   }
-
-  // signUp.email auto-establishes the session; read it to get the new uuid.
-  const { data: session } = await auth.getSession();
-  const userId = session?.user?.id;
-  if (!userId) {
-    return { ok: false, error: 'server' };
-  }
+  const userId = resolved.userId;
 
   try {
     const result = await db.$transaction(async (tx) => {
