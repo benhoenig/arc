@@ -102,6 +102,17 @@
     "slug": "Slug",
     "nameTh": "Name (Thai)",
     "nameEn": "Name (English)",
+    "pnlBucket": "P&L bucket",
+    "pnlBuckets": {
+      "purchase": "Purchase",
+      "renovation": "Renovation",
+      "holding": "Holding",
+      "transaction": "Transaction fees",
+      "selling": "Selling",
+      "marketing": "Marketing",
+      "other": "Other",
+      "exclude_from_pnl": "Exclude from P&L"
+    },
     "sortOrder": "Sort order",
     "system": "System",
     "add": "Add category",

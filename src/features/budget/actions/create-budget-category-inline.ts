@@ -82,6 +82,7 @@ export async function createBudgetCategoryInline(
           nameTh,
           nameEn: nameEn ?? null,
           sortOrder,
+          pnlBucket: 'renovation',
           isSystem: false,
         },
         select: {
@@ -92,6 +93,7 @@ export async function createBudgetCategoryInline(
           sortOrder: true,
           isSystem: true,
           parentId: true,
+          pnlBucket: true,
         },
       });
 
@@ -101,7 +103,7 @@ export async function createBudgetCategoryInline(
         entityType: 'budget_category',
         entityId: row.id,
         action: 'created',
-        changes: { slug, nameTh, source: 'inline' },
+        changes: { slug, nameTh, pnlBucket: 'renovation', source: 'inline' },
       });
 
       return row;

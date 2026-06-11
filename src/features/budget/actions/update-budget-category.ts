@@ -26,9 +26,13 @@ export async function updateBudgetCategory(
     return { ok: false, error: 'validation', issues: parsed.error.issues };
   }
 
-  const { id, slug, nameTh, nameEn, sortOrder } = parsed.data;
+  const { id, slug, nameTh, nameEn, sortOrder, pnlBucket } = parsed.data;
   const hasChange =
-    slug !== undefined || nameTh !== undefined || nameEn !== undefined || sortOrder !== undefined;
+    slug !== undefined ||
+    nameTh !== undefined ||
+    nameEn !== undefined ||
+    sortOrder !== undefined ||
+    pnlBucket !== undefined;
   if (!hasChange) {
     return { ok: false, error: 'validation', issues: [] };
   }
@@ -66,6 +70,7 @@ export async function updateBudgetCategory(
           ...(nameTh !== undefined ? { nameTh } : {}),
           ...(nameEn !== undefined ? { nameEn } : {}),
           ...(sortOrder !== undefined ? { sortOrder } : {}),
+          ...(pnlBucket !== undefined ? { pnlBucket } : {}),
         },
       });
 
@@ -75,7 +80,7 @@ export async function updateBudgetCategory(
         entityType: 'budget_category',
         entityId: existing.id,
         action: 'updated',
-        changes: { slug, nameTh, nameEn, sortOrder },
+        changes: { slug, nameTh, nameEn, sortOrder, pnlBucket },
       });
     });
 

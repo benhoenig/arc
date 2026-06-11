@@ -43,6 +43,7 @@ export async function createBudgetCategory(
           nameTh: parsed.data.nameTh,
           nameEn: parsed.data.nameEn ?? null,
           sortOrder: parsed.data.sortOrder,
+          pnlBucket: parsed.data.pnlBucket,
           isSystem: false,
         },
         select: { id: true },
@@ -54,7 +55,11 @@ export async function createBudgetCategory(
         entityType: 'budget_category',
         entityId: row.id,
         action: 'created',
-        changes: { slug: parsed.data.slug, nameTh: parsed.data.nameTh },
+        changes: {
+          slug: parsed.data.slug,
+          nameTh: parsed.data.nameTh,
+          pnlBucket: parsed.data.pnlBucket,
+        },
       });
 
       return row;

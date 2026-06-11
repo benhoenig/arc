@@ -216,6 +216,43 @@
     "revisionNote": "แผนอ้างอิงจากการทบทวนรอบที่ {number}",
     "baselineNote": "แผนอ้างอิงจาก Deal analysis เริ่มต้น",
     "noDealAnalysis": "ยังไม่ได้ผูก Deal analysis — ไม่สามารถดูค่าใช้จ่ายโอเวอร์เฮด",
-    "emptyState": "ข้อมูล baseline ไม่ครบ ต้องมีราคาซื้อและ ARV เป้าหมาย"
+    "emptyState": "ข้อมูล baseline ไม่ครบ ต้องมีราคาซื้อและ ARV เป้าหมาย",
+    "overheadEditHint": "คลิกที่ค่าใช้จ่ายเพื่อแก้ไข"
+  },
+  "history": {
+    "title": "ประวัติการแก้ไข",
+    "subtitle": "ใครแก้ไขอะไร เมื่อไหร่",
+    "empty": "ยังไม่มีประวัติการแก้ไข",
+    "system": "ระบบ",
+    "entity": {
+      "flip": "ฟลิป",
+      "dealAnalysis": "Deal analysis",
+      "budgetLine": "รายการงบประมาณ",
+      "transaction": "ธุรกรรม"
+    },
+    "action": {
+      "created": "สร้าง",
+      "updated": "แก้ไข",
+      "deleted": "ลบ",
+      "revised": "ทบทวนใหม่",
+      "pivoted": "เปลี่ยนเป็นโอนเข้า",
+      "overheads_updated": "แก้ไขค่าใช้จ่ายโอเวอร์เฮด"
+    },
+    "view": "ดูประวัติ ({count})",
+    "field": {
+      "category": "หมวดหมู่",
+      "budgetLine": "รายการงบประมาณ",
+      "description": "รายละเอียด",
+      "budgeted": "งบที่ตั้งไว้",
+      "committed": "ผูกพันแล้ว",
+      "amount": "จำนวนเงิน",
+      "source": "แหล่งที่มา",
+      "kind": "ประเภท",
+      "revisionNumber": "การทบทวนรอบที่",
+      "revisionType": "ประเภทการทบทวน",
+      "mode": "โหมด",
+      "projectedProfit": "กำไรประมาณการ",
+      "capitalDeployed": "เงินทุนที่ใช้"
+    }
   }
 }

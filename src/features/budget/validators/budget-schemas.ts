@@ -37,11 +37,27 @@ const slug = z
   .max(64)
   .regex(/^[a-z0-9_]+$/, 'lower snake_case only');
 
+export const PNL_BUCKETS = [
+  'purchase',
+  'renovation',
+  'holding',
+  'transaction',
+  'selling',
+  'marketing',
+  'other',
+  'exclude_from_pnl',
+] as const;
+
+export type PnlBucket = (typeof PNL_BUCKETS)[number];
+
+const pnlBucket = z.enum(PNL_BUCKETS);
+
 export const createBudgetCategorySchema = z.object({
   slug,
   nameTh: z.string().min(1).max(120),
   nameEn: z.string().min(1).max(120).optional(),
   sortOrder: z.number().int().min(0).max(9999).default(0),
+  pnlBucket: pnlBucket.default('renovation'),
 });
 export type CreateBudgetCategoryInput = z.infer<typeof createBudgetCategorySchema>;
 
@@ -61,6 +77,7 @@ export const updateBudgetCategorySchema = z.object({
   nameTh: z.string().min(1).max(120).optional(),
   nameEn: z.string().min(1).max(120).nullable().optional(),
   sortOrder: z.number().int().min(0).max(9999).optional(),
+  pnlBucket: pnlBucket.optional(),
 });
 export type UpdateBudgetCategoryInput = z.infer<typeof updateBudgetCategorySchema>;
 

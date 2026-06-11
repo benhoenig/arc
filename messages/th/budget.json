@@ -102,6 +102,17 @@
     "slug": "ชื่อระบบ",
     "nameTh": "ชื่อ (ไทย)",
     "nameEn": "ชื่อ (อังกฤษ)",
+    "pnlBucket": "หมวดกำไรขาดทุน",
+    "pnlBuckets": {
+      "purchase": "ราคาซื้อ",
+      "renovation": "รีโนเวต",
+      "holding": "ต้นทุนถือครอง",
+      "transaction": "ค่าธรรมเนียม/โอน",
+      "selling": "ต้นทุนขาย",
+      "marketing": "การตลาด",
+      "other": "อื่น ๆ",
+      "exclude_from_pnl": "ไม่รวมในกำไรขาดทุน"
+    },
     "sortOrder": "ลำดับ",
     "system": "ระบบ",
     "add": "เพิ่มหมวด",

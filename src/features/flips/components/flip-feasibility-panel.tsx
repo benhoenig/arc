@@ -4,9 +4,12 @@ import type { FlipPnl } from '@/features/flips/queries/get-flip-pnl';
 import { formatPercent } from '@/lib/formatters/currency';
 import type { Locale } from '@/lib/i18n';
 import { cn } from '@/lib/utils';
+import { FlipOverheadCell, type OverheadField } from './flip-overhead-cell';
 
 type Props = {
   pnl: FlipPnl;
+  flipId: string;
+  readOnly?: boolean;
 };
 
 const COST_ROW_KEYS = [
@@ -19,9 +22,20 @@ const COST_ROW_KEYS = [
   'other',
 ] as const;
 
-export function FlipFeasibilityPanel({ pnl }: Props) {
+// Plan values that map to deal_analysis overheads and are editable inline.
+// purchase / renovation are owned by the re-underwriting flow and stay read-only.
+const EDITABLE_OVERHEADS = new Set<string>([
+  'holding',
+  'transaction',
+  'selling',
+  'marketing',
+  'other',
+]);
+
+export function FlipFeasibilityPanel({ pnl, flipId, readOnly = false }: Props) {
   const t = useTranslations('flips.feasibility');
   const locale = useLocale() as Locale;
+  const canEditOverheads = !readOnly && pnl.hasDealAnalysis;
 
   const baselineIncomplete = pnl.revenue.plan === 0 || pnl.costs.purchase.plan == null;
   if (baselineIncomplete) {
@@ -45,7 +59,10 @@ export function FlipFeasibilityPanel({ pnl }: Props) {
         <h2 className="text-sm font-semibold text-text-strong">{t('title')}</h2>
         <span className="text-xs text-text-muted">{planNote}</span>
       </div>
-      <p className="mb-4 text-xs text-text-muted">{t('subtitle')}</p>
+      <p className="mb-4 text-xs text-text-muted">
+        {t('subtitle')}
+        {canEditOverheads ? <span className="ml-1">· {t('overheadEditHint')}</span> : null}
+      </p>
 
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
@@ -92,7 +109,14 @@ export function FlipFeasibilityPanel({ pnl }: Props) {
                 <tr key={key} className="border-t border-border-subtle">
                   <td className="py-1.5 pr-2 text-text-default">{t(key)}</td>
                   <td className="px-2 py-1.5 text-right text-text-default">
-                    {row.plan != null ? (
+                    {EDITABLE_OVERHEADS.has(key) ? (
+                      <FlipOverheadCell
+                        flipId={flipId}
+                        field={key as OverheadField}
+                        initial={row.plan ?? 0}
+                        disabled={!canEditOverheads}
+                      />
+                    ) : row.plan != null ? (
                       <Currency amount={row.plan} />
                     ) : (
                       <span className="text-text-muted">{t('notTrackedYet')}</span>

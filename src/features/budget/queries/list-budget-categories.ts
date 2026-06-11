@@ -13,6 +13,7 @@ export async function listBudgetCategories(orgId: string) {
       sortOrder: true,
       isSystem: true,
       parentId: true,
+      pnlBucket: true,
     },
     orderBy: [{ sortOrder: 'asc' }, { nameTh: 'asc' }],
   });
