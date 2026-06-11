@@ -15,6 +15,8 @@ type Props = {
   orgId: string;
   lines: BudgetLineItem[];
   categories: BudgetCategoryItem[];
+  /** Admins may create a category inline from the add-line dialog. */
+  canCreateCategory?: boolean;
   readOnly?: boolean;
 };
 
@@ -48,7 +50,14 @@ function sumGroup(lines: BudgetLineItem[]) {
   );
 }
 
-export function BudgetTable({ flipId, orgId, lines, categories, readOnly = false }: Props) {
+export function BudgetTable({
+  flipId,
+  orgId,
+  lines,
+  categories,
+  canCreateCategory = false,
+  readOnly = false,
+}: Props) {
   const t = useTranslations('budget');
   const locale = useLocale() as Locale;
 
@@ -59,7 +68,13 @@ export function BudgetTable({ flipId, orgId, lines, categories, readOnly = false
     <div className="rounded-md border border-border">
       <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
         <h2 className="text-sm font-semibold text-text-strong">{t('table.title')}</h2>
-        {!readOnly ? <AddBudgetLineDialog flipId={flipId} categories={categories} /> : null}
+        {!readOnly ? (
+          <AddBudgetLineDialog
+            flipId={flipId}
+            categories={categories}
+            canCreateCategory={canCreateCategory}
+          />
+        ) : null}
       </div>
 
       {lines.length === 0 ? (

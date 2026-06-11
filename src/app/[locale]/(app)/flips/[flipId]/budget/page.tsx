@@ -16,7 +16,8 @@ import { listBudgetLinesForFlip } from '@/features/budget/queries/list-budget-li
 import { listTransactionsForFlip } from '@/features/budget/queries/list-flip-transactions';
 import { getFlipById } from '@/features/flips/queries/get-flip';
 import { Link } from '@/i18n/navigation';
-import { getActiveOrgId } from '@/server/auth';
+import { getActiveOrgId, requireAuth } from '@/server/auth';
+import { isOrgAdmin } from '@/server/shared/require-admin';
 
 type Props = {
   params: Promise<{ locale: string; flipId: string }>;
@@ -27,7 +28,8 @@ export default async function FlipBudgetPage({ params }: Props) {
   setRequestLocale(locale);
 
   const orgId = await getActiveOrgId();
-  const [flip, lines, categories, summary, breakdown, cashSummary, transactions] =
+  const user = await requireAuth(); // cached per request — no extra round trip
+  const [flip, lines, categories, summary, breakdown, cashSummary, transactions, isAdmin] =
     await Promise.all([
       getFlipById(orgId, flipId),
       listBudgetLinesForFlip(orgId, flipId),
@@ -36,6 +38,7 @@ export default async function FlipBudgetPage({ params }: Props) {
       getCategoryBreakdownForFlip(orgId, flipId),
       getFlipCashSummary(orgId, flipId),
       listTransactionsForFlip(orgId, flipId),
+      isOrgAdmin(user.id, orgId),
     ]);
 
   if (!flip) {
@@ -100,6 +103,7 @@ export default async function FlipBudgetPage({ params }: Props) {
           orgId={orgId}
           lines={lines}
           categories={categories}
+          canCreateCategory={isAdmin}
           readOnly={locked}
         />
       </div>
