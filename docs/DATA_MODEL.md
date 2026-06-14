@@ -908,6 +908,8 @@ CREATE INDEX idx_milestones_pending_approval ON contractor_milestones(organizati
 
 For `payment_model = 'time_materials'`. Timesheet + materials log entries.
 
+> **M6 drift note (shipped 2026-06-14):** the shipped table uses `receipt_path text` (Vercel Blob private store, signed-URL reads — same pattern as `flip_transactions.receipt_path`) **instead of** the `receipt_document_id uuid REFERENCES documents(id)` shown below, because the `documents` table doesn't exist until M11. Swap to a `documents` FK when M11 lands if desired. A `chk_tm_entry_fields` CHECK was also added (labor needs rate + days|hours; material needs cost).
+
 ```sql
 CREATE TABLE contractor_tm_entries (
   id                     uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1759,6 +1761,8 @@ When a `contractor_payment` changes status to `paid`, update `contractors.total_
 ### 14.4 Budget line contractor sync
 
 When a `contractor_payment` is paid, increment the corresponding `budget_lines.actual_amount_thb` (matched via `contractor_assignment_id`). In the M4.5+ world this works by inserting a `flip_transactions` row with `kind='spend'` on the payment's budget_line, which then feeds through §14.5 to `budget_lines.actual_amount_thb`. Contractor payments therefore unify with manual spend under the same rollup — no double-counting risk.
+
+> **M6 implementation note (shipped 2026-06-14):** this is implemented in **app code**, not a DB trigger. `markPaymentPaid` inserts the `flip_transactions` spend row inside its own transaction — the ledger row needs `created_by` + a human `description` a trigger can't supply. If the assignment has no linked budget line, the action **auto-creates one** (category = assignment's `budget_category_id`, else org `contingency`, else first category) and tags it with `contractor_assignment_id`. A `flip_transactions.contractor_payment_id` column (unique among non-deleted) guards against double-emitting. The §14.3 `total_paid_thb` / `total_committed_thb` rollups ARE DB triggers (`recompute_contractor_paid`, `recompute_assignment_committed`).
 
 ### 14.5 Budget line actual rollup (M4.5)
 
