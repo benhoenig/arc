@@ -1,0 +1,132 @@
+{
+  "back": "Flip contractors",
+  "assignmentModels": {
+    "fixed_milestone": "Fixed milestone",
+    "time_materials": "Time & materials"
+  },
+  "summary": {
+    "committed": "Committed",
+    "paid": "Paid"
+  },
+  "fields": {
+    "title": "Title",
+    "amount": "Amount",
+    "targetDate": "Target date",
+    "status": "Status",
+    "date": "Date",
+    "description": "Description"
+  },
+  "milestones": {
+    "title": "Milestones",
+    "empty": "No milestones yet",
+    "add": "Add milestone",
+    "addTitle": "Add milestone",
+    "editTitle": "Edit milestone",
+    "requestPayment": "Request payment",
+    "confirmDelete": "Delete this milestone?",
+    "statuses": {
+      "pending": "Pending",
+      "in_progress": "In progress",
+      "completed": "Completed",
+      "approved": "Approved",
+      "paid": "Paid",
+      "disputed": "Disputed"
+    }
+  },
+  "tm": {
+    "title": "Time & materials log",
+    "empty": "No entries yet",
+    "add": "Add entry",
+    "addTitle": "Add time / materials entry",
+    "type": "Type",
+    "lineTotal": "Line total",
+    "requestApproved": "Request approved",
+    "approve": "Approve",
+    "reject": "Reject",
+    "confirmDelete": "Delete this entry?",
+    "rate": "Rate",
+    "days": "Days",
+    "materialCost": "Material cost",
+    "markup": "Markup",
+    "receipt": "Receipt",
+    "uploadReceipt": "Attach receipt",
+    "changeReceipt": "Change receipt",
+    "types": {
+      "labor": "Labor",
+      "material": "Material"
+    },
+    "statuses": {
+      "pending": "Pending",
+      "approved": "Approved",
+      "rejected": "Rejected",
+      "paid": "Paid"
+    }
+  },
+  "payments": {
+    "title": "Payments",
+    "empty": "No payments yet",
+    "source": "For",
+    "requested": "Requested",
+    "paid": "Paid on",
+    "tmBatch": "T&M batch",
+    "cancel": "Cancel",
+    "confirmCancel": "Cancel this payment?",
+    "statuses": {
+      "requested": "Requested",
+      "approved": "Approved",
+      "paid": "Paid",
+      "rejected": "Rejected",
+      "canceled": "Canceled"
+    }
+  },
+  "queue": {
+    "title": "Payment queue",
+    "subtitle": "All payments awaiting approval or release",
+    "empty": "No payments in the queue",
+    "contractor": "Contractor",
+    "flip": "Flip",
+    "for": "For",
+    "approve": "Approve",
+    "markPaid": "Mark paid",
+    "reject": "Reject",
+    "confirmReject": "Reject this payment?"
+  },
+  "markPaid": {
+    "title": "Record payment",
+    "method": "Method",
+    "paidAt": "Paid on",
+    "reference": "Reference",
+    "referencePlaceholder": "Transfer / cheque no.",
+    "methods": {
+      "bank_transfer": "Bank transfer",
+      "cash": "Cash",
+      "check": "Cheque",
+      "other": "Other"
+    }
+  },
+  "errors": {
+    "validation": "Invalid input",
+    "conflict": "Cannot complete action",
+    "not_found": "Not found",
+    "forbidden": "Not allowed",
+    "server": "Something went wrong",
+    "flip_closed": "Flip is closed",
+    "wrong_payment_model": "Payment model mismatch",
+    "milestone_paid": "Milestone is paid and locked",
+    "has_payment": "A payment is attached",
+    "entry_locked": "Entry is locked — reopen to pending to edit",
+    "entry_paid": "Entry is already paid",
+    "milestone_not_billable": "Milestone is not billable yet",
+    "milestone_already_billed": "Milestone is already billed",
+    "no_approved_entries": "No approved entries to bill",
+    "not_approved": "Approve before paying",
+    "not_requested": "Not in requested state",
+    "not_open": "Payment is no longer open",
+    "paid_set_by_payment": "Paid status is set only by a payment",
+    "invalid_status_transition": "That status change isn't allowed",
+    "no_budget_category": "No budget category found",
+    "uploadInvalidType": "Unsupported file type",
+    "uploadTooLarge": "File too large",
+    "uploadFailed": "Upload failed"
+  }
+}

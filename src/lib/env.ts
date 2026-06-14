@@ -32,6 +32,21 @@ const envSchema = z.object({
   // Treat empty string as absent — a blank `SENTRY_DSN=` in .env.local counts
   // as "Sentry disabled" rather than a validation error.
   SENTRY_DSN: z.preprocess((v) => (v === '' ? undefined : v), z.string().url().optional()),
+
+  // AI document extraction (M6.7). Either auth method works — the OCR client
+  // prefers the API key, then falls back to a Claude subscription OAuth token
+  // (e.g. from `ant auth login` / Claude Code). Both optional: with neither
+  // set, extraction is simply disabled. Empty strings count as absent.
+  ANTHROPIC_API_KEY: z.preprocess((v) => (v === '' ? undefined : v), z.string().min(1).optional()),
+  ANTHROPIC_AUTH_TOKEN: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.string().min(1).optional(),
+  ),
+  // Override the extraction model without a code change. Defaults to Sonnet 4.6.
+  OCR_MODEL: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.string().min(1).default('claude-sonnet-4-6'),
+  ),
 });
 
 const parsed = envSchema.safeParse(process.env);

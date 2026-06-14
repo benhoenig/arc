@@ -26,6 +26,11 @@ export function buildReceiptPath(orgId: string, flipId: string, ext: string): st
   return `receipts/${orgId}/${flipId}/${crypto.randomUUID()}.${ext}`;
 }
 
+/** Path for a document uploaded only for AI extraction (not tied to a flip). */
+export function buildOcrDocPath(orgId: string, ext: string): string {
+  return `receipts/${orgId}/_ocr/${crypto.randomUUID()}.${ext}`;
+}
+
 /** URL of our authenticated streaming route for a stored blob pathname. */
 export function blobViewUrl(pathname: string | null | undefined): string | null {
   if (!pathname) {

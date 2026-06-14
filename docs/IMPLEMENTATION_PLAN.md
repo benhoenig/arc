@@ -37,7 +37,7 @@ Five principles that drive the sequencing:
 | [ ] | M4.5 | Flip transactions & receipts | Signed-amount ledger per flip, receipt uploads, trigger-maintained actuals, cash balance on flip header | 10–14 | 150 | 6 |
 | [ ] | M4.6 | Live P&L / feasibility | Read-only feasibility panel on flip detail composing latest revision + baseline + budget summary + deal analysis | 4–6 | 156 | 6 |
 | [ ] | M5 | Contractors (directory + assignments) | Contractor library + scope of work per flip | 20–28 | 150 | 6–7 |
-| [ ] | M6 | Contractor Payments | Milestones, T&M entries, payment queue | 24–32 | 182 | 7–9 |
+| [x] | M6 | Contractor Payments | Milestones, T&M entries, payment queue | 24–32 | 182 | 7–9 |
 | [ ] | M7 | Tasks & Timeline | Tasks per flip, milestone timeline, due dates | 12–18 | 200 | 9 |
 | [ ] | M8 | Investors & Capital | Investor directory, commitments per flip | 16–24 | 224 | 10 |
 | [ ] | M9 | Distributions & Statements | Payouts + PDF statement generation | 16–24 | 248 | 11 |
@@ -803,6 +803,20 @@ On FLIP-2026-001:
 - This replaces your current contractor-payment chaos completely
 - The budget-on-the-flip updates automatically as payments flow through
 - Payment queue is the Contractor Manager's daily-driver page
+
+### 9.6 Retrospective (shipped 2026-06-14)
+
+Built end-to-end against the spec. What shipped:
+
+- **DB** (`db/migrations/0002_contractor_payments.sql`): `contractor_milestones`, `contractor_tm_entries`, `contractor_payments` (all RLS-enabled, policy-less per the Neon pattern), `flip_transactions.contractor_payment_id` link column (unique among non-deleted), and two recompute-style triggers — `recompute_contractor_paid` (`total_paid_thb` on contractor + assignment) and `recompute_assignment_committed` (`total_committed_thb` from milestones + approved/paid T&M, on both source tables). **Validated on a throwaway Neon branch (insert milestone → committed updates; insert paid payment → both paid rollups update); NOT yet applied to `production` — Ben applies it.**
+- **Feature module** (`/src/features/contractors` expanded): `payment-schemas.ts` (milestone/T&M/payment validators + `canTransitionMilestoneStatus` / `canTransitionTmEntryStatus` + `computeTmLineTotal`), queries (milestones, T&M, payments-for-assignment/contractor, payment queue, assignment detail), 11 actions, and UI (milestone panel, T&M panel with receipt upload, assignment payments list, payment queue + mark-paid dialog, directionality-aware `PaymentStatusPill`).
+- **Routes**: `/contractors/payments` (queue) + `/flips/[id]/contractors/[assignmentId]` (assignment detail, renders milestones OR T&M by `payment_model`). `payments` i18n namespace (th + en), Payments sidebar item.
+
+**Decisions captured in `CLAUDE.md` "Key architectural decisions made during M6"**: app-code budget sync vs DB-trigger rollups (deviates from §14.4); payment→budget-line auto-create (option B); T&M batch recorded in `metadata.tmEntryIds` (no join table); `contractor_payment_id` double-emit guard; `paid` status reachable only via `markPaymentPaid`.
+
+**Deferred** (consistent with prior milestones): payments on closed flips blocked; no edit of paid milestones / approved-or-paid T&M entries; milestone-completed notifications (M11); role permissions (post-M7 pass); contractor performance rollups (M11 reviews); integration + Playwright tests.
+
+**Doc drift fixed in this milestone:** §6.4 spec'd `receipt_document_id uuid REFERENCES documents(id)` but `documents` doesn't exist until M11 — used `receipt_path text` (Vercel Blob signed-URL pattern) instead. §14.4 spec'd a trigger for budget sync — implemented as app-code (rationale above). DATA_MODEL.md §6.4 / §14.4 carry follow-up notes.
 
 ---
 

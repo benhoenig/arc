@@ -81,7 +81,12 @@ export function FlipAssignmentList({
                     ) : null}
                   </td>
                   <td className="px-2 py-2 text-text-default">
-                    <div>{a.title}</div>
+                    <Link
+                      href={`/flips/${a.flipId}/contractors/${a.id}`}
+                      className="font-medium text-text-strong hover:underline"
+                    >
+                      {a.title}
+                    </Link>
                     {categoryLabel ? (
                       <div className="text-xs text-text-muted">{categoryLabel}</div>
                     ) : null}

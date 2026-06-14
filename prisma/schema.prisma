@@ -62,6 +62,9 @@ model Organization {
   flipTransactions FlipTransaction[]
   contractors      Contractor[]
   contractorAssignments ContractorAssignment[]
+  contractorMilestones  ContractorMilestone[]
+  contractorTmEntries   ContractorTmEntry[]
+  contractorPayments    ContractorPayment[]
 
   @@map("organizations")
 }
@@ -105,6 +108,12 @@ model User {
   contractorsUpdated      Contractor[]     @relation("ContractorUpdatedBy")
   contractorAssignmentsCreated ContractorAssignment[] @relation("ContractorAssignmentCreatedBy")
   contractorAssignmentsUpdated ContractorAssignment[] @relation("ContractorAssignmentUpdatedBy")
+  milestonesCompleted     ContractorMilestone[] @relation("ContractorMilestoneCompletedBy")
+  milestonesApproved      ContractorMilestone[] @relation("ContractorMilestoneApprovedBy")
+  tmEntriesCreated        ContractorTmEntry[]   @relation("ContractorTmEntryCreatedBy")
+  tmEntriesApproved       ContractorTmEntry[]   @relation("ContractorTmEntryApprovedBy")
+  paymentsRequested       ContractorPayment[]   @relation("ContractorPaymentRequestedBy")
+  paymentsApproved        ContractorPayment[]   @relation("ContractorPaymentApprovedBy")
 
   @@map("users")
 }
@@ -438,6 +447,7 @@ model Flip {
   budgetLines   BudgetLine[]
   transactions  FlipTransaction[]
   contractorAssignments ContractorAssignment[]
+  contractorPayments    ContractorPayment[]
 
   @@index([organizationId], map: "idx_flips_org")
   @@index([propertyId], map: "idx_flips_property")
@@ -651,6 +661,10 @@ model FlipTransaction {
   // Supabase Storage path in private `budget-receipts` bucket.
   receiptPath     String?   @map("receipt_path")
 
+  // Set when this transaction was emitted by a paid contractor_payment (M6),
+  // so the payment path never double-emits a spend. Unique among non-deleted.
+  contractorPaymentId String? @map("contractor_payment_id") @db.Uuid
+
   notes           String?
   metadata        Json      @default("{}")
 
@@ -665,6 +679,7 @@ model FlipTransaction {
   budgetLine    BudgetLine?  @relation(fields: [budgetLineId], references: [id], onDelete: SetNull)
   createdByUser User?        @relation("FlipTransactionCreatedBy", fields: [createdBy], references: [id])
   updatedByUser User?        @relation("FlipTransactionUpdatedBy", fields: [updatedBy], references: [id])
+  contractorPayment ContractorPayment? @relation(fields: [contractorPaymentId], references: [id], onDelete: SetNull)
 
   @@index([flipId, date(sort: Desc)], map: "idx_flip_tx_flip")
   @@index([budgetLineId], map: "idx_flip_tx_budget_line")
@@ -715,6 +730,7 @@ model Contractor {
   createdByUser User?        @relation("ContractorCreatedBy", fields: [createdBy], references: [id])
   updatedByUser User?        @relation("ContractorUpdatedBy", fields: [updatedBy], references: [id])
   assignments   ContractorAssignment[]
+  payments      ContractorPayment[]
 
   @@index([organizationId], map: "idx_contractors_org")
   @@index([organizationId, primaryTrade], map: "idx_contractors_trade")
@@ -763,6 +779,9 @@ model ContractorAssignment {
   createdByUser  User?           @relation("ContractorAssignmentCreatedBy", fields: [createdBy], references: [id])
   updatedByUser  User?           @relation("ContractorAssignmentUpdatedBy", fields: [updatedBy], references: [id])
   budgetLines    BudgetLine[]
+  milestones     ContractorMilestone[]
+  tmEntries      ContractorTmEntry[]
+  payments       ContractorPayment[]
 
   @@index([flipId], map: "idx_assignments_flip")
   @@index([contractorId], map: "idx_assignments_contractor")
@@ -770,4 +789,130 @@ model ContractorAssignment {
   @@index([contractorId, startDate, targetEndDate], map: "idx_assignments_date_range")
   @@index([budgetCategoryId], map: "idx_assignments_category")
   @@map("contractor_assignments")
+}
+
+// ============================================
+// Contractor payments (M6)
+// ============================================
+
+model ContractorMilestone {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String    @map("organization_id") @db.Uuid
+  assignmentId    String    @map("assignment_id") @db.Uuid
+
+  title           String
+  sortOrder       Int       @default(0) @map("sort_order")
+  amountThb       Decimal   @map("amount_thb") @db.Decimal(14, 2)
+  percentage      Decimal?  @db.Decimal(5, 2)
+
+  targetDate      DateTime? @map("target_date") @db.Date
+  completedAt     DateTime? @map("completed_at") @db.Timestamptz(6)
+  completedBy     String?   @map("completed_by") @db.Uuid
+  approvedAt      DateTime? @map("approved_at") @db.Timestamptz(6)
+  approvedBy      String?   @map("approved_by") @db.Uuid
+
+  // 'pending' | 'in_progress' | 'completed' | 'approved' | 'paid' | 'disputed'
+  status          String    @default("pending")
+
+  notes           String?
+
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt       DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization    Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignment      ContractorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  completedByUser User?                @relation("ContractorMilestoneCompletedBy", fields: [completedBy], references: [id])
+  approvedByUser  User?                @relation("ContractorMilestoneApprovedBy", fields: [approvedBy], references: [id])
+  payments        ContractorPayment[]
+
+  @@index([assignmentId, sortOrder], map: "idx_milestones_assignment")
+  @@index([organizationId], map: "idx_milestones_pending_approval")
+  @@map("contractor_milestones")
+}
+
+model ContractorTmEntry {
+  id                String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId    String    @map("organization_id") @db.Uuid
+  assignmentId      String    @map("assignment_id") @db.Uuid
+
+  // 'labor' | 'material'
+  entryType         String    @map("entry_type")
+  entryDate         DateTime  @map("entry_date") @db.Date
+  description       String
+
+  hoursWorked       Decimal?  @map("hours_worked") @db.Decimal(6, 2)
+  daysWorked        Decimal?  @map("days_worked") @db.Decimal(6, 2)
+  appliedRateThb    Decimal?  @map("applied_rate_thb") @db.Decimal(10, 2)
+
+  materialCostThb   Decimal?  @map("material_cost_thb") @db.Decimal(14, 2)
+  materialMarkupPct Decimal?  @map("material_markup_pct") @db.Decimal(5, 2)
+  receiptPath       String?   @map("receipt_path")
+
+  lineTotalThb      Decimal   @map("line_total_thb") @db.Decimal(14, 2)
+
+  // 'pending' | 'approved' | 'rejected' | 'paid'
+  status            String    @default("pending")
+  approvedAt        DateTime? @map("approved_at") @db.Timestamptz(6)
+  approvedBy        String?   @map("approved_by") @db.Uuid
+
+  notes             String?
+
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy         String?   @map("created_by") @db.Uuid
+  deletedAt         DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization    Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignment      ContractorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Cascade)
+  approvedByUser  User?                @relation("ContractorTmEntryApprovedBy", fields: [approvedBy], references: [id])
+  createdByUser   User?                @relation("ContractorTmEntryCreatedBy", fields: [createdBy], references: [id])
+
+  @@index([assignmentId, entryDate], map: "idx_tm_assignment")
+  @@index([organizationId], map: "idx_tm_pending")
+  @@map("contractor_tm_entries")
+}
+
+model ContractorPayment {
+  id               String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId   String    @map("organization_id") @db.Uuid
+  assignmentId     String    @map("assignment_id") @db.Uuid
+  contractorId     String    @map("contractor_id") @db.Uuid
+  flipId           String    @map("flip_id") @db.Uuid
+  milestoneId      String?   @map("milestone_id") @db.Uuid
+
+  amountThb        Decimal   @map("amount_thb") @db.Decimal(14, 2)
+  paymentMethod    String?   @map("payment_method")
+  paymentReference String?   @map("payment_reference")
+  paidAt           DateTime? @map("paid_at") @db.Timestamptz(6)
+
+  requestedAt      DateTime  @default(now()) @map("requested_at") @db.Timestamptz(6)
+  requestedBy      String?   @map("requested_by") @db.Uuid
+  approvedAt       DateTime? @map("approved_at") @db.Timestamptz(6)
+  approvedBy       String?   @map("approved_by") @db.Uuid
+
+  // 'requested' | 'approved' | 'paid' | 'rejected' | 'canceled'
+  status           String    @default("requested")
+
+  notes            String?
+  metadata         Json      @default("{}")
+
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt        DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  deletedAt        DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization    Organization         @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  assignment      ContractorAssignment @relation(fields: [assignmentId], references: [id], onDelete: Restrict)
+  contractor      Contractor           @relation(fields: [contractorId], references: [id], onDelete: Restrict)
+  flip            Flip                 @relation(fields: [flipId], references: [id], onDelete: Restrict)
+  milestone       ContractorMilestone? @relation(fields: [milestoneId], references: [id], onDelete: SetNull)
+  requestedByUser User?                @relation("ContractorPaymentRequestedBy", fields: [requestedBy], references: [id])
+  approvedByUser  User?                @relation("ContractorPaymentApprovedBy", fields: [approvedBy], references: [id])
+  transactions    FlipTransaction[]
+
+  @@index([assignmentId], map: "idx_payments_assignment")
+  @@index([contractorId], map: "idx_payments_contractor")
+  @@index([organizationId, status], map: "idx_payments_queue")
+  @@index([flipId], map: "idx_payments_flip")
+  @@map("contractor_payments")
 }

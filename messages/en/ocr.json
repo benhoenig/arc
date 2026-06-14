@@ -1,0 +1,66 @@
+{
+  "extract": "Extract from file",
+  "title": "AI extraction",
+  "targets": {
+    "transaction": "Transactions",
+    "budget_line": "Budget lines",
+    "milestone": "Milestones",
+    "tm_entry": "Time & materials",
+    "contractor": "Contractor"
+  },
+  "configure": {
+    "target": "Log as",
+    "mode": "This file is",
+    "file": "File (image or PDF)",
+    "chooseFile": "Choose file"
+  },
+  "modes": {
+    "single": "One entry",
+    "batch": "Multiple entries"
+  },
+  "extractCta": "Extract",
+  "extracting": "Reading file…",
+  "review": {
+    "help": "Review and edit before saving. Untick anything the AI misread.",
+    "back": "Back",
+    "saveAll": "Save all ({count})",
+    "include": "Include this row",
+    "remove": "Remove row"
+  },
+  "columns": {
+    "description": "Description",
+    "title": "Milestone title",
+    "amount": "Amount",
+    "budgetLine": "Budget line",
+    "category": "Category",
+    "name": "Name",
+    "phone": "Phone",
+    "taxId": "Tax ID",
+    "contactPerson": "Contact person",
+    "email": "Email",
+    "address": "Address"
+  },
+  "entryTypes": {
+    "labor": "Labor",
+    "material": "Material"
+  },
+  "errors": {
+    "noFile": "Please choose a file",
+    "noItems": "No data found in the file",
+    "noRows": "No rows selected",
+    "uploadInvalidType": "Unsupported file type (image or PDF only)",
+    "uploadTooLarge": "File too large",
+    "uploadFailed": "Upload failed",
+    "unsupported_file_type": "Unsupported file type",
+    "ocr_not_configured": "AI isn't configured yet (needs an API key or subscription)",
+    "extraction_refused": "The AI couldn't read this file",
+    "extraction_failed": "Extraction failed — please try again",
+    "flip_closed": "Flip is closed",
+    "wrong_payment_model": "Payment model mismatch",
+    "validation": "Invalid input",
+    "conflict": "Cannot complete action",
+    "not_found": "Not found",
+    "forbidden": "Not allowed",
+    "server": "Something went wrong"
+  }
+}

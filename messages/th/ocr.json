@@ -1,0 +1,66 @@
+{
+  "extract": "ดึงข้อมูลจากไฟล์",
+  "title": "ดึงข้อมูลด้วย AI",
+  "targets": {
+    "transaction": "รายการเงิน",
+    "budget_line": "รายการงบประมาณ",
+    "milestone": "งวดงาน",
+    "tm_entry": "เวลา/วัสดุ",
+    "contractor": "ผู้รับเหมา"
+  },
+  "configure": {
+    "target": "บันทึกเป็น",
+    "mode": "ไฟล์นี้คือ",
+    "file": "ไฟล์ (รูปภาพ หรือ PDF)",
+    "chooseFile": "เลือกไฟล์"
+  },
+  "modes": {
+    "single": "รายการเดียว",
+    "batch": "หลายรายการ"
+  },
+  "extractCta": "ดึงข้อมูล",
+  "extracting": "กำลังอ่านไฟล์…",
+  "review": {
+    "help": "ตรวจสอบและแก้ไขก่อนบันทึก เอา AI อ่านผิดออกได้",
+    "back": "ย้อนกลับ",
+    "saveAll": "บันทึกทั้งหมด ({count})",
+    "include": "รวมรายการนี้",
+    "remove": "ลบรายการ"
+  },
+  "columns": {
+    "description": "รายละเอียด",
+    "title": "ชื่องวดงาน",
+    "amount": "จำนวนเงิน",
+    "budgetLine": "รายการงบ",
+    "category": "หมวด",
+    "name": "ชื่อ",
+    "phone": "โทรศัพท์",
+    "taxId": "เลขผู้เสียภาษี",
+    "contactPerson": "ผู้ติดต่อ",
+    "email": "อีเมล",
+    "address": "ที่อยู่"
+  },
+  "entryTypes": {
+    "labor": "ค่าแรง",
+    "material": "วัสดุ"
+  },
+  "errors": {
+    "noFile": "กรุณาเลือกไฟล์",
+    "noItems": "ไม่พบข้อมูลในไฟล์",
+    "noRows": "ไม่มีรายการที่เลือก",
+    "uploadInvalidType": "ชนิดไฟล์ไม่รองรับ (รูปภาพ หรือ PDF เท่านั้น)",
+    "uploadTooLarge": "ไฟล์ใหญ่เกินไป",
+    "uploadFailed": "อัปโหลดไม่สำเร็จ",
+    "unsupported_file_type": "ชนิดไฟล์ไม่รองรับ",
+    "ocr_not_configured": "ยังไม่ได้ตั้งค่า AI (ต้องมี API key หรือ subscription)",
+    "extraction_refused": "AI ไม่สามารถอ่านไฟล์นี้ได้",
+    "extraction_failed": "อ่านข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง",
+    "flip_closed": "ฟลิปปิดแล้ว",
+    "wrong_payment_model": "รูปแบบการจ่ายไม่ตรงกัน",
+    "validation": "ข้อมูลไม่ถูกต้อง",
+    "conflict": "ดำเนินการไม่ได้",
+    "not_found": "ไม่พบรายการ",
+    "forbidden": "ไม่มีสิทธิ์",
+    "server": "เกิดข้อผิดพลาด"
+  }
+}
