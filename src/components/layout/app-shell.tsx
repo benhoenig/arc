@@ -4,6 +4,7 @@ import {
   HardHat,
   Layers,
   LayoutDashboard,
+  ListChecks,
   type LucideIcon,
   PanelLeftClose,
   PanelLeftOpen,
@@ -31,8 +32,12 @@ type Props = {
 
 type NavItem = { key: string; href: string; icon: LucideIcon };
 
-// Dashboard stands alone — it's the overview, not part of a workflow group.
-const DASHBOARD_NAV: NavItem = { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard };
+// Personal, cross-flip views stand alone above the operational groups — the
+// overview and the operator's own task inbox.
+const PERSONAL_NAV: NavItem[] = [
+  { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
+  { key: 'myTasks', href: '/my-tasks', icon: ListChecks },
+];
 
 // Operational nav, grouped: "operations" is the workflows/queues you act on
 // (the find → flip → sell pipeline, plus the contractor-payment queue);
@@ -68,7 +73,7 @@ const SETTINGS_NAV = [
 // sibling (e.g. /contractors/payments) is the page. Same for /settings vs
 // /settings/members.
 const ALL_NAV_HREFS: string[] = [
-  DASHBOARD_NAV,
+  ...PERSONAL_NAV,
   ...NAV_GROUPS.flatMap((g) => g.items),
   ...SETTINGS_NAV,
 ].map((i) => i.href);
@@ -170,7 +175,7 @@ export function AppShell({ orgName, userName, userEmail, children }: Props) {
           </Button>
         </div>
         <nav className="flex flex-1 flex-col gap-3 overflow-y-auto px-2 py-2">
-          <div className="flex flex-col gap-0.5">{renderNavItem(DASHBOARD_NAV)}</div>
+          <div className="flex flex-col gap-0.5">{PERSONAL_NAV.map(renderNavItem)}</div>
 
           {NAV_GROUPS.map((group) => (
             <div key={group.key} className="flex flex-col gap-0.5">

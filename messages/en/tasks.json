@@ -1,0 +1,99 @@
+{
+  "title": "Tasks",
+  "subtitle": "Work to be done on this flip",
+  "empty": "No tasks yet. Add your first task above.",
+  "quickAdd": {
+    "placeholder": "Add a task and press Enter…",
+    "add": "Add"
+  },
+  "sections": {
+    "open": "To do",
+    "done": "Completed"
+  },
+  "actions": {
+    "addTask": "Add task",
+    "addDetailed": "Add detailed task",
+    "addMilestone": "Add milestone",
+    "edit": "Edit",
+    "delete": "Delete",
+    "complete": "Mark complete",
+    "reopen": "Reopen",
+    "viewTasks": "View tasks",
+    "viewTimeline": "View timeline",
+    "confirmDelete": "Delete this task? This can't be undone.",
+    "confirmDeleteMilestone": "Delete this milestone? This can't be undone."
+  },
+  "form": {
+    "createTitle": "New task",
+    "editTitle": "Edit task",
+    "title": "Title",
+    "titlePlaceholder": "e.g. Order bathroom tiles",
+    "description": "Description",
+    "priority": "Priority",
+    "dueDate": "Due date",
+    "assignee": "Assignee",
+    "unassigned": "Unassigned"
+  },
+  "priority": {
+    "low": "Low",
+    "normal": "Normal",
+    "high": "High",
+    "urgent": "Urgent"
+  },
+  "status": {
+    "open": "Open",
+    "in_progress": "In progress",
+    "blocked": "Blocked",
+    "done": "Done",
+    "canceled": "Canceled"
+  },
+  "due": {
+    "overdue": "Overdue",
+    "today": "Due today",
+    "tomorrow": "Due tomorrow",
+    "none": "No due date"
+  },
+  "panel": {
+    "title": "Tasks & Timeline",
+    "openTasks": "{count, plural, =0 {No open tasks} one {# open task} other {# open tasks}}",
+    "overdue": "{count, plural, =0 {} one {# overdue} other {# overdue}}",
+    "upcomingMilestone": "Next milestone",
+    "noMilestones": "No milestones set",
+    "viewAll": "View tasks & timeline"
+  },
+  "myTasks": {
+    "title": "My Tasks",
+    "subtitle": "Open tasks assigned to you across every flip",
+    "empty": "You're all caught up — no open tasks assigned to you.",
+    "noDueDate": "No due date"
+  },
+  "timeline": {
+    "title": "Timeline",
+    "subtitle": "Flip-level milestones",
+    "empty": "No milestones yet. Add a checkpoint to start the timeline.",
+    "target": "Target",
+    "actual": "Actual",
+    "critical": "Critical path",
+    "pending": "Pending",
+    "hit": "Hit",
+    "onTime": "On time",
+    "early": "Early",
+    "late": "Late",
+    "markHit": "Mark hit",
+    "reopen": "Reopen",
+    "form": {
+      "createTitle": "New milestone",
+      "editTitle": "Edit milestone",
+      "title": "Title",
+      "titlePlaceholder": "e.g. Renovation complete",
+      "description": "Description",
+      "targetDate": "Target date",
+      "actualDate": "Actual date",
+      "critical": "On the critical path"
+    }
+  },
+  "errors": {
+    "validation": "Please check your input.",
+    "server": "Something went wrong. Please try again."
+  }
+}
