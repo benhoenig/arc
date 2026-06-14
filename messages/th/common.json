@@ -14,7 +14,11 @@
     "settings": "ตั้งค่า",
     "members": "สมาชิก",
     "collapseSidebar": "ย่อแถบเมนู",
-    "expandSidebar": "ขยายแถบเมนู"
+    "expandSidebar": "ขยายแถบเมนู",
+    "groups": {
+      "operations": "ดำเนินงาน",
+      "partners": "พาร์ทเนอร์"
+    }
   },
   "auth": {
     "login": {

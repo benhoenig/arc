@@ -4,6 +4,7 @@ import {
   HardHat,
   Layers,
   LayoutDashboard,
+  type LucideIcon,
   PanelLeftClose,
   PanelLeftOpen,
   Search as SearchIcon,
@@ -28,16 +29,32 @@ type Props = {
   children: React.ReactNode;
 };
 
-// Primary operational nav — the day-to-day workflow.
-const PRIMARY_NAV = [
-  { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
-  { key: 'sourcing', href: '/sourcing', icon: SearchIcon },
-  { key: 'flips', href: '/flips', icon: Layers },
-  { key: 'contractors', href: '/contractors', icon: HardHat },
-  { key: 'payments', href: '/contractors/payments', icon: Wallet },
-  { key: 'investors', href: '/investors', icon: Users },
-  { key: 'listings', href: '/listings', icon: Store },
-] as const;
+type NavItem = { key: string; href: string; icon: LucideIcon };
+
+// Dashboard stands alone — it's the overview, not part of a workflow group.
+const DASHBOARD_NAV: NavItem = { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard };
+
+// Operational nav, grouped: "operations" is the workflows/queues you act on
+// (the find → flip → sell pipeline, plus the contractor-payment queue);
+// "partners" is the directories of who you work with.
+const NAV_GROUPS: { key: string; items: NavItem[] }[] = [
+  {
+    key: 'operations',
+    items: [
+      { key: 'sourcing', href: '/sourcing', icon: SearchIcon },
+      { key: 'flips', href: '/flips', icon: Layers },
+      { key: 'payments', href: '/contractors/payments', icon: Wallet },
+      { key: 'listings', href: '/listings', icon: Store },
+    ],
+  },
+  {
+    key: 'partners',
+    items: [
+      { key: 'contractors', href: '/contractors', icon: HardHat },
+      { key: 'investors', href: '/investors', icon: Users },
+    ],
+  },
+];
 
 // Org setup / admin — pinned to the bottom of the sidebar, separated from the
 // operational nav above. Both route into /settings/*.
@@ -45,6 +62,16 @@ const SETTINGS_NAV = [
   { key: 'members', href: '/settings/members', icon: UserCog },
   { key: 'settings', href: '/settings', icon: SlidersHorizontal },
 ] as const;
+
+// Every nav href, used to resolve the single active item by LONGEST match — so a
+// parent route (e.g. /contractors) isn't highlighted when a more specific
+// sibling (e.g. /contractors/payments) is the page. Same for /settings vs
+// /settings/members.
+const ALL_NAV_HREFS: string[] = [
+  DASHBOARD_NAV,
+  ...NAV_GROUPS.flatMap((g) => g.items),
+  ...SETTINGS_NAV,
+].map((i) => i.href);
 
 const MOBILE_TABS = [
   { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
@@ -74,9 +101,36 @@ export function AppShell({ orgName, userName, userEmail, children }: Props) {
     localStorage.setItem(SIDEBAR_STORAGE_KEY, String(isSidebarCollapsed));
   }, [hasLoadedSidebarPreference, isSidebarCollapsed]);
 
+  const cleanPath = pathname.replace(/^\/(th|en)/, '') || '/';
+  // The active item is the longest href that matches the current path (exact or
+  // as a prefix), so the most specific route wins and parents don't co-highlight.
+  const activeHref = ALL_NAV_HREFS.filter(
+    (href) => cleanPath === href || cleanPath.startsWith(`${href}/`),
+  ).sort((a, b) => b.length - a.length)[0];
+
   function isActive(href: string): boolean {
-    const clean = pathname.replace(/^\/(th|en)/, '') || '/';
-    return clean === href || clean.startsWith(`${href}/`);
+    return href === activeHref;
+  }
+
+  function renderNavItem({ key, href, icon: Icon }: NavItem) {
+    return (
+      <Link
+        key={key}
+        href={href}
+        aria-label={isSidebarCollapsed ? t(key) : undefined}
+        title={isSidebarCollapsed ? t(key) : undefined}
+        className={cn(
+          'flex h-8 items-center rounded-md text-sm transition-colors',
+          isSidebarCollapsed ? 'justify-center px-0' : 'gap-2.5 px-3',
+          isActive(href)
+            ? 'bg-fill-selected font-medium text-text-strong'
+            : 'text-text-muted hover:bg-fill-hover hover:text-text-default',
+        )}
+      >
+        <Icon size={16} strokeWidth={1.5} />
+        {isSidebarCollapsed ? null : <span className="truncate">{t(key)}</span>}
+      </Link>
+    );
   }
 
   return (
@@ -115,47 +169,22 @@ export function AppShell({ orgName, userName, userEmail, children }: Props) {
             )}
           </Button>
         </div>
-        <nav className="flex flex-1 flex-col px-2 py-2">
-          <div className="flex flex-col gap-0.5">
-            {PRIMARY_NAV.map(({ key, href, icon: Icon }) => (
-              <Link
-                key={key}
-                href={href}
-                aria-label={isSidebarCollapsed ? t(key) : undefined}
-                title={isSidebarCollapsed ? t(key) : undefined}
-                className={cn(
-                  'flex h-9 items-center rounded-md text-sm transition-colors',
-                  isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3',
-                  isActive(href)
-                    ? 'bg-fill-selected font-medium text-text-strong'
-                    : 'text-text-muted hover:bg-fill-hover hover:text-text-default',
-                )}
-              >
-                <Icon size={16} strokeWidth={1.5} />
-                {isSidebarCollapsed ? null : <span className="truncate">{t(key)}</span>}
-              </Link>
-            ))}
-          </div>
+        <nav className="flex flex-1 flex-col gap-3 overflow-y-auto px-2 py-2">
+          <div className="flex flex-col gap-0.5">{renderNavItem(DASHBOARD_NAV)}</div>
+
+          {NAV_GROUPS.map((group) => (
+            <div key={group.key} className="flex flex-col gap-0.5">
+              {isSidebarCollapsed ? null : (
+                <p className="px-3 pb-0.5 text-[11px] font-medium uppercase tracking-wider text-text-muted">
+                  {t(`groups.${group.key}`)}
+                </p>
+              )}
+              {group.items.map(renderNavItem)}
+            </div>
+          ))}
 
           <div className="mt-auto flex flex-col gap-0.5 border-t border-border-subtle pt-2">
-            {SETTINGS_NAV.map(({ key, href, icon: Icon }) => (
-              <Link
-                key={key}
-                href={href}
-                aria-label={isSidebarCollapsed ? t(key) : undefined}
-                title={isSidebarCollapsed ? t(key) : undefined}
-                className={cn(
-                  'flex h-9 items-center rounded-md text-sm transition-colors',
-                  isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3',
-                  isActive(href)
-                    ? 'bg-fill-selected font-medium text-text-strong'
-                    : 'text-text-muted hover:bg-fill-hover hover:text-text-default',
-                )}
-              >
-                <Icon size={16} strokeWidth={1.5} />
-                {isSidebarCollapsed ? null : <span className="truncate">{t(key)}</span>}
-              </Link>
-            ))}
+            {SETTINGS_NAV.map(renderNavItem)}
           </div>
         </nav>
       </aside>

@@ -14,7 +14,11 @@
     "settings": "Settings",
     "members": "Members",
     "collapseSidebar": "Collapse sidebar",
-    "expandSidebar": "Expand sidebar"
+    "expandSidebar": "Expand sidebar",
+    "groups": {
+      "operations": "Operations",
+      "partners": "Partners"
+    }
   },
   "auth": {
     "login": {
