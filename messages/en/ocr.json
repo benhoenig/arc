@@ -55,6 +55,7 @@
     "ocr_not_configured": "AI isn't configured yet (needs an API key or subscription)",
     "extraction_refused": "The AI couldn't read this file",
     "extraction_failed": "Extraction failed — please try again",
+    "invalid_date": "A row has an invalid date (must be YYYY-MM-DD)",
     "flip_closed": "Flip is closed",
     "wrong_payment_model": "Payment model mismatch",
     "validation": "Invalid input",

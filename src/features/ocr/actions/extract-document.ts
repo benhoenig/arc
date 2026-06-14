@@ -2,10 +2,11 @@
 
 import { zodOutputFormat } from '@anthropic-ai/sdk/helpers/zod';
 import { get } from '@vercel/blob';
+import { recordAiUsage } from '@/features/ai-usage/lib/record-usage';
 import { pathBelongsToOrg } from '@/lib/blob-paths';
 import { getActiveOrgId, requireAuth } from '@/server/auth';
 import type { ActionResult } from '@/types/common';
-import { getAnthropicClient, OCR_MODEL } from '../lib/anthropic';
+import { getOcrClientForOrg } from '../lib/anthropic';
 import {
   type ExtractedRow,
   type ExtractionMode,
@@ -25,13 +26,14 @@ type ExtractInput = {
 export async function extractFromDocument(
   input: ExtractInput,
 ): Promise<ActionResult<{ target: ExtractionTarget; items: ExtractedRow[] }>> {
-  await requireAuth();
+  const user = await requireAuth();
   const orgId = await getActiveOrgId();
 
-  const client = getAnthropicClient();
-  if (!client) {
+  const ocr = await getOcrClientForOrg(orgId);
+  if (!ocr) {
     return { ok: false, error: 'conflict', message: 'ocr_not_configured' };
   }
+  const { client, model } = ocr;
 
   // Tenant guard — only read blobs under the caller's org.
   if (!pathBelongsToOrg(input.blobPathname, orgId)) {
@@ -73,7 +75,7 @@ export async function extractFromDocument(
         : `This document lists multiple entries (e.g. a contractor's scope of work or an itemized receipt). Extract every distinct line item. Each item is ${config.rowHint}. Do not invent rows; only extract what is on the document. Skip subtotals, totals, tax lines, and headers.`;
 
     const response = await client.messages.parse({
-      model: OCR_MODEL,
+      model,
       max_tokens: 4096,
       system:
         'You extract structured data from Thai property-renovation documents (receipts, quotations, contractor scopes of work). Amounts are Thai Baht — return them as plain numbers with no commas, currency symbols, or spaces. Preserve Thai text exactly as written.',
@@ -85,6 +87,23 @@ export async function extractFromDocument(
       ],
       output_config: { format: zodOutputFormat(extractionEnvelope(input.target)) },
     });
+
+    // Record token usage (best-effort) — tokens are billed regardless of the
+    // outcome below, so log before the refusal/parse-failure returns.
+    if (response.usage) {
+      await recordAiUsage({
+        orgId,
+        userId: user.id,
+        model,
+        feature: 'ocr_extraction',
+        usage: {
+          inputTokens: response.usage.input_tokens ?? 0,
+          outputTokens: response.usage.output_tokens ?? 0,
+          cacheReadTokens: response.usage.cache_read_input_tokens ?? 0,
+          cacheWriteTokens: response.usage.cache_creation_input_tokens ?? 0,
+        },
+      });
+    }
 
     if (response.stop_reason === 'refusal') {
       return { ok: false, error: 'conflict', message: 'extraction_refused' };

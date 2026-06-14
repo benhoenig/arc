@@ -1,0 +1,91 @@
+{
+  "hub": {
+    "title": "การตั้งค่า",
+    "subtitle": "จัดการบัญชีของคุณและการตั้งค่าขององค์กร",
+    "account": {
+      "title": "บัญชีของฉัน",
+      "description": "เปลี่ยนรหัสผ่านและดูข้อมูลบัญชี"
+    },
+    "ai": {
+      "title": "การตั้งค่า AI",
+      "description": "จัดการ API key และโมเดลสำหรับการดึงข้อมูลจากเอกสาร"
+    },
+    "members": {
+      "title": "สมาชิก",
+      "description": "เชิญและจัดการสมาชิกในองค์กร"
+    },
+    "budgetCategories": {
+      "title": "หมวดงบประมาณ",
+      "description": "จัดการหมวดหมู่งบประมาณขององค์กร"
+    }
+  },
+  "account": {
+    "title": "บัญชีของฉัน",
+    "subtitle": "จัดการข้อมูลบัญชีและรหัสผ่านของคุณ",
+    "profileTitle": "ข้อมูลส่วนตัว",
+    "name": "ชื่อ",
+    "email": "อีเมล",
+    "password": {
+      "title": "เปลี่ยนรหัสผ่าน",
+      "currentPassword": "รหัสผ่านปัจจุบัน",
+      "newPassword": "รหัสผ่านใหม่",
+      "newPasswordPlaceholder": "อย่างน้อย 8 ตัวอักษร",
+      "confirmPassword": "ยืนยันรหัสผ่านใหม่",
+      "submit": "เปลี่ยนรหัสผ่าน",
+      "submitting": "กำลังเปลี่ยน...",
+      "success": "เปลี่ยนรหัสผ่านเรียบร้อยแล้ว",
+      "errors": {
+        "required": "กรุณากรอกข้อมูล",
+        "tooShort": "รหัสผ่านต้องมีอย่างน้อย 8 ตัวอักษร",
+        "passwordMismatch": "รหัสผ่านใหม่ไม่ตรงกัน",
+        "samePassword": "รหัสผ่านใหม่ต้องไม่ซ้ำกับรหัสผ่านเดิม",
+        "invalidCurrent": "รหัสผ่านปัจจุบันไม่ถูกต้อง",
+        "server": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"
+      }
+    }
+  },
+  "ai": {
+    "title": "การตั้งค่า AI",
+    "subtitle": "กำหนดค่า Anthropic API key หรือ Claude subscription และโมเดลสำหรับการดึงข้อมูลจากเอกสาร",
+    "statusTitle": "สถานะปัจจุบัน",
+    "sourceOrgKey": "กำลังใช้ API key ขององค์กรนี้",
+    "sourceOrgSubscription": "กำลังเชื่อมต่อกับ Claude subscription ขององค์กรนี้",
+    "sourceEnv": "กำลังใช้ข้อมูลรับรองที่ตั้งค่าไว้ในระบบ (ค่าเริ่มต้น)",
+    "sourceNone": "ยังไม่ได้ตั้งค่าข้อมูลรับรอง — การดึงข้อมูลจากเอกสารถูกปิดใช้งาน",
+    "clearCredential": "ลบข้อมูลรับรอง",
+    "credentialCleared": "ลบข้อมูลรับรองเรียบร้อยแล้ว",
+    "encryptionUnavailable": "ยังไม่ได้ตั้งค่าคีย์เข้ารหัส (SECRET_ENCRYPTION_KEY) ในระบบ จึงยังไม่สามารถบันทึกข้อมูลรับรองได้",
+    "keyTitle": "Anthropic API key",
+    "keyHelp": "คีย์จะถูกเข้ารหัสก่อนจัดเก็บ และจะไม่ถูกแสดงอีกหลังบันทึก",
+    "keyLabel": "API key",
+    "saveKey": "บันทึกคีย์",
+    "replaceKey": "เปลี่ยนคีย์",
+    "keySaved": "บันทึก API key เรียบร้อยแล้ว",
+    "subscriptionTitle": "Claude subscription",
+    "subscriptionHelp": "เชื่อมต่อบัญชี Claude subscription เพื่อใช้โควต้าการสมัครสมาชิกแทน API key ข้อมูลรับรองจะถูกเข้ารหัสก่อนจัดเก็บ และระบบจะต่ออายุโทเค็นให้อัตโนมัติ",
+    "subscriptionHint": "บน macOS คัดลอกข้อมูลรับรองได้จาก Terminal ด้วยคำสั่ง:",
+    "subscriptionLabel": "ข้อมูลรับรอง (credential JSON)",
+    "connectSubscription": "บันทึก subscription",
+    "reconnectSubscription": "อัปเดต subscription",
+    "subscriptionConnected": "เชื่อมต่อ Claude subscription เรียบร้อยแล้ว",
+    "modelTitle": "โมเดล",
+    "modelHelp": "เลือกโมเดล Claude ที่จะใช้ดึงข้อมูลจากเอกสาร",
+    "modelLabel": "โมเดลที่ใช้",
+    "modelSaved": "บันทึกโมเดลเรียบร้อยแล้ว",
+    "recommended": "แนะนำ",
+    "usageTitle": "การใช้งานและค่าใช้จ่าย",
+    "usageNote": "ประเมินจากราคา API ของ Anthropic หากใช้ Claude subscription ตัวเลขนี้คือมูลค่าเทียบเท่าราคา API ไม่ใช่ค่าใช้จ่ายจริง",
+    "usageEmpty": "ยังไม่มีการใช้งาน AI",
+    "usageThisMonth": "เดือนนี้",
+    "usageAllTime": "ทั้งหมด",
+    "usageExtractions": "{count} ครั้ง",
+    "usageTokens": "โทเค็นทั้งหมด {total} (ป้อนเข้า {input} · ผลลัพธ์ {output})",
+    "errors": {
+      "invalidKey": "API key ไม่ถูกต้อง (ต้องขึ้นต้นด้วย sk-ant-)",
+      "invalid_credential": "ข้อมูลรับรองไม่ถูกต้อง กรุณาคัดลอกใหม่จาก Claude Code",
+      "encryption_not_configured": "ยังไม่ได้ตั้งค่าคีย์เข้ารหัสในระบบ",
+      "forbidden": "คุณไม่มีสิทธิ์ดำเนินการนี้",
+      "server": "เกิดข้อผิดพลาด กรุณาลองใหม่อีกครั้ง"
+    }
+  }
+}

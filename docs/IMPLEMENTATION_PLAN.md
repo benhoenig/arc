@@ -762,8 +762,8 @@ Create contractor "ช่างสมชาย ระบบไฟฟ้า" as a
 - [ ] `/flips/[flipId]/contractors/[assignmentId]` → assignment detail with milestones OR T&M entries (based on payment_model)
 
 **Integration:**
-- [ ] When a payment is marked `paid`, the trigger increments `budget_lines.actual_amount_thb` on the linked budget line — so the flip's budget variance updates automatically
-- [ ] Contractor Manager gets notified (via `notifications` table — queue only; actual sending is M11) when a milestone is marked `completed` and needs approval
+- [ ] When a payment is marked `paid`, the `markPaymentPaid` action inserts a `flip_transactions` row (`kind='spend'`, negative amount, tagged to the assignment's budget line); the existing `recompute_budget_line_actual()` trigger then updates `budget_lines.actual_amount_thb` automatically. **Payments are NOT written directly to `budget_lines.actual_amount_thb`** — they flow through the M4.5 ledger so reversal (reject/cancel) just soft-deletes the ledger row and the rollup unwinds. (Supersedes DATA_MODEL.md §14.3, which describes a direct-increment trigger.)
+- [ ] ~~Contractor Manager gets notified when a milestone needs approval~~ — **DEFERRED to M11.** No `notifications` table exists yet, and there's no consumer until M11 (LINE/sending). The `/contractors/payments` queue page IS the Contractor Manager's view of what needs approval — no notification needed in M6. The `notifications` table is built properly in M11. _(Decided 2026-06-12 with Ben.)_
 
 **i18n:** `/messages/{th,en}/payments.json` (new namespace)
 
@@ -774,7 +774,7 @@ Create contractor "ช่างสมชาย ระบบไฟฟ้า" as a
 - [ ] Integration test: full T&M lifecycle — create assignment → add 5 labor entries + 3 material entries → approve → batch request payment → approve → mark paid → verify totals
 - [ ] Integration test: reject a payment — does NOT update budget actuals, milestone returns to `completed` state
 - [ ] Integration test: trigger correctness — idempotent (marking paid twice doesn't double-increment)
-- [ ] Playwright: Contractor Manager workflow — receive milestone completion notification (simulated) → approve milestone → approve payment → mark paid → see budget page reflects new actual
+- [ ] Playwright: Contractor Manager workflow — open payment queue → approve milestone → approve payment → mark paid → see budget page reflects new actual _(no notification step — deferred to M11)_
 
 **Manual:**
 - [ ] Payment queue page is fast (this will be used multiple times per day)
@@ -793,6 +793,9 @@ On FLIP-2026-001:
 
 ### 9.4 What's explicitly NOT in M6
 
+- Notifications / `notifications` table — **deferred to M11** (queue page serves as the view; no sending until M11)
+- Role enforcement on payment actions — open to any org member in M6 (org-wide role pass after M7; will gate by role-*possession*, never segregation-of-duties, to stay safe for multi-hat small teams)
+- `progress_payment` payment model — not a valid value in the live `chk_payment_model` CHECK; milestones serve `fixed_milestone` only
 - Automated payment reminders (M11)
 - Payment method integrations (bank API, Stripe) — v2 commercial
 - Multi-currency — v2 only (THB only in v1)

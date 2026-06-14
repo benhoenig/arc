@@ -55,6 +55,7 @@
     "ocr_not_configured": "ยังไม่ได้ตั้งค่า AI (ต้องมี API key หรือ subscription)",
     "extraction_refused": "AI ไม่สามารถอ่านไฟล์นี้ได้",
     "extraction_failed": "อ่านข้อมูลไม่สำเร็จ ลองใหม่อีกครั้ง",
+    "invalid_date": "มีรายการที่วันที่ไม่ถูกต้อง (ต้องเป็นรูปแบบ ปปปป-ดด-วว)",
     "flip_closed": "ฟลิปปิดแล้ว",
     "wrong_payment_model": "รูปแบบการจ่ายไม่ตรงกัน",
     "validation": "ข้อมูลไม่ถูกต้อง",

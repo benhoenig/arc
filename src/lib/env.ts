@@ -42,10 +42,41 @@ const envSchema = z.object({
     (v) => (v === '' ? undefined : v),
     z.string().min(1).optional(),
   ),
+  // Token endpoint + client id used to refresh a stored Claude *subscription*
+  // credential (org_ai_settings, credential_type='oauth'). These mirror the
+  // values Claude Code uses; they are NOT officially documented by Anthropic, so
+  // they're overridable here in case Anthropic changes them — no code edit
+  // needed. Defaults live in src/lib/anthropic/oauth.ts. Empty string = absent.
+  ANTHROPIC_OAUTH_CLIENT_ID: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.string().min(1).optional(),
+  ),
+  ANTHROPIC_OAUTH_TOKEN_URL: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.string().url().optional(),
+  ),
   // Override the extraction model without a code change. Defaults to Sonnet 4.6.
   OCR_MODEL: z.preprocess(
     (v) => (v === '' ? undefined : v),
     z.string().min(1).default('claude-sonnet-4-6'),
+  ),
+  // USD→THB rate used to price AI token usage for display. Snapshotted per
+  // usage event, so changing it only affects new events. Override when the rate
+  // drifts; default is a reasonable mid-rate. Empty string counts as absent.
+  USD_TO_THB_RATE: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.coerce.number().positive().optional(),
+  ),
+
+  // Master key for encrypting org-level secrets at rest (e.g. each org's own
+  // Anthropic API key in `org_ai_settings`). AES-256-GCM needs 32 bytes — supply
+  // a base64-encoded 32-byte value (`openssl rand -base64 32`). Optional: when
+  // absent, secret encryption is unavailable and the AI-settings page reports
+  // "encryption not configured" instead of crashing the app at boot. Empty
+  // string counts as absent. Validated for correct length in `secret-box.ts`.
+  SECRET_ENCRYPTION_KEY: z.preprocess(
+    (v) => (v === '' ? undefined : v),
+    z.string().min(1).optional(),
   ),
 });
 

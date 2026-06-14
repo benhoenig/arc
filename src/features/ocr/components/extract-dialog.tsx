@@ -121,6 +121,15 @@ export function ExtractDialog({
 
   const catLabel = (c: CategoryOption) => (locale === 'en' && c.nameEn ? c.nameEn : c.nameTh);
 
+  // Always resolve an error code to a readable message — fall back to the
+  // generic server message so an unmapped code never renders blank (or trips
+  // next-intl's MISSING_MESSAGE) in front of the user.
+  const errorMessage = error
+    ? t.has(`errors.${error}`)
+      ? t(`errors.${error}`)
+      : t('errors.server')
+    : null;
+
   function reset() {
     setStep('configure');
     setTarget(allowedTargets[0] ?? 'transaction');
@@ -396,7 +405,7 @@ export function ExtractDialog({
               </Button>
             </div>
 
-            {error ? <p className="text-sm text-destructive">{t(`errors.${error}`)}</p> : null}
+            {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
 
             <div className="flex justify-end gap-2 pt-2">
               <Button type="button" variant="ghost" onClick={() => setOpen(false)}>
@@ -423,7 +432,7 @@ export function ExtractDialog({
               />
             </div>
 
-            {error ? <p className="text-sm text-destructive">{t(`errors.${error}`)}</p> : null}
+            {errorMessage ? <p className="text-sm text-destructive">{errorMessage}</p> : null}
 
             <div className="flex justify-between gap-2 pt-2">
               <Button type="button" variant="ghost" onClick={() => setStep('configure')}>

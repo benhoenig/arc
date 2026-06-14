@@ -28,7 +28,8 @@ type Props = {
   children: React.ReactNode;
 };
 
-const NAV_ITEMS = [
+// Primary operational nav — the day-to-day workflow.
+const PRIMARY_NAV = [
   { key: 'dashboard', href: '/dashboard', icon: LayoutDashboard },
   { key: 'sourcing', href: '/sourcing', icon: SearchIcon },
   { key: 'flips', href: '/flips', icon: Layers },
@@ -36,7 +37,13 @@ const NAV_ITEMS = [
   { key: 'payments', href: '/contractors/payments', icon: Wallet },
   { key: 'investors', href: '/investors', icon: Users },
   { key: 'listings', href: '/listings', icon: Store },
+] as const;
+
+// Org setup / admin — pinned to the bottom of the sidebar, separated from the
+// operational nav above. Both route into /settings/*.
+const SETTINGS_NAV = [
   { key: 'members', href: '/settings/members', icon: UserCog },
+  { key: 'settings', href: '/settings', icon: SlidersHorizontal },
 ] as const;
 
 const MOBILE_TABS = [
@@ -108,25 +115,48 @@ export function AppShell({ orgName, userName, userEmail, children }: Props) {
             )}
           </Button>
         </div>
-        <nav className="flex flex-1 flex-col gap-0.5 px-2 py-2">
-          {NAV_ITEMS.map(({ key, href, icon: Icon }) => (
-            <Link
-              key={key}
-              href={href}
-              aria-label={isSidebarCollapsed ? t(key) : undefined}
-              title={isSidebarCollapsed ? t(key) : undefined}
-              className={cn(
-                'flex h-9 items-center rounded-md text-sm transition-colors',
-                isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3',
-                isActive(href)
-                  ? 'bg-fill-selected font-medium text-text-strong'
-                  : 'text-text-muted hover:bg-fill-hover hover:text-text-default',
-              )}
-            >
-              <Icon size={16} strokeWidth={1.5} />
-              {isSidebarCollapsed ? null : <span className="truncate">{t(key)}</span>}
-            </Link>
-          ))}
+        <nav className="flex flex-1 flex-col px-2 py-2">
+          <div className="flex flex-col gap-0.5">
+            {PRIMARY_NAV.map(({ key, href, icon: Icon }) => (
+              <Link
+                key={key}
+                href={href}
+                aria-label={isSidebarCollapsed ? t(key) : undefined}
+                title={isSidebarCollapsed ? t(key) : undefined}
+                className={cn(
+                  'flex h-9 items-center rounded-md text-sm transition-colors',
+                  isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3',
+                  isActive(href)
+                    ? 'bg-fill-selected font-medium text-text-strong'
+                    : 'text-text-muted hover:bg-fill-hover hover:text-text-default',
+                )}
+              >
+                <Icon size={16} strokeWidth={1.5} />
+                {isSidebarCollapsed ? null : <span className="truncate">{t(key)}</span>}
+              </Link>
+            ))}
+          </div>
+
+          <div className="mt-auto flex flex-col gap-0.5 border-t border-border-subtle pt-2">
+            {SETTINGS_NAV.map(({ key, href, icon: Icon }) => (
+              <Link
+                key={key}
+                href={href}
+                aria-label={isSidebarCollapsed ? t(key) : undefined}
+                title={isSidebarCollapsed ? t(key) : undefined}
+                className={cn(
+                  'flex h-9 items-center rounded-md text-sm transition-colors',
+                  isSidebarCollapsed ? 'justify-center px-0' : 'gap-3 px-3',
+                  isActive(href)
+                    ? 'bg-fill-selected font-medium text-text-strong'
+                    : 'text-text-muted hover:bg-fill-hover hover:text-text-default',
+                )}
+              >
+                <Icon size={16} strokeWidth={1.5} />
+                {isSidebarCollapsed ? null : <span className="truncate">{t(key)}</span>}
+              </Link>
+            ))}
+          </div>
         </nav>
       </aside>
 

@@ -65,6 +65,8 @@ model Organization {
   contractorMilestones  ContractorMilestone[]
   contractorTmEntries   ContractorTmEntry[]
   contractorPayments    ContractorPayment[]
+  aiSettings            OrgAiSettings?
+  aiUsageEvents         AiUsageEvent[]
 
   @@map("organizations")
 }
@@ -114,6 +116,9 @@ model User {
   tmEntriesApproved       ContractorTmEntry[]   @relation("ContractorTmEntryApprovedBy")
   paymentsRequested       ContractorPayment[]   @relation("ContractorPaymentRequestedBy")
   paymentsApproved        ContractorPayment[]   @relation("ContractorPaymentApprovedBy")
+  orgAiSettingsCreated    OrgAiSettings[]       @relation("OrgAiSettingsCreatedBy")
+  orgAiSettingsUpdated    OrgAiSettings[]       @relation("OrgAiSettingsUpdatedBy")
+  aiUsageEvents           AiUsageEvent[]
 
   @@map("users")
 }
@@ -915,4 +920,55 @@ model ContractorPayment {
   @@index([organizationId, status], map: "idx_payments_queue")
   @@index([flipId], map: "idx_payments_flip")
   @@map("contractor_payments")
+}
+
+model OrgAiSettings {
+  id              String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId  String    @unique @map("organization_id") @db.Uuid
+  // Which credential the org actively uses: 'api_key' | 'oauth' | null.
+  credentialType  String?   @map("credential_type")
+  apiKeyEncrypted String?   @map("api_key_encrypted")
+  apiKeyLast4     String?   @map("api_key_last4")
+  // Claude subscription (OAuth) credential — access + refresh tokens encrypted
+  // at rest; the access token is auto-refreshed server-side on expiry.
+  oauthAccessTokenEncrypted  String?   @map("oauth_access_token_encrypted")
+  oauthRefreshTokenEncrypted String?   @map("oauth_refresh_token_encrypted")
+  oauthAccessLast4           String?   @map("oauth_access_last4")
+  oauthExpiresAt             DateTime? @map("oauth_expires_at") @db.Timestamptz(6)
+  model           String?
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy       String?   @map("created_by") @db.Uuid
+  updatedBy       String?   @map("updated_by") @db.Uuid
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  createdByUser User?        @relation("OrgAiSettingsCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser User?        @relation("OrgAiSettingsUpdatedBy", fields: [updatedBy], references: [id])
+
+  @@map("org_ai_settings")
+}
+
+// Append-only log of AI token usage (one row per model call). Cost is
+// snapshotted per event — see db/migrations/0005_ai_usage_events.sql.
+model AiUsageEvent {
+  id               String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId   String   @map("organization_id") @db.Uuid
+  userId           String?  @map("user_id") @db.Uuid
+  provider         String   @default("anthropic")
+  model            String
+  feature          String
+  inputTokens      Int      @default(0) @map("input_tokens")
+  outputTokens     Int      @default(0) @map("output_tokens")
+  cacheReadTokens  Int      @default(0) @map("cache_read_tokens")
+  cacheWriteTokens Int      @default(0) @map("cache_write_tokens")
+  costUsd          Decimal  @default(0) @map("cost_usd") @db.Decimal(14, 6)
+  costThb          Decimal  @default(0) @map("cost_thb") @db.Decimal(14, 4)
+  usdToThb         Decimal  @map("usd_to_thb") @db.Decimal(10, 4)
+  createdAt        DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+
+  organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  user         User?        @relation(fields: [userId], references: [id])
+
+  @@index([organizationId, createdAt(sort: Desc)], map: "idx_ai_usage_org_created")
+  @@map("ai_usage_events")
 }

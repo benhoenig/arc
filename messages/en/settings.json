@@ -1,0 +1,91 @@
+{
+  "hub": {
+    "title": "Settings",
+    "subtitle": "Manage your account and your organization's settings",
+    "account": {
+      "title": "My account",
+      "description": "Change your password and view account details"
+    },
+    "ai": {
+      "title": "AI settings",
+      "description": "Manage the API key and model for document extraction"
+    },
+    "members": {
+      "title": "Members",
+      "description": "Invite and manage organization members"
+    },
+    "budgetCategories": {
+      "title": "Budget categories",
+      "description": "Manage your organization's budget categories"
+    }
+  },
+  "account": {
+    "title": "My account",
+    "subtitle": "Manage your account details and password",
+    "profileTitle": "Profile",
+    "name": "Name",
+    "email": "Email",
+    "password": {
+      "title": "Change password",
+      "currentPassword": "Current password",
+      "newPassword": "New password",
+      "newPasswordPlaceholder": "At least 8 characters",
+      "confirmPassword": "Confirm new password",
+      "submit": "Change password",
+      "submitting": "Changing...",
+      "success": "Password changed successfully",
+      "errors": {
+        "required": "This field is required",
+        "tooShort": "Password must be at least 8 characters",
+        "passwordMismatch": "New passwords do not match",
+        "samePassword": "New password must differ from the current one",
+        "invalidCurrent": "Current password is incorrect",
+        "server": "Something went wrong. Please try again."
+      }
+    }
+  },
+  "ai": {
+    "title": "AI settings",
+    "subtitle": "Configure an Anthropic API key or Claude subscription, and the model used for document extraction",
+    "statusTitle": "Current status",
+    "sourceOrgKey": "Using this organization's own API key",
+    "sourceOrgSubscription": "Connected to this organization's Claude subscription",
+    "sourceEnv": "Using the system-configured credential (default)",
+    "sourceNone": "No credential configured — document extraction is disabled",
+    "clearCredential": "Remove",
+    "credentialCleared": "Credential removed",
+    "encryptionUnavailable": "The encryption key (SECRET_ENCRYPTION_KEY) is not configured, so a credential cannot be saved yet.",
+    "keyTitle": "Anthropic API key",
+    "keyHelp": "The key is encrypted before storage and is never shown again after saving.",
+    "keyLabel": "API key",
+    "saveKey": "Save key",
+    "replaceKey": "Replace key",
+    "keySaved": "API key saved",
+    "subscriptionTitle": "Claude subscription",
+    "subscriptionHelp": "Connect your Claude subscription to use its quota instead of an API key. The credential is encrypted before storage and the access token is refreshed automatically.",
+    "subscriptionHint": "On macOS, copy the credential from Terminal with:",
+    "subscriptionLabel": "Credential (JSON)",
+    "connectSubscription": "Save subscription",
+    "reconnectSubscription": "Update subscription",
+    "subscriptionConnected": "Claude subscription connected",
+    "modelTitle": "Model",
+    "modelHelp": "Choose the Claude model used to extract data from documents",
+    "modelLabel": "Active model",
+    "modelSaved": "Model saved",
+    "recommended": "Recommended",
+    "usageTitle": "Usage & cost",
+    "usageNote": "Estimated from Anthropic API pricing. If you use a Claude subscription, this is the equivalent API value, not an actual charge.",
+    "usageEmpty": "No AI usage yet",
+    "usageThisMonth": "This month",
+    "usageAllTime": "All time",
+    "usageExtractions": "{count, plural, =0 {No extractions} one {# extraction} other {# extractions}}",
+    "usageTokens": "{total} tokens total ({input} in · {output} out)",
+    "errors": {
+      "invalidKey": "Invalid API key (must start with sk-ant-)",
+      "invalid_credential": "That credential isn't valid. Copy it again from Claude Code.",
+      "encryption_not_configured": "The encryption key is not configured on the server",
+      "forbidden": "You don't have permission to do this",
+      "server": "Something went wrong. Please try again."
+    }
+  }
+}
