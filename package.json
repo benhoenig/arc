@@ -20,6 +20,7 @@
     "prepare": "lefthook install 2>/dev/null || true"
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^0.104.1",
     "@aws-sdk/client-s3": "^3.1065.0",
     "@aws-sdk/s3-request-presigner": "^3.1065.0",
     "@dnd-kit/core": "^6.3.1",

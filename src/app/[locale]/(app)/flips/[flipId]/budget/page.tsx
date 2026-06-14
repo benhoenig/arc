@@ -15,6 +15,7 @@ import { listBudgetCategories } from '@/features/budget/queries/list-budget-cate
 import { listBudgetLinesForFlip } from '@/features/budget/queries/list-budget-lines';
 import { listTransactionsForFlip } from '@/features/budget/queries/list-flip-transactions';
 import { getFlipById } from '@/features/flips/queries/get-flip';
+import { ExtractDialog } from '@/features/ocr/components/extract-dialog';
 import { Link } from '@/i18n/navigation';
 import { getActiveOrgId, requireAuth } from '@/server/auth';
 import { isOrgAdmin } from '@/server/shared/require-admin';
@@ -112,12 +113,21 @@ export default async function FlipBudgetPage({ params }: Props) {
         <div className="flex items-center justify-between border-b border-border-subtle px-4 py-3">
           <h2 className="text-sm font-semibold text-text-strong">{t('transactions.title')}</h2>
           {!locked ? (
-            <AddTransactionDialog
-              flipId={flip.id}
-              orgId={orgId}
-              budgetLines={lines}
-              defaultKind="investor_deposit"
-            />
+            <div className="flex items-center gap-2">
+              <ExtractDialog
+                orgId={orgId}
+                flipId={flip.id}
+                allowedTargets={['transaction', 'budget_line']}
+                budgetLines={lines}
+                budgetCategories={categories}
+              />
+              <AddTransactionDialog
+                flipId={flip.id}
+                orgId={orgId}
+                budgetLines={lines}
+                defaultKind="investor_deposit"
+              />
+            </div>
           ) : null}
         </div>
         <FlipTransactionList transactions={transactions} readOnly={locked} />

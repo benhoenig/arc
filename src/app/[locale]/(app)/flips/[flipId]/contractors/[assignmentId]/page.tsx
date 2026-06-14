@@ -9,6 +9,7 @@ import { getAssignment } from '@/features/contractors/queries/get-assignment';
 import { listMilestonesForAssignment } from '@/features/contractors/queries/list-milestones-for-assignment';
 import { listPaymentsForAssignment } from '@/features/contractors/queries/list-payments-for-assignment';
 import { listTmEntriesForAssignment } from '@/features/contractors/queries/list-tm-entries-for-assignment';
+import { ExtractDialog } from '@/features/ocr/components/extract-dialog';
 import { Link } from '@/i18n/navigation';
 import { getActiveOrgId } from '@/server/auth';
 
@@ -76,6 +77,16 @@ export default async function AssignmentDetailPage({ params }: Props) {
           </div>
         </dl>
       </div>
+
+      {!locked ? (
+        <div className="mb-4 flex justify-end">
+          <ExtractDialog
+            orgId={orgId}
+            assignmentId={assignmentId}
+            allowedTargets={[isFixed ? 'milestone' : 'tm_entry']}
+          />
+        </div>
+      ) : null}
 
       <div className="flex flex-col gap-6">
         {isFixed ? (
