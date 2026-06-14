@@ -19,6 +19,9 @@ import { listFlipActivity } from '@/features/flips/queries/list-flip-activity';
 import { listFlipRevisions } from '@/features/flips/queries/list-flip-revisions';
 import { listFlipStages } from '@/features/flips/queries/list-flip-stages';
 import { listOrgUsers } from '@/features/flips/queries/list-org-users';
+import { FlipTasksPanel } from '@/features/tasks/components/flip-tasks-panel';
+import { listMilestonesForFlip } from '@/features/tasks/queries/list-milestones-for-flip';
+import { listTasksForFlip } from '@/features/tasks/queries/list-tasks-for-flip';
 import { Link } from '@/i18n/navigation';
 import type { Locale } from '@/lib/i18n';
 import { getActiveOrgId } from '@/server/auth';
@@ -45,6 +48,8 @@ export default async function FlipDetailPage({ params }: Props) {
     pnl,
     assignments,
     activity,
+    tasks,
+    milestones,
   ] = await Promise.all([
     getFlipById(orgId, flipId),
     listFlipStages(orgId),
@@ -56,6 +61,8 @@ export default async function FlipDetailPage({ params }: Props) {
     getFlipPnl(orgId, flipId),
     listAssignmentsForFlip(orgId, flipId),
     listFlipActivity(orgId, flipId, typedLocale),
+    listTasksForFlip(orgId, flipId),
+    listMilestonesForFlip(orgId, flipId),
   ]);
 
   if (!flip) {
@@ -70,6 +77,21 @@ export default async function FlipDetailPage({ params }: Props) {
     flip.stage.slug === 'killed' ||
     flip.soldAt != null ||
     flip.killedAt != null;
+
+  // Task summary for the inline panel. Overdue = due before today, still open.
+  const todayMidnight = new Date();
+  todayMidnight.setHours(0, 0, 0, 0);
+  const openTasks = tasks.filter(
+    (task) => task.status === 'open' || task.status === 'in_progress' || task.status === 'blocked',
+  );
+  const overdueCount = openTasks.filter(
+    (task) => task.dueDate != null && new Date(task.dueDate) < todayMidnight,
+  ).length;
+  const nextMilestone =
+    milestones
+      .filter((m) => m.actualDate == null)
+      .sort((a, b) => new Date(a.targetDate).getTime() - new Date(b.targetDate).getTime())[0] ??
+    null;
 
   return (
     <div className="px-6 py-6">
@@ -149,6 +171,19 @@ export default async function FlipDetailPage({ params }: Props) {
 
       <div className="mb-8">
         <FlipContractorsPanel flipId={flip.id} assignments={assignments} />
+      </div>
+
+      <div className="mb-8">
+        <FlipTasksPanel
+          flipId={flip.id}
+          openCount={openTasks.length}
+          overdueCount={overdueCount}
+          nextMilestone={
+            nextMilestone
+              ? { title: nextMilestone.title, targetDate: nextMilestone.targetDate }
+              : null
+          }
+        />
       </div>
 
       <FlipTeamPanel

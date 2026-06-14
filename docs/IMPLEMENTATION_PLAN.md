@@ -38,7 +38,7 @@ Five principles that drive the sequencing:
 | [ ] | M4.6 | Live P&L / feasibility | Read-only feasibility panel on flip detail composing latest revision + baseline + budget summary + deal analysis | 4–6 | 156 | 6 |
 | [ ] | M5 | Contractors (directory + assignments) | Contractor library + scope of work per flip | 20–28 | 150 | 6–7 |
 | [x] | M6 | Contractor Payments | Milestones, T&M entries, payment queue | 24–32 | 182 | 7–9 |
-| [ ] | M7 | Tasks & Timeline | Tasks per flip, milestone timeline, due dates | 12–18 | 200 | 9 |
+| [x] | M7 | Tasks & Timeline | Tasks per flip, milestone timeline, due dates | 12–18 | 200 | 9 |
 | [ ] | M8 | Investors & Capital | Investor directory, commitments per flip | 16–24 | 224 | 10 |
 | [ ] | M9 | Distributions & Statements | Payouts + PDF statement generation | 16–24 | 248 | 11 |
 | [ ] | M10 | Listings & Leads | Sales pillar — list flips, capture buyer inquiries | 16–20 | 268 | 12 |
@@ -832,28 +832,29 @@ Built end-to-end against the spec. What shipped:
 ### 10.1 Deliverables
 
 **Database:**
-- [ ] `tasks` table (DATA_MODEL.md §7.1) with RLS
-- [ ] `milestones` table (DATA_MODEL.md §7.2) with RLS (note: these are flip-level milestones, distinct from contractor milestones)
-- [ ] Extend `flip_portfolio_dashboard` view to include `open_tasks_count`, `overdue_tasks_count`
+- [x] `tasks` table (DATA_MODEL.md §7.1) with RLS — migration `db/migrations/0006_tasks_milestones.sql`
+- [x] `milestones` table (DATA_MODEL.md §7.2) with RLS (note: these are flip-level milestones, distinct from contractor milestones)
+- [x] Extend `flip_portfolio_dashboard` view to include `open_tasks_count`, `overdue_tasks_count` (`CREATE OR REPLACE VIEW`)
 
 **Feature: `/src/features/tasks`**
-- [ ] Queries: `listTasksForFlip`, `listTasksForUser`, `listOverdueTasks`, `listMilestonesForFlip`, `getUpcomingMilestones`
-- [ ] Actions: `createTask`, `updateTask`, `assignTask`, `completeTask`, `reopenTask`, `createMilestone`, `updateMilestone`, `markMilestoneActual`
-- [ ] Validators: `taskSchema`, `milestoneSchema`
-- [ ] Components:
-  - [ ] `<TaskListPanel>` — per-flip task list with priority + due date + assignee
-  - [ ] `<TaskForm>` — create/edit task dialog
-  - [ ] `<TaskQuickAdd>` — inline "add task" row at top of task list (no dialog, just type + enter)
-  - [ ] `<MyTasksPage>` — cross-flip view of tasks assigned to current user
-  - [ ] `<TimelinePanel>` — flip-level milestone list with target + actual dates
-  - [ ] `<DueDatePill>` — semantic variant (overdue=destructive, due today/tomorrow=warning, future=neutral)
+- [x] Queries: `listTasksForFlip`, `listTasksForUser`, `listOverdueTasks`, `listMilestonesForFlip`, `getUpcomingMilestones`
+- [x] Actions: `createTask`, `updateTask`, `assignTask`, `completeTask`, `reopenTask`, `deleteTask`, `createMilestone`, `updateMilestone`, `markMilestoneActual`, `deleteMilestone`
+- [x] Validators: `task-schemas.ts` (create/update/assign task + create/update/markActual milestone)
+- [x] Components:
+  - [x] `<TaskListPanel>` — per-flip task list with priority + due date + assignee
+  - [x] `<TaskForm>` — create/edit task dialog
+  - [x] `<TaskQuickAdd>` — inline "add task" row at top of task list (no dialog, just type + enter)
+  - [x] `<MyTasksList>` (`/my-tasks` page) — cross-flip view of tasks assigned to current user
+  - [x] `<TimelinePanel>` — flip-level milestone list with target + actual dates
+  - [x] `<DueDatePill>` — semantic variant (overdue=destructive, due today/tomorrow=warning, future=neutral); pure `dueDateBucket()` helper extracted for testing
+  - [x] `<FlipTasksPanel>` — read-only summary on flip detail (open/overdue counts + next milestone)
 
 **Routes:**
-- [ ] `/flips/[flipId]/tasks` → task list sub-route
-- [ ] `/flips/[flipId]/timeline` → milestone timeline sub-route
-- [ ] `/my-tasks` → cross-flip personal task inbox
+- [x] `/flips/[flipId]/tasks` → task list sub-route
+- [x] `/flips/[flipId]/timeline` → milestone timeline sub-route
+- [x] `/my-tasks` → cross-flip personal task inbox (+ sidebar nav item)
 
-**i18n:** `/messages/{th,en}/tasks.json`
+**i18n:** `/messages/{th,en}/tasks.json` ✅
 
 ### 10.2 Test criteria
 
@@ -881,9 +882,11 @@ On FLIP-2026-001 add tasks: "Order bathroom tiles" (assigned to you, due tomorro
 
 ### 10.5 Done when
 
-- Every flip has a working task list
-- Overdue tasks are visually obvious
-- `/my-tasks` is a legit "my day" inbox
+- Every flip has a working task list ✅
+- Overdue tasks are visually obvious ✅ (`DueDatePill` destructive + bold)
+- `/my-tasks` is a legit "my day" inbox ✅
+
+**Deferred** (consistent with prior milestones): automated tests — unit (`dueDateBucket`), integration (completion stamps + activity), Playwright — deferred until vitest/Playwright is wired (no test infra in repo yet); `relatedAssignmentId` / `flipStageId` task links are supported by schema + actions but not surfaced in `TaskForm` yet (operator can't pick them from the UI — trivial follow-up); role permissions still org-member-open (same gap as prior modules); LINE/email due-date reminders (M11); task comments + attachments (M11 polymorphic comments/documents). Tasks can be created on a sold/killed flip on purpose (post-sale follow-ups like buyer viewings) — unlike budget lines, which are locked on closed flips.
 
 ---
 

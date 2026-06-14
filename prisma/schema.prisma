@@ -67,6 +67,8 @@ model Organization {
   contractorPayments    ContractorPayment[]
   aiSettings            OrgAiSettings?
   aiUsageEvents         AiUsageEvent[]
+  tasks                 Task[]
+  milestones            Milestone[]
 
   @@map("organizations")
 }
@@ -119,6 +121,12 @@ model User {
   orgAiSettingsCreated    OrgAiSettings[]       @relation("OrgAiSettingsCreatedBy")
   orgAiSettingsUpdated    OrgAiSettings[]       @relation("OrgAiSettingsUpdatedBy")
   aiUsageEvents           AiUsageEvent[]
+  tasksAssigned           Task[]                @relation("TaskAssignedTo")
+  tasksCompleted          Task[]                @relation("TaskCompletedBy")
+  tasksCreated            Task[]                @relation("TaskCreatedBy")
+  tasksUpdated            Task[]                @relation("TaskUpdatedBy")
+  milestonesCreated       Milestone[]           @relation("MilestoneCreatedBy")
+  milestonesUpdated       Milestone[]           @relation("MilestoneUpdatedBy")
 
   @@map("users")
 }
@@ -221,6 +229,7 @@ model FlipStage {
 
   organization Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   flips        Flip[]
+  tasks        Task[]
 
   @@unique([organizationId, slug], map: "idx_flip_stages_org_slug")
   @@index([organizationId, sortOrder], map: "idx_flip_stages_org")
@@ -453,6 +462,8 @@ model Flip {
   transactions  FlipTransaction[]
   contractorAssignments ContractorAssignment[]
   contractorPayments    ContractorPayment[]
+  tasks                 Task[]
+  milestones            Milestone[]
 
   @@index([organizationId], map: "idx_flips_org")
   @@index([propertyId], map: "idx_flips_property")
@@ -787,6 +798,7 @@ model ContractorAssignment {
   milestones     ContractorMilestone[]
   tmEntries      ContractorTmEntry[]
   payments       ContractorPayment[]
+  relatedTasks   Task[]
 
   @@index([flipId], map: "idx_assignments_flip")
   @@index([contractorId], map: "idx_assignments_contractor")
@@ -971,4 +983,82 @@ model AiUsageEvent {
 
   @@index([organizationId, createdAt(sort: Desc)], map: "idx_ai_usage_org_created")
   @@map("ai_usage_events")
+}
+
+// ============================================
+// M7: Tasks & Timeline
+// ============================================
+
+model Task {
+  id                  String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId      String    @map("organization_id") @db.Uuid
+  flipId              String    @map("flip_id") @db.Uuid
+
+  title               String
+  description         String?
+  assignedToUserId    String?   @map("assigned_to_user_id") @db.Uuid
+  relatedAssignmentId String?   @map("related_assignment_id") @db.Uuid
+  flipStageId         String?   @map("flip_stage_id") @db.Uuid
+
+  // 'low' | 'normal' | 'high' | 'urgent'
+  priority            String    @default("normal")
+  // 'open' | 'in_progress' | 'blocked' | 'done' | 'canceled'
+  status              String    @default("open")
+
+  dueDate             DateTime? @map("due_date") @db.Date
+  completedAt         DateTime? @map("completed_at") @db.Timestamptz(6)
+  completedBy         String?   @map("completed_by") @db.Uuid
+
+  metadata            Json      @default("{}")
+
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy           String?   @map("created_by") @db.Uuid
+  updatedBy           String?   @map("updated_by") @db.Uuid
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization      Organization          @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  flip              Flip                  @relation(fields: [flipId], references: [id], onDelete: Cascade)
+  assignedToUser    User?                 @relation("TaskAssignedTo", fields: [assignedToUserId], references: [id], onDelete: SetNull)
+  relatedAssignment ContractorAssignment? @relation(fields: [relatedAssignmentId], references: [id], onDelete: SetNull)
+  flipStage         FlipStage?            @relation(fields: [flipStageId], references: [id], onDelete: SetNull)
+  completedByUser   User?                 @relation("TaskCompletedBy", fields: [completedBy], references: [id])
+  createdByUser     User?                 @relation("TaskCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser     User?                 @relation("TaskUpdatedBy", fields: [updatedBy], references: [id])
+
+  @@index([flipId], map: "idx_tasks_flip")
+  @@index([assignedToUserId], map: "idx_tasks_assignee")
+  @@index([organizationId, status], map: "idx_tasks_open")
+  @@index([dueDate], map: "idx_tasks_due")
+  @@map("tasks")
+}
+
+model Milestone {
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  organizationId String    @map("organization_id") @db.Uuid
+  flipId         String    @map("flip_id") @db.Uuid
+
+  title          String
+  description    String?
+  sortOrder      Int       @default(0) @map("sort_order")
+  targetDate     DateTime  @map("target_date") @db.Date
+  actualDate     DateTime? @map("actual_date") @db.Date
+  isCritical     Boolean   @default(false) @map("is_critical")
+
+  metadata       Json      @default("{}")
+
+  createdAt      DateTime  @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt @map("updated_at") @db.Timestamptz(6)
+  createdBy      String?   @map("created_by") @db.Uuid
+  updatedBy      String?   @map("updated_by") @db.Uuid
+  deletedAt      DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  organization  Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  flip          Flip         @relation(fields: [flipId], references: [id], onDelete: Cascade)
+  createdByUser User?        @relation("MilestoneCreatedBy", fields: [createdBy], references: [id])
+  updatedByUser User?        @relation("MilestoneUpdatedBy", fields: [updatedBy], references: [id])
+
+  @@index([flipId, sortOrder], map: "idx_milestones_flip")
+  @@index([targetDate], map: "idx_milestones_upcoming")
+  @@map("milestones")
 }
