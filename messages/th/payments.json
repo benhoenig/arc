@@ -1,0 +1,132 @@
+{
+  "back": "ผู้รับเหมาของฟลิป",
+  "assignmentModels": {
+    "fixed_milestone": "เหมาตามงวดงาน",
+    "time_materials": "ตามเวลาและวัสดุ"
+  },
+  "summary": {
+    "committed": "ผูกพันแล้ว",
+    "paid": "จ่ายแล้ว"
+  },
+  "fields": {
+    "title": "ชื่อรายการ",
+    "amount": "จำนวนเงิน",
+    "targetDate": "กำหนดเสร็จ",
+    "status": "สถานะ",
+    "date": "วันที่",
+    "description": "รายละเอียด"
+  },
+  "milestones": {
+    "title": "งวดงาน",
+    "empty": "ยังไม่มีงวดงาน",
+    "add": "เพิ่มงวดงาน",
+    "addTitle": "เพิ่มงวดงาน",
+    "editTitle": "แก้ไขงวดงาน",
+    "requestPayment": "ขอเบิกจ่าย",
+    "confirmDelete": "ลบงวดงานนี้?",
+    "statuses": {
+      "pending": "รอดำเนินการ",
+      "in_progress": "กำลังทำ",
+      "completed": "เสร็จแล้ว",
+      "approved": "อนุมัติแล้ว",
+      "paid": "จ่ายแล้ว",
+      "disputed": "มีข้อโต้แย้ง"
+    }
+  },
+  "tm": {
+    "title": "บันทึกเวลาและวัสดุ",
+    "empty": "ยังไม่มีรายการ",
+    "add": "เพิ่มรายการ",
+    "addTitle": "เพิ่มรายการเวลา/วัสดุ",
+    "type": "ประเภท",
+    "lineTotal": "รวมรายการ",
+    "requestApproved": "ขอเบิกที่อนุมัติแล้ว",
+    "approve": "อนุมัติ",
+    "reject": "ปฏิเสธ",
+    "confirmDelete": "ลบรายการนี้?",
+    "rate": "อัตรา",
+    "days": "จำนวนวัน",
+    "materialCost": "ค่าวัสดุ",
+    "markup": "บวกเพิ่ม",
+    "receipt": "ใบเสร็จ",
+    "uploadReceipt": "แนบใบเสร็จ",
+    "changeReceipt": "เปลี่ยนใบเสร็จ",
+    "types": {
+      "labor": "ค่าแรง",
+      "material": "วัสดุ"
+    },
+    "statuses": {
+      "pending": "รออนุมัติ",
+      "approved": "อนุมัติแล้ว",
+      "rejected": "ปฏิเสธแล้ว",
+      "paid": "จ่ายแล้ว"
+    }
+  },
+  "payments": {
+    "title": "การเบิกจ่าย",
+    "empty": "ยังไม่มีการเบิกจ่าย",
+    "source": "รายการ",
+    "requested": "ขอเบิก",
+    "paid": "จ่ายเมื่อ",
+    "tmBatch": "ชุดเวลา/วัสดุ",
+    "cancel": "ยกเลิก",
+    "confirmCancel": "ยกเลิกการเบิกจ่ายนี้?",
+    "statuses": {
+      "requested": "ขอเบิก",
+      "approved": "อนุมัติแล้ว",
+      "paid": "จ่ายแล้ว",
+      "rejected": "ปฏิเสธแล้ว",
+      "canceled": "ยกเลิกแล้ว"
+    }
+  },
+  "queue": {
+    "title": "คิวการเบิกจ่าย",
+    "subtitle": "รายการที่รออนุมัติและรอจ่ายทั้งหมด",
+    "empty": "ไม่มีรายการค้างจ่าย",
+    "contractor": "ผู้รับเหมา",
+    "flip": "ฟลิป",
+    "for": "สำหรับ",
+    "approve": "อนุมัติ",
+    "markPaid": "บันทึกจ่ายแล้ว",
+    "reject": "ปฏิเสธ",
+    "confirmReject": "ปฏิเสธการเบิกจ่ายนี้?"
+  },
+  "markPaid": {
+    "title": "บันทึกการจ่ายเงิน",
+    "method": "ช่องทาง",
+    "paidAt": "วันที่จ่าย",
+    "reference": "เลขอ้างอิง",
+    "referencePlaceholder": "เลขที่โอน / เช็ค",
+    "methods": {
+      "bank_transfer": "โอนธนาคาร",
+      "cash": "เงินสด",
+      "check": "เช็ค",
+      "other": "อื่นๆ"
+    }
+  },
+  "errors": {
+    "validation": "ข้อมูลไม่ถูกต้อง",
+    "conflict": "ดำเนินการไม่ได้",
+    "not_found": "ไม่พบรายการ",
+    "forbidden": "ไม่มีสิทธิ์",
+    "server": "เกิดข้อผิดพลาด",
+    "flip_closed": "ฟลิปปิดแล้ว",
+    "wrong_payment_model": "รูปแบบการจ่ายไม่ตรงกัน",
+    "milestone_paid": "งวดงานจ่ายแล้ว แก้ไขไม่ได้",
+    "has_payment": "มีการเบิกจ่ายผูกอยู่",
+    "entry_locked": "รายการถูกล็อก ต้องเปิดกลับเป็นรออนุมัติก่อน",
+    "entry_paid": "รายการจ่ายแล้ว",
+    "milestone_not_billable": "งวดงานยังเบิกไม่ได้",
+    "milestone_already_billed": "งวดงานนี้ขอเบิกไปแล้ว",
+    "no_approved_entries": "ไม่มีรายการที่อนุมัติแล้ว",
+    "not_approved": "ต้องอนุมัติก่อนจึงจ่ายได้",
+    "not_requested": "สถานะไม่ใช่คำขอเบิก",
+    "not_open": "รายการปิดแล้ว",
+    "paid_set_by_payment": "สถานะจ่ายแล้วตั้งจากการเบิกจ่ายเท่านั้น",
+    "invalid_status_transition": "เปลี่ยนสถานะนี้ไม่ได้",
+    "no_budget_category": "ไม่พบหมวดงบประมาณ",
+    "uploadInvalidType": "ชนิดไฟล์ไม่รองรับ",
+    "uploadTooLarge": "ไฟล์ใหญ่เกินไป",
+    "uploadFailed": "อัปโหลดไม่สำเร็จ"
+  }
+}

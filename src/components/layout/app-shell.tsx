@@ -11,6 +11,7 @@ import {
   Store,
   UserCog,
   Users,
+  Wallet,
 } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 import { useTranslations } from 'next-intl';
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { key: 'sourcing', href: '/sourcing', icon: SearchIcon },
   { key: 'flips', href: '/flips', icon: Layers },
   { key: 'contractors', href: '/contractors', icon: HardHat },
+  { key: 'payments', href: '/contractors/payments', icon: Wallet },
   { key: 'investors', href: '/investors', icon: Users },
   { key: 'listings', href: '/listings', icon: Store },
   { key: 'members', href: '/settings/members', icon: UserCog },
